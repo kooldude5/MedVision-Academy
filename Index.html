@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MedVision Academy — Learn Brain Tumor Segmentation from Scratch</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #12151c;
+    --surface-2: #1a1e28;
+    --surface-3: #222834;
+    --border: #2a3040;
+    --border-light: #353d50;
+    --text: #e8eaf0;
+    --text-muted: #8b92a8;
+    --text-dim: #5c6478;
+    --accent: #4af0c0;
+    --accent-dim: #2a8068;
+    --accent-glow: rgba(74, 240, 192, 0.12);
+    --warm: #f0a04a;
+    --warm-dim: #805828;
+    --rose: #f06088;
+    --rose-dim: #803048;
+    --blue: #4a90f0;
+    --blue-dim: #284880;
+    --purple: #a06af0;
+    --serif: 'DM Serif Display', Georgia, serif;
+    --sans: 'Instrument Sans', -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg); color: var(--text); font-family: var(--sans);
+    font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--accent); color: var(--bg); }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(10, 12, 16, 0.85); backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border); padding: 0 2rem;
+  }
+  .nav-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between; height: 64px;
+  }
+  .nav-logo {
+    font-family: var(--serif); font-size: 1.25rem; color: var(--accent);
+    text-decoration: none; letter-spacing: -0.02em;
+  }
+  .nav-logo span { color: var(--text-muted); font-style: italic; font-size: 0.9rem; margin-left: 0.4rem; }
+  .nav-links { display: flex; gap: 0.25rem; flex-wrap: wrap; }
+  .nav-links a {
+    color: var(--text-muted); text-decoration: none; font-size: 0.82rem;
+    font-weight: 500; padding: 0.4rem 0.75rem; border-radius: 6px; transition: all 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); background: var(--surface-2); }
+
+  .hero {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    text-align: center; padding: 6rem 2rem 4rem; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; top: -30%; left: 50%; transform: translateX(-50%);
+    width: 800px; height: 800px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(74,240,192,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: var(--surface-2); border: 1px solid var(--border);
+    padding: 0.4rem 1rem; border-radius: 100px; font-size: 0.78rem;
+    color: var(--text-muted); margin-bottom: 2rem;
+    font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .hero-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  .hero h1 {
+    font-family: var(--serif); font-size: clamp(2.8rem, 6vw, 5rem);
+    line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 1.5rem; max-width: 800px;
+  }
+  .hero h1 em { font-style: italic; color: var(--accent); }
+  .hero p {
+    font-size: 1.1rem; color: var(--text-muted); max-width: 580px;
+    margin: 0 auto 2.5rem; line-height: 1.7;
+  }
+  .hero-cta {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: var(--accent); color: var(--bg); font-weight: 600;
+    padding: 0.85rem 2rem; border-radius: 8px; text-decoration: none;
+    font-size: 0.95rem; transition: all 0.25s;
+  }
+  .hero-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(74,240,192,0.25); }
+  .hero-cta svg { width: 18px; height: 18px; }
+
+  .section { max-width: 1200px; margin: 0 auto; padding: 5rem 2rem; }
+  .section-label {
+    font-family: var(--mono); font-size: 0.72rem; font-weight: 600;
+    color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.75rem;
+  }
+  .section-title {
+    font-family: var(--serif); font-size: clamp(2rem, 4vw, 2.8rem);
+    line-height: 1.15; letter-spacing: -0.025em; margin-bottom: 1rem;
+  }
+  .section-subtitle {
+    font-size: 1.05rem; color: var(--text-muted); max-width: 640px;
+    margin-bottom: 3rem; line-height: 1.7;
+  }
+  .divider { max-width: 1200px; margin: 0 auto; padding: 0 2rem; border-top: 1px solid var(--border); }
+
+  .curriculum-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  .curr-month {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 1.5rem 1.75rem;
+    position: relative; overflow: hidden; transition: border-color 0.3s, transform 0.3s;
+  }
+  .curr-month:hover { border-color: var(--border-light); transform: translateY(-2px); }
+  .curr-month::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; }
+  .curr-month.q1::before { background: var(--accent); }
+  .curr-month.q2::before { background: var(--blue); }
+  .curr-month.q3::before { background: var(--warm); }
+  .curr-month.q4::before { background: var(--purple); }
+  .curr-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+  .curr-num {
+    font-family: var(--mono); font-size: 0.65rem; font-weight: 600;
+    padding: 0.2rem 0.55rem; border-radius: 4px;
+    background: var(--surface-2); color: var(--text-dim); white-space: nowrap;
+  }
+  .curr-month-name { font-family: var(--serif); font-size: 1.15rem; line-height: 1.25; }
+  .curr-quarter {
+    font-family: var(--mono); font-size: 0.62rem; font-weight: 600;
+    margin-left: auto; padding: 0.15rem 0.5rem; border-radius: 3px; white-space: nowrap;
+  }
+  .curr-quarter.q1 { background: rgba(74,240,192,0.1); color: var(--accent); }
+  .curr-quarter.q2 { background: rgba(74,144,240,0.1); color: var(--blue); }
+  .curr-quarter.q3 { background: rgba(240,160,74,0.1); color: var(--warm); }
+  .curr-quarter.q4 { background: rgba(160,106,240,0.1); color: var(--purple); }
+  .curr-desc { color: var(--text-muted); font-size: 0.88rem; line-height: 1.65; }
+  .curr-topics { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem; }
+  .topic-tag {
+    font-size: 0.73rem; font-weight: 500; padding: 0.25rem 0.6rem;
+    border-radius: 5px; background: var(--surface-2); color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+  .quarter-label {
+    grid-column: 1 / -1; display: flex; align-items: center; gap: 1rem; padding: 0.5rem 0 0;
+  }
+  .quarter-label span {
+    font-family: var(--mono); font-size: 0.72rem; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap;
+  }
+  .quarter-label.q1 span { color: var(--accent); }
+  .quarter-label.q2 span { color: var(--blue); }
+  .quarter-label.q3 span { color: var(--warm); }
+  .quarter-label.q4 span { color: var(--purple); }
+  .quarter-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .content-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 2rem 2.25rem; transition: border-color 0.3s, transform 0.3s;
+  }
+  .content-card:hover { border-color: var(--border-light); transform: translateY(-2px); }
+  .content-card.full { grid-column: 1 / -1; }
+  .card-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; margin-bottom: 1.25rem;
+  }
+  .card-icon.green { background: var(--accent-glow); color: var(--accent); }
+  .card-icon.blue { background: rgba(74,144,240,0.12); color: var(--blue); }
+  .card-icon.warm { background: rgba(240,160,74,0.12); color: var(--warm); }
+  .card-icon.rose { background: rgba(240,96,136,0.12); color: var(--rose); }
+  .card-icon.purple { background: rgba(160,106,240,0.12); color: var(--purple); }
+  .card-title { font-family: var(--serif); font-size: 1.2rem; margin-bottom: 0.75rem; line-height: 1.3; }
+  .card-text { color: var(--text-muted); font-size: 0.92rem; line-height: 1.7; }
+  .card-text p { margin-bottom: 0.75rem; }
+  .card-text p:last-child { margin-bottom: 0; }
+
+  .resource-list { display: flex; flex-direction: column; gap: 1rem; }
+  .resource-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.5rem 1.75rem;
+    display: grid; grid-template-columns: auto 1fr auto; gap: 1.25rem;
+    align-items: start; transition: border-color 0.3s;
+  }
+  .resource-item:hover { border-color: var(--border-light); }
+  .resource-type {
+    font-family: var(--mono); font-size: 0.65rem; font-weight: 600;
+    padding: 0.2rem 0.5rem; border-radius: 4px;
+    text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; margin-top: 0.15rem;
+  }
+  .resource-type.video { background: rgba(240,96,136,0.15); color: var(--rose); }
+  .resource-type.course { background: rgba(74,240,192,0.12); color: var(--accent); }
+  .resource-type.tutorial { background: rgba(74,144,240,0.12); color: var(--blue); }
+  .resource-type.tool { background: rgba(160,106,240,0.12); color: var(--purple); }
+  .resource-type.dataset { background: rgba(240,160,74,0.12); color: var(--warm); }
+  .resource-type.paper { background: rgba(240,160,74,0.12); color: var(--warm); }
+  .resource-type.site { background: rgba(74,240,192,0.12); color: var(--accent); }
+  .resource-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.35rem; line-height: 1.4; }
+  .resource-title a {
+    color: var(--text); text-decoration: none;
+    border-bottom: 1px solid transparent; transition: border-color 0.2s;
+  }
+  .resource-title a:hover { border-bottom-color: var(--accent); }
+  .resource-desc { color: var(--text-muted); font-size: 0.85rem; line-height: 1.65; }
+  .resource-meta {
+    font-family: var(--mono); font-size: 0.7rem; color: var(--text-dim);
+    text-align: right; white-space: nowrap; margin-top: 0.15rem;
+  }
+
+  .comp-table { width: 100%; border-collapse: collapse; }
+  .comp-table th {
+    font-family: var(--mono); font-size: 0.7rem; font-weight: 600;
+    color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em;
+    text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border);
+  }
+  .comp-table td {
+    padding: 1rem; font-size: 0.9rem; color: var(--text-muted);
+    border-bottom: 1px solid var(--border); vertical-align: top;
+  }
+  .comp-table tr:last-child td { border-bottom: none; }
+  .comp-table td:first-child { font-weight: 600; color: var(--text); }
+  .comp-table a { color: var(--accent); text-decoration: none; font-size: 0.82rem; font-weight: 500; }
+  .comp-table a:hover { text-decoration: underline; }
+
+  .mri-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 1.5rem; }
+  .mri-card {
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 1.25rem; text-align: center;
+  }
+  .mri-card .modality { font-family: var(--mono); font-size: 0.85rem; font-weight: 600; color: var(--accent); margin-bottom: 0.5rem; }
+  .mri-card .mri-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; }
+
+  .label-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1.5rem; }
+  .label-card { background: var(--surface-2); border-radius: 10px; padding: 1.25rem; border-left: 3px solid; }
+  .label-card.et { border-color: var(--warm); }
+  .label-card.tc { border-color: var(--rose); }
+  .label-card.wt { border-color: var(--blue); }
+  .label-card .label-name { font-family: var(--mono); font-size: 0.78rem; font-weight: 600; margin-bottom: 0.35rem; }
+  .label-card.et .label-name { color: var(--warm); }
+  .label-card.tc .label-name { color: var(--rose); }
+  .label-card.wt .label-name { color: var(--blue); }
+  .label-card .label-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; }
+
+  .code-block {
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 1.5rem; margin: 1.25rem 0; overflow-x: auto;
+  }
+  .code-block code { font-family: var(--mono); font-size: 0.82rem; line-height: 1.8; color: var(--text-muted); }
+  .code-block .comment { color: var(--text-dim); }
+  .code-block .cmd { color: var(--accent); }
+  .code-block .flag { color: var(--warm); }
+
+  .metric-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1.5rem; }
+  .metric-box { background: var(--surface-2); border-radius: 10px; padding: 1.25rem; text-align: center; }
+  .metric-box .metric-name {
+    font-family: var(--mono); font-size: 0.72rem; color: var(--text-dim);
+    text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.35rem;
+  }
+  .metric-box .metric-val { font-family: var(--serif); font-size: 1.1rem; color: var(--text); margin-bottom: 0.25rem; }
+  .metric-box .metric-desc { font-size: 0.78rem; color: var(--text-muted); }
+
+  .callout {
+    background: var(--accent-glow); border: 1px solid var(--accent-dim);
+    border-radius: 10px; padding: 1.25rem 1.5rem;
+    display: flex; gap: 1rem; align-items: start; margin: 1.5rem 0;
+  }
+  .callout-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 0.1rem; }
+  .callout-text { font-size: 0.9rem; color: var(--text-muted); line-height: 1.65; }
+  .callout-text strong { color: var(--text); }
+
+  footer {
+    border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center;
+    color: var(--text-dim); font-size: 0.82rem; max-width: 1200px; margin: 0 auto;
+  }
+  footer a { color: var(--text-muted); text-decoration: none; }
+  footer a:hover { color: var(--accent); }
+
+  @media (max-width: 900px) {
+    .curriculum-grid { grid-template-columns: 1fr; }
+    .content-grid { grid-template-columns: 1fr; }
+    .mri-grid { grid-template-columns: repeat(2, 1fr); }
+    .label-grid { grid-template-columns: 1fr; }
+    .metric-row { grid-template-columns: 1fr; }
+    .nav-links { display: none; }
+    .resource-item { grid-template-columns: 1fr; gap: 0.5rem; }
+    .resource-meta { text-align: left; }
+    .comp-table { font-size: 0.82rem; }
+    .comp-table th, .comp-table td { padding: 0.6rem 0.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="#top">MedVision<span>Academy</span></a>
+    <div class="nav-links">
+      <a href="#curriculum">12-Month Curriculum</a>
+      <a href="#radiology">Radiology</a>
+      <a href="#ml">Machine Learning</a>
+      <a href="#nnunet">nnU-Net</a>
+      <a href="#brats">BraTS</a>
+      <a href="#competitions">Competitions</a>
+      <a href="#resources">Resources</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero" id="top">
+  <div>
+    <div class="hero-badge"><span class="dot"></span> Created by a Student, for Students</div>
+    <h1>Learn to Build <em>Brain Tumor Segmentation</em> Models</h1>
+    <p>A 12-month curriculum covering radiology, deep learning, nnU-Net, MONAI, and clinical deployment &mdash; everything you need to go from zero to competing in the BraTS Challenge at MICCAI.</p>
+    <a href="#curriculum" class="hero-cta">
+      Start the 12-Month Path
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section class="section" id="curriculum">
+  <div class="section-label">// 12-Month Curriculum</div>
+  <h2 class="section-title">Your Year-Long Path to Medical AI</h2>
+  <p class="section-subtitle">A structured, month-by-month curriculum designed for students. Each month builds on the last &mdash; starting from clinical context, through preprocessing and model building, all the way to deployment and advanced radiomics.</p>
+
+  <div class="curriculum-grid">
+    <div class="quarter-label q1"><span>Q1 &mdash; Clinical &amp; Preprocessing Foundations</span></div>
+
+    <div class="curr-month q1">
+      <div class="curr-header">
+        <span class="curr-num">MONTH 01</span>
+        <span class="curr-month-name">March</span>
+        <span class="curr-quarter q1">Q1</span>
+      </div>
+      <div class="curr-desc">Clinical uses of AI-based segmentation software in Neuro-Oncology practice. Understand why this work matters &mdash; how automated segmentation assists neurosurgeons and oncologists with diagnosis, surgical planning, and monitoring treatment response. Study real clinical workflows to see where AI tools fit in.</div>
+      <div class="curr-topics">
+        <span class="topic-tag">Neuro-oncology overview</span>
+        <span class="topic-tag">Clinical decision-making</span>
+        <span class="topic-tag">AI in radiology workflows</span>
+        <span class="topic-tag">Tumor grading (WHO)</span>
+        <span class="topic-tag">Treatment planning</span>
+      </div>
+    </div>
+
+    <div class="curr-month q1">
+      <div class="curr-header">
+        <span class="curr-num">MONTH 02</span>
+        <span class="curr-month-name">April</span>
+        <span class="curr-quarter q1">Q1</span>
+      </div>
+      <div class="curr-desc">Performing basic MRI preprocessing &mdash; skull-stripping and intensity normalization. Learn to prepare raw brain MRI data for analysis by removing non-brain tissue and standardizing signal intensity across patients and scanners. These steps are essential before any segmentation algorithm can work reliably.</div>
+      <div class="curr-topics">
+        <span class="topic-tag">NIfTI file format</span>
+        <span class="topic-tag">Skull-stripping (BET, HD-BET)</span>
+        <span class="topic-tag">Intensity normalization</span>
+        <span class="topic-tag">Co-registration</span>
+        <span class="topic-tag">nibabel &amp; SimpleITK</span>
+        <span class="topic-tag">3D Slicer / ITK-SNAP</span>
+      </div>
+    </div>
+
+    <div class="curr-month q1">
+      <div class="curr-header">
+        <span class="curr-num">MONTH 03</span>
+        <span class="curr-month-name">May</span>
+        <span class="curr-quarter q1">Q1</span>
+      </div>
+      <div class="curr-desc">Introduction to open-source tools for creation of automated image segmentation algorithms &mdash; MONAI Core, MONAI Label &amp; MONAI Auto3DSeg. Explore the MONAI ecosystem: a PyTorch-based framework purpose-built for medical imaging. MONAI Core provides transforms and dataloaders; MONAI Label enables interactive annotation; Auto3DSeg automates model selection and training.</div>
+      <div class="curr-topics">
+        <span class="topic-tag">MONAI Core</span>
+        <span class="topic-tag">MONAI Label</span>
+        <span class="topic-tag">MONAI Auto3DSeg</span>
+        <span class="topic-tag">PyTorch basics</span>
+        <span class="topic-tag">Medical image transforms</span>
+        <span class="topic-tag">Interactive annotation</span>
+      </div>
+    </div>
+
+    <div class="quarter-label q2"><span>Q2 &mdash; Deep Learning &amp; nnU-Net Mastery</span></div>
+
+    <div class="curr-month q2">
+      <div class="curr-header">
+        <span class="curr-num">MONTH 04</span>
+        <span class="curr-month-name">June</span>
+        <span class="curr-quarter q2">Q2</span>
+      </div>
+      <div class="curr-desc">Fundamentals of convolutional neural networks. Introduction to nnU-Net. Build your deep learning foundations &mdash; understand convolution operations, pooling, activation functions, and the encoder-decoder architecture. Then meet nnU-Net: the self-configuring framework that dominates medical image segmentation benchmarks.</div>
+      <div class="curr-topics">
+        <span class="topic-tag">CNNs &amp; convolutions</span>
+        <span class="topic-tag">U-Net architecture</span>
+        <span class="topic-tag">Encoder-decoder</span>
+        <span class="topic-tag">Skip connections</span>
+        <span class="topic-tag">nnU-Net overview</span>
+        <span class="topic-tag">Loss functions</span>
+      </div>
+    </div>
+
+    <div class="curr-month q2">
+      <div class="curr-header">
+        <span class="curr-num">MONTH 05</span>
+        <span class="curr-month-name">July</span>
+        <span class="curr-quarter q2">Q2</span>
+      </div>
+      <div class="curr-desc">In-depth understanding of nnU-Net. Go beyond the basics &mdash; study how nnU-Net&rsquo;s fingerprinting system analyzes datasets, how it selects between 2D, 3D full-resolution, and cascade configurations, and how its automated preprocessing, augmentation, and post-processing pipelines work under the hood.</div>
+      <div class="curr-topics">
+        <span class="topic-tag">Dataset fingerprinting</span>
+        <span class="topic-tag">2D / 3D / cascade configs</span>
+        <span class="topic-tag">Automated preprocessing</span>
+        <span class="topic-tag">Data augmentation pipeline</span>
+        <span class="topic-tag">5-fold cross-validation</span>
+        <span class="topic-tag">Post-processing</span>
+      </div>
+    </div>
+
+    <div class="curr-month q2">
+      <div class="curr-header">
+        <span class="curr-num">MONTH 06</span>
+        <span class="curr-month-name">August</span>
+        <span class="curr-quarter q2">Q2</span>
+      </div>
+      <div class="curr-desc">Dataset preparation, folder structuring, patch sizes, interpreting logs. The hands-on month &mdash; learn to convert raw BraTS data into nnU-Net&rsquo;s expected format, understand how patch sizes and batch sizes are determined, read training logs to diagnose problems, and run your first real training jobs.</div>
+      <div class="curr-topics">
+        <span class="topic-tag">nnU-Net folder structure</span>
+        <span class="topic-tag">dataset.json creation</span>
+        <span class="topic-tag">File renaming conventions</span>
+        <span class="topic-tag">Patch size selection</span>
+        <span class="topic-tag">Training log analysis</span>
+        <span class="topic-tag">GPU memory management</span>
+      </div>
+    </div>
+
+    <div class="quarter-label q3"><span>Q3 &mdash; Evaluation, Optimization &amp; Integration</span></div>
+
+    <div class="curr-month q3">
+      <div class="curr-header">
+        <span class="curr-num">MONTH 07</span>
+        <span class="curr-month-name">September</span>
+        <span class="curr-quarter q3">Q3</span>
+      </div>
+      <div class="curr-desc">Understanding evaluation metrics for image segmentation algorithms. Learn to measure your model&rsquo;s performance with the metrics that matter: Dice Similarity Coefficient, Hausdorff Distance (HD95), Normalized Surface Distance, sensitivity, specificity, and precision. Understand what each metric rewards and penalizes.</div>
+      <div class="curr-topics">
+        <span class="topic-tag">Dice Score (DSC)</span>
+        <span class="topic-tag">Hausdorff Distance (HD95)</span>
+        <span class="topic-tag">Normalized Surface Distance</span>
+        <span class="topic-tag">Sensitivity &amp; specificity</span>
+        <span class="topic-tag">Per-region evaluation</span>
+        <span class="topic-tag">Statistical significance</span>
+      </div>
+    </div>
+
+    <div class="curr-month q3">
+      <div class="curr-header">
+        <span class="curr-num">MONTH 08</span>
+        <span class="curr-month-name">October</span>
+        <span class="curr-quarter q3">Q3</span>
+      </div>
+      <div class="curr-desc">Fine-tuning and improving an image segmentation model. Move beyond baselines &mdash; explore model ensembling, residual encoders, learning rate scheduling, test-time augmentation, custom post-processing rules, and strategies that top BraTS teams use to squeeze out every fraction of a Dice point.</div>
+      <div class="curr-topics">
+        <span class="topic-tag">Model ensembling</span>
+        <span class="topic-tag">Residual encoders</span>
+        <span class="topic-tag">Test-time augmentation</span>
+        <span class="topic-tag">Learning rate tuning</span>
+        <span class="topic-tag">Custom post-processing</span>
+        <span class="topic-tag">Error analysis</span>
+      </div>
+    </div>
+
+    <div class="curr-month q3">
+      <div class="curr-header">
+        <span class="curr-num">MONTH 09</span>
+        <span class="curr-month-name">November</span>
+        <span class="curr-quarter q3">Q3</span>
+      </div>
+      <div class="curr-desc">Integrating AI solutions into the radiology workflow: challenges and future perspectives. Step back from code to understand the bigger picture &mdash; regulatory hurdles (FDA clearance), clinician trust, explainability, bias in datasets, generalizability across institutions, and the gap between research performance and clinical utility.</div>
+      <div class="curr-topics">
+        <span class="topic-tag">FDA/CE regulatory pathways</span>
+        <span class="topic-tag">Clinical validation</span>
+        <span class="topic-tag">Explainability &amp; trust</span>
+        <span class="topic-tag">Dataset bias</span>
+        <span class="topic-tag">Domain shift</span>
+        <span class="topic-tag">Ethics in medical AI</span>
+      </div>
+    </div>
+
+    <div class="quarter-label q4"><span>Q4 &mdash; Deployment &amp; Advanced Applications</span></div>
+
+    <div class="curr-month q4">
+      <div class="curr-header">
+        <span class="curr-num">MONTH 10</span>
+        <span class="curr-month-name">December</span>
+        <span class="curr-quarter q4">Q4</span>
+      </div>
+      <div class="curr-desc">Deploying an AI software into clinical practice using MONAI Deploy, Streamlit, BraTS Orchestrator, and other tools. Turn your trained model into something doctors can actually use &mdash; build inference pipelines, create web-based visualization apps, package models in Docker containers, and understand the MONAI Deploy App SDK.</div>
+      <div class="curr-topics">
+        <span class="topic-tag">MONAI Deploy</span>
+        <span class="topic-tag">Streamlit apps</span>
+        <span class="topic-tag">BraTS Orchestrator</span>
+        <span class="topic-tag">Docker containers</span>
+        <span class="topic-tag">Inference pipelines</span>
+        <span class="topic-tag">DICOM integration</span>
+      </div>
+    </div>
+
+    <div class="curr-month q4">
+      <div class="curr-header">
+        <span class="curr-num">MONTH 11</span>
+        <span class="curr-month-name">January</span>
+        <span class="curr-quarter q4">Q4</span>
+      </div>
+      <div class="curr-desc">Organizing and segmenting a brain MRI longitudinal dataset of pre- and post-treatment brain tumors for treatment response assessment. RANO criteria. Work with real-world complexity &mdash; longitudinal data where the same patient has multiple scans over time. Learn the RANO (Response Assessment in Neuro-Oncology) criteria used by clinicians to judge whether tumors are responding, stable, or progressing.</div>
+      <div class="curr-topics">
+        <span class="topic-tag">Longitudinal datasets</span>
+        <span class="topic-tag">RANO criteria</span>
+        <span class="topic-tag">Treatment response</span>
+        <span class="topic-tag">Pre- vs post-treatment</span>
+        <span class="topic-tag">Volumetric tracking</span>
+        <span class="topic-tag">Clinical endpoints</span>
+      </div>
+    </div>
+
+    <div class="curr-month q4">
+      <div class="curr-header">
+        <span class="curr-num">MONTH 12</span>
+        <span class="curr-month-name">February</span>
+        <span class="curr-quarter q4">Q4</span>
+      </div>
+      <div class="curr-desc">Radiomics applications in neuro-oncological radiology. The frontier &mdash; extract quantitative features from medical images (shape, texture, intensity histograms) that go beyond what the human eye can see. Learn how radiomics pipelines extract hundreds of features from segmented tumors and how these features correlate with genetics, treatment outcomes, and prognosis.</div>
+      <div class="curr-topics">
+        <span class="topic-tag">Radiomics fundamentals</span>
+        <span class="topic-tag">PyRadiomics</span>
+        <span class="topic-tag">Feature extraction</span>
+        <span class="topic-tag">Texture analysis</span>
+        <span class="topic-tag">Radiogenomics</span>
+        <span class="topic-tag">Prognostic modeling</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section class="section" id="radiology">
+  <div class="section-label">// Months 01&ndash;02 Deep Dive</div>
+  <h2 class="section-title">Radiology &amp; MRI for the Absolute Beginner</h2>
+  <p class="section-subtitle">You&rsquo;re not training to be a radiologist &mdash; you&rsquo;re training a model to behave like one. But you need to understand what the data means.</p>
+
+  <div class="content-grid">
+    <div class="content-card full">
+      <div class="card-icon green">&#129504;</div>
+      <div class="card-title">What is MRI and Why Does It Matter?</div>
+      <div class="card-text">
+        <p>Magnetic Resonance Imaging (MRI) uses powerful magnets and radio waves to create detailed images of soft tissues &mdash; particularly the brain. Unlike CT scans or X-rays, MRI doesn&rsquo;t use ionizing radiation, making it safer for repeated imaging. It produces images with excellent contrast between different types of brain tissue, ideal for spotting tumors.</p>
+        <p>An MRI scan is not a single 2D image &mdash; it&rsquo;s a <strong>3D volume</strong> made up of many 2D &ldquo;slices.&rdquo; Think of it like a loaf of bread: each slice is a cross-section of the brain. MRI files come in the <strong>NIfTI format</strong> (.nii or .nii.gz), which stores these 3D volumes along with metadata about voxel spacing and orientation.</p>
+      </div>
+    </div>
+
+    <div class="content-card full">
+      <div class="card-icon blue">&#128225;</div>
+      <div class="card-title">The Four MRI Modalities Used in BraTS</div>
+      <div class="card-text"><p>We use four different &ldquo;modalities&rdquo; that each highlight different tissue properties &mdash; like looking at the same scene with different camera filters.</p></div>
+      <div class="mri-grid">
+        <div class="mri-card"><div class="modality">T1</div><div class="mri-desc">Native T1-weighted. Shows brain anatomy clearly. CSF appears dark, white matter bright, gray matter intermediate.</div></div>
+        <div class="mri-card"><div class="modality">T1ce</div><div class="mri-desc">T1 with contrast agent (gadolinium). Makes actively growing tumor regions &ldquo;light up&rdquo; where the blood-brain barrier is disrupted.</div></div>
+        <div class="mri-card"><div class="modality">T2</div><div class="mri-desc">T2-weighted. Fluid appears bright, making edema (swelling) and CSF highly visible.</div></div>
+        <div class="mri-card"><div class="modality">FLAIR</div><div class="mri-desc">Fluid-Attenuated Inversion Recovery. Like T2 but CSF is suppressed (dark), making peritumoral edema stand out clearly.</div></div>
+      </div>
+    </div>
+
+    <div class="content-card full">
+      <div class="card-icon warm">&#127991;&#65039;</div>
+      <div class="card-title">Understanding Tumor Sub-regions (Segmentation Labels)</div>
+      <div class="card-text"><p>Brain tumors have distinct sub-regions. BraTS asks you to segment three nested regions:</p></div>
+      <div class="label-grid">
+        <div class="label-card et"><div class="label-name">Enhancing Tumor (ET)</div><div class="label-desc">The actively growing, vascularized core that &ldquo;enhances&rdquo; on T1ce. The most aggressive part.</div></div>
+        <div class="label-card tc"><div class="label-name">Tumor Core (TC)</div><div class="label-desc">Enhancing tumor + necrotic and non-enhancing core. The bulk of solid tumor mass.</div></div>
+        <div class="label-card wt"><div class="label-name">Whole Tumor (WT)</div><div class="label-desc">Everything: ET + TC + peritumoral edema. The total extent of visible disease.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="font-family:var(--serif);font-size:1.4rem;margin:3rem 0 1.5rem;">Radiology Learning Resources</h3>
+  <div class="resource-list">
+    <div class="resource-item"><span class="resource-type course">Course</span><div><div class="resource-title"><a href="https://www.classcentral.com/course/youtube-lecture-series-on-introduction-to-radiology-53061" target="_blank">Introduction to Radiology &mdash; Yale University (Free)</a></div><div class="resource-desc">Free lecture series covering conventional radiography, CT, ultrasound, and MRI with real clinical cases. Ideal starting point with zero background.</div></div><div class="resource-meta">Video series<br>Free</div></div>
+    <div class="resource-item"><span class="resource-type course">Course</span><div><div class="resource-title"><a href="https://www.coursera.org/learn/mri-fundamentals" target="_blank">MRI Fundamentals &mdash; KAIST (Coursera)</a></div><div class="resource-desc">Deep dive into MRI physics: magnetic resonance, relaxation, RF pulses, imaging sequences (spin echo, gradient echo, EPI), and contrast mechanisms.</div></div><div class="resource-meta">4 weeks<br>Free audit</div></div>
+    <div class="resource-item"><span class="resource-type site">Site</span><div><div class="resource-title"><a href="https://www.imaios.com/en/e-mri" target="_blank">e-MRI &mdash; Interactive MRI Course (IMAIOS)</a></div><div class="resource-desc">Award-winning interactive course with animations and experiments. Won awards from the European and North American radiology societies.</div></div><div class="resource-meta">16 chapters<br>Free</div></div>
+    <div class="resource-item"><span class="resource-type site">Site</span><div><div class="resource-title"><a href="https://radiopaedia.org/" target="_blank">Radiopaedia.org &mdash; Radiology Reference</a></div><div class="resource-desc">The Wikipedia of radiology. 25,000+ cases with expert annotations. Search for &ldquo;glioblastoma&rdquo; or &ldquo;brain metastasis&rdquo; to build visual intuition.</div></div><div class="resource-meta">25,000+ cases<br>Free</div></div>
+    <div class="resource-item"><span class="resource-type site">Site</span><div><div class="resource-title"><a href="https://www.radiologycafe.com/radiology-basics/" target="_blank">Radiology Basics &mdash; Radiology Cafe</a></div><div class="resource-desc">Free e-learning with scrollable MRI image stacks and illustrated pathology examples for medical students.</div></div><div class="resource-meta">Interactive<br>Free</div></div>
+    <div class="resource-item"><span class="resource-type site">Site</span><div><div class="resource-title"><a href="https://www.radiologymasterclass.co.uk/" target="_blank">Radiology Masterclass</a></div><div class="resource-desc">Structured tutorials on X-ray, CT, and MRI interpretation with quizzes and gallery cases.</div></div><div class="resource-meta">Tutorials<br>Free</div></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section class="section" id="ml">
+  <div class="section-label">// Months 04&ndash;06 Deep Dive</div>
+  <h2 class="section-title">Machine Learning &amp; Deep Learning Fundamentals</h2>
+  <p class="section-subtitle">From &ldquo;what is a neural network&rdquo; to confidently working with CNNs and U-Net.</p>
+
+  <div class="content-grid">
+    <div class="content-card"><div class="card-icon green">&#128279;</div><div class="card-title">Key Concepts</div><div class="card-text"><p><strong>Supervised learning:</strong> Learning from labeled examples (MRI + expert tumor boundaries).</p><p><strong>CNNs:</strong> Convolution filters detect edges, textures, and patterns in images.</p><p><strong>U-Net:</strong> Encoder-decoder with skip connections &mdash; the architecture behind nnU-Net.</p><p><strong>Loss functions:</strong> Dice loss and cross-entropy &mdash; how the model measures segmentation mistakes.</p><p><strong>Backpropagation:</strong> How the model learns through gradient descent.</p></div></div>
+    <div class="content-card"><div class="card-icon blue">&#128208;</div><div class="card-title">The Math You Actually Need</div><div class="card-text"><p><strong>Linear algebra:</strong> Matrices and multiplication (tensor operations). 3Blue1Brown&rsquo;s series is the gold standard.</p><p><strong>Basic calculus:</strong> Derivatives and the chain rule for backpropagation.</p><p><strong>Probability:</strong> Softmax, sigmoid, distributions. Your model outputs per-voxel class probabilities.</p></div></div>
+  </div>
+
+  <h3 style="font-family:var(--serif);font-size:1.4rem;margin:3rem 0 1.5rem;">ML &amp; Deep Learning Resources</h3>
+  <div class="resource-list">
+    <div class="resource-item"><span class="resource-type video">Video</span><div><div class="resource-title"><a href="https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi" target="_blank">Neural Networks &mdash; 3Blue1Brown (YouTube)</a></div><div class="resource-desc">The best visual introduction to neural networks. Explains neurons, gradient descent, and backpropagation with beautiful animations. Watch this first.</div></div><div class="resource-meta">4 videos<br>~1 hour</div></div>
+    <div class="resource-item"><span class="resource-type video">Video</span><div><div class="resource-title"><a href="https://www.youtube.com/playlist?list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab" target="_blank">Essence of Linear Algebra &mdash; 3Blue1Brown (YouTube)</a></div><div class="resource-desc">Visual, geometric intuition for vectors, matrices, and transformations. Makes linear algebra feel intuitive.</div></div><div class="resource-meta">16 videos<br>~3.5 hours</div></div>
+    <div class="resource-item"><span class="resource-type course">Course</span><div><div class="resource-title"><a href="https://www.fast.ai/" target="_blank">Practical Deep Learning for Coders &mdash; fast.ai</a></div><div class="resource-desc">Jeremy Howard&rsquo;s legendary free course. Top-down approach: build working models from day one, then learn theory. Uses PyTorch. The single most impactful ML course for self-learners.</div></div><div class="resource-meta">~7 weeks<br>Free</div></div>
+    <div class="resource-item"><span class="resource-type course">Course</span><div><div class="resource-title"><a href="https://www.coursera.org/specializations/deep-learning" target="_blank">Deep Learning Specialization &mdash; Andrew Ng (Coursera)</a></div><div class="resource-desc">Five courses covering neural networks, optimization, CNNs, sequence models, and ML projects. More theoretical than fast.ai &mdash; great complement.</div></div><div class="resource-meta">5 courses<br>Free audit</div></div>
+    <div class="resource-item"><span class="resource-type tutorial">Tutorial</span><div><div class="resource-title"><a href="https://pytorch.org/tutorials/" target="_blank">Official PyTorch Tutorials</a></div><div class="resource-desc">Learn the framework nnU-Net is built on. Start with &ldquo;Learn the Basics,&rdquo; then the CNN tutorial.</div></div><div class="resource-meta">Self-paced<br>Free</div></div>
+    <div class="resource-item"><span class="resource-type video">Video</span><div><div class="resource-title"><a href="https://www.youtube.com/watch?v=IHq1t7NxS8k" target="_blank">U-Net Paper Explained &mdash; Yannic Kilcher (YouTube)</a></div><div class="resource-desc">Detailed walkthrough of the original U-Net paper: encoder-decoder, skip connections, and why it works for medical segmentation.</div></div><div class="resource-meta">30 min<br>Free</div></div>
+    <div class="resource-item"><span class="resource-type video">Video</span><div><div class="resource-title"><a href="https://www.youtube.com/watch?v=0tZFQs7qBfQ" target="_blank">Coding a U-Net from Scratch &mdash; Aladdin Persson (YouTube)</a></div><div class="resource-desc">Hands-on PyTorch U-Net implementation. Builds each component step-by-step. Great prep before using nnU-Net.</div></div><div class="resource-meta">~30 min<br>Free</div></div>
+    <div class="resource-item"><span class="resource-type tutorial">Tutorial</span><div><div class="resource-title"><a href="https://monai.io/started.html" target="_blank">Getting Started with MONAI</a></div><div class="resource-desc">Official MONAI quickstart. Medical imaging-specific PyTorch framework. Covers transforms, datasets, and building your first pipeline. Aligns with months 3 and 10.</div></div><div class="resource-meta">Self-paced<br>Free</div></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section class="section" id="nnunet">
+  <div class="section-label">// Months 05&ndash;08 Deep Dive</div>
+  <h2 class="section-title">nnU-Net: The Framework That Wins Challenges</h2>
+  <p class="section-subtitle">nnU-Net automatically adapts to any dataset. It dominated the Medical Segmentation Decathlon and is the baseline for most BraTS competitors.</p>
+
+  <div class="content-grid">
+    <div class="content-card full"><div class="card-icon purple">&#9881;&#65039;</div><div class="card-title">What Makes nnU-Net Special</div><div class="card-text">
+      <p>The name &ldquo;no-new-Net&rdquo; is the whole point &mdash; it squeezes maximum performance from the classic U-Net by optimizing everything else: preprocessing, augmentation, training schedule, patch size, network depth, post-processing, and ensembling. It analyzes your dataset&rsquo;s &ldquo;fingerprint&rdquo; and auto-configures the pipeline.</p>
+      <p>It generates up to three configs: <strong>2D U-Net</strong>, <strong>3D full-resolution</strong>, and <strong>3D cascade</strong>. It trains all with 5-fold cross-validation, then picks the best or ensembles them. Nine out of ten MICCAI 2020 winners built on nnU-Net.</p>
+    </div></div>
+
+    <div class="content-card"><div class="card-icon green">&#128295;</div><div class="card-title">Setting Up nnU-Net v2</div><div class="card-text"><p><strong>Requirements:</strong> NVIDIA GPU (8GB+ VRAM), CUDA, PyTorch, Python 3.9+.</p></div>
+      <div class="code-block"><code><span class="comment"># Create environment</span><br><span class="cmd">conda</span> create <span class="flag">-n</span> nnunet python=3.10<br><span class="cmd">conda</span> activate nnunet<br><br><span class="comment"># Install PyTorch + nnU-Net</span><br><span class="cmd">pip</span> install torch torchvision <span class="flag">--index-url</span> https://download.pytorch.org/whl/cu121<br><span class="cmd">pip</span> install nnunetv2<br><br><span class="comment"># Set environment variables</span><br><span class="cmd">export</span> nnUNet_raw="/path/to/nnUNet_raw"<br><span class="cmd">export</span> nnUNet_preprocessed="/path/to/nnUNet_preprocessed"<br><span class="cmd">export</span> nnUNet_results="/path/to/nnUNet_results"</code></div>
+    </div>
+    <div class="content-card"><div class="card-icon warm">&#128194;</div><div class="card-title">Preparing BraTS Data</div><div class="card-text"><p>nnU-Net v2 expects this folder structure:</p></div>
+      <div class="code-block"><code>Dataset001_BraTS/<br>&#9500;&#9472;&#9472; imagesTr/<br>&#9474;   &#9500;&#9472;&#9472; BraTS_001_0000.nii.gz  <span class="comment"># T1</span><br>&#9474;   &#9500;&#9472;&#9472; BraTS_001_0001.nii.gz  <span class="comment"># T1ce</span><br>&#9474;   &#9500;&#9472;&#9472; BraTS_001_0002.nii.gz  <span class="comment"># T2</span><br>&#9474;   &#9500;&#9472;&#9472; BraTS_001_0003.nii.gz  <span class="comment"># FLAIR</span><br>&#9500;&#9472;&#9472; labelsTr/<br>&#9474;   &#9500;&#9472;&#9472; BraTS_001.nii.gz<br>&#9492;&#9472;&#9472; dataset.json</code></div>
+    </div>
+
+    <div class="content-card full"><div class="card-icon rose">&#128640;</div><div class="card-title">The Training Pipeline</div><div class="card-text"><p>Three commands:</p></div>
+      <div class="code-block"><code><span class="comment"># 1. Analyze &amp; preprocess</span><br><span class="cmd">nnUNetv2_plan_and_preprocess</span> <span class="flag">-d</span> 001 <span class="flag">--verify_dataset_integrity</span><br><br><span class="comment"># 2. Train (3D full-res, fold 0)</span><br><span class="cmd">nnUNetv2_train</span> 001 3d_fullres 0<br><br><span class="comment"># 3. Predict</span><br><span class="cmd">nnUNetv2_predict</span> <span class="flag">-i</span> INPUT <span class="flag">-o</span> OUTPUT <span class="flag">-d</span> 001 <span class="flag">-c</span> 3d_fullres <span class="flag">-f</span> 0</code></div>
+      <div class="card-text" style="margin-top:1rem;"><p>Train all 5 folds for best results. Each fold: 12&ndash;48+ hours on a single GPU.</p></div>
+    </div>
+  </div>
+
+  <h3 style="font-family:var(--serif);font-size:1.4rem;margin:3rem 0 1.5rem;">nnU-Net Resources</h3>
+  <div class="resource-list">
+    <div class="resource-item"><span class="resource-type tool">Repo</span><div><div class="resource-title"><a href="https://github.com/MIC-DKFZ/nnUNet" target="_blank">nnU-Net Official GitHub (MIC-DKFZ)</a></div><div class="resource-desc">Official source code and docs. Start with the README, then <code>documentation/how_to_use_nnunet.md</code>.</div></div><div class="resource-meta">Official<br>Free</div></div>
+    <div class="resource-item"><span class="resource-type tutorial">Tutorial</span><div><div class="resource-title"><a href="https://towardsdatascience.com/the-ultimate-guide-to-nnu-net-for-state-of-the-art-image-segmentation-6dda7f44b935/" target="_blank">The Ultimate Guide to nnU-Net &mdash; Fran&ccedil;ois Porcher (TDS)</a></div><div class="resource-desc">Most comprehensive written tutorial. Covers theory and practice: fingerprinting, three variants, optimization strategies.</div></div><div class="resource-meta">Long read<br>Free</div></div>
+    <div class="resource-item"><span class="resource-type tutorial">Tutorial</span><div><div class="resource-title"><a href="https://medium.com/miccai-educational-initiative/nnu-net-the-no-new-unet-for-automatic-segmentation-8d655f3f6d2a" target="_blank">nnU-Net &mdash; MICCAI Educational Initiative (Medium)</a></div><div class="resource-desc">Includes a Google Colab notebook for the full pipeline. Great for first experiments without GPU setup.</div></div><div class="resource-meta">Colab<br>Free</div></div>
+    <div class="resource-item"><span class="resource-type tutorial">Tutorial</span><div><div class="resource-title"><a href="https://towardsai.net/p/l/how-i-use-nnunet-for-medical-image-segmentation-a-comprehensive-guide" target="_blank">How I Use nnUNet &mdash; Towards AI</a></div><div class="resource-desc">Practical walkthrough: installation, formatting, training, inference. Helpful on v2 naming conventions.</div></div><div class="resource-meta">Step-by-step<br>Free</div></div>
+    <div class="resource-item"><span class="resource-type tutorial">Tutorial</span><div><div class="resource-title"><a href="https://medium.com/@maknimariem11/your-guide-to-nnu-net-ee04103f8c22" target="_blank">Your Guide to nnU-Net &mdash; Mariem Makni</a></div><div class="resource-desc">Beginner guide with BraTS-Metastases data conversion code. Covers v1 and v2 differences.</div></div><div class="resource-meta">Aug 2024<br>Free</div></div>
+    <div class="resource-item"><span class="resource-type paper">Paper</span><div><div class="resource-title"><a href="https://www.nature.com/articles/s41592-020-01008-z" target="_blank">nnU-Net: self-configuring method &mdash; Isensee et al. (Nature Methods, 2021)</a></div><div class="resource-desc">The original paper. Explains design philosophy, fingerprinting, and evaluation across 23 datasets.</div></div><div class="resource-meta">Nature Methods<br>Open Access</div></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section class="section" id="brats">
+  <div class="section-label">// The Challenge</div>
+  <h2 class="section-title">The BraTS Challenge at MICCAI</h2>
+  <p class="section-subtitle">Running since 2012, BraTS is the premier benchmark for brain tumor segmentation.</p>
+
+  <div class="content-grid">
+    <div class="content-card full"><div class="card-icon green">&#127942;</div><div class="card-title">What is BraTS?</div><div class="card-text">
+      <p>BraTS is an annual challenge at MICCAI, the top conference in medical image analysis. Organized by CBICA (UPenn) with RSNA, ASNR, ESNR, NIH, and FDA. Since 2023, it expanded into a &ldquo;Cluster of Challenges&rdquo; with 12+ tasks.</p>
+    </div></div>
+    <div class="content-card full"><div class="card-icon warm">&#128203;</div><div class="card-title">BraTS 2025 Lighthouse &mdash; Tasks</div><div class="card-text">
+      <p><strong>Task 1 &mdash; Adult Glioma:</strong> Pre- and post-treatment glioma segmentation.</p>
+      <p><strong>Tasks 2&ndash;3 &mdash; Meningioma:</strong> Pre-treatment and pre-RT meningioma segmentation.</p>
+      <p><strong>Task 4 &mdash; Brain Metastases:</strong> 1,475 cases, 4-label system, pre- and post-treatment.</p>
+      <p><strong>Task 5 &mdash; BraTS-Africa:</strong> Addressing bias from underrepresentation of sub-Saharan populations.</p>
+      <p><strong>Task 6 &mdash; Pediatric. Task 7 &mdash; GOAT</strong> (generalizability across tumor types).</p>
+      <p><strong>Tasks 8&ndash;10:</strong> Synthesis, inpainting, and histopathology.</p>
+    </div></div>
+  </div>
+
+  <h3 style="font-family:var(--serif);font-size:1.4rem;margin:3rem 0 1rem;">Evaluation Metrics</h3>
+  <div class="metric-row">
+    <div class="metric-box"><div class="metric-name">Dice Score (DSC)</div><div class="metric-val">2|A&cap;B| / (|A|+|B|)</div><div class="metric-desc">Overlap between prediction and ground truth. Primary ranking metric.</div></div>
+    <div class="metric-box"><div class="metric-name">Hausdorff Distance (HD95)</div><div class="metric-val">95th percentile</div><div class="metric-desc">Maximum boundary error. Lower is better.</div></div>
+    <div class="metric-box"><div class="metric-name">Normalized Surface Dist.</div><div class="metric-val">NSD@&tau;</div><div class="metric-desc">Surface accuracy at clinical tolerance.</div></div>
+  </div>
+
+  <div class="callout" style="margin-top:2.5rem;"><div class="callout-icon">&#128161;</div><div class="callout-text"><strong>How to access BraTS data:</strong> Hosted on <a href="https://www.synapse.org/" target="_blank" style="color:var(--accent);">Synapse</a>. Create a free account, search &ldquo;BraTS 2025,&rdquo; register, accept the data use agreement. Training data with annotations is free.</div></div>
+
+  <h3 style="font-family:var(--serif);font-size:1.4rem;margin:3rem 0 1.5rem;">BraTS Resources</h3>
+  <div class="resource-list">
+    <div class="resource-item"><span class="resource-type site">Site</span><div><div class="resource-title"><a href="http://braintumorsegmentation.org/" target="_blank">braintumorsegmentation.org &mdash; Official BraTS Website</a></div><div class="resource-desc">Central hub for all past and current editions, datasets, leaderboards, and proceedings.</div></div><div class="resource-meta">Official<br>Free</div></div>
+    <div class="resource-item"><span class="resource-type site">Site</span><div><div class="resource-title"><a href="https://www.synapse.org/" target="_blank">Synapse &mdash; Challenge Platform &amp; Data</a></div><div class="resource-desc">Data hosting and prediction submission platform. Also hosts many other medical imaging challenges.</div></div><div class="resource-meta">Platform<br>Free</div></div>
+    <div class="resource-item"><span class="resource-type tutorial">Tutorial</span><div><div class="resource-title"><a href="https://blog.ovhcloud.com/image-segmentation-train-a-u-net-model-to-segment-brain-tumors/" target="_blank">Train a U-Net on BraTS &mdash; OVHcloud Blog</a></div><div class="resource-desc">Complete walkthrough with BraTS 2020: NIfTI handling, modalities, U-Net training, visualization. GitHub repo included.</div></div><div class="resource-meta">Full tutorial<br>Free + Code</div></div>
+    <div class="resource-item"><span class="resource-type paper">Paper</span><div><div class="resource-title"><a href="https://arxiv.org/abs/2504.12527" target="_blank">BraTS-METS 2025 Challenge Paper (ArXiv)</a></div><div class="resource-desc">Official analysis: annotation pipeline, 1,475 cases, 4-label system, evaluation methodology.</div></div><div class="resource-meta">2025<br>Open Access</div></div>
+    <div class="resource-item"><span class="resource-type paper">Paper</span><div><div class="resource-title"><a href="https://arxiv.org/abs/2509.17281" target="_blank">BraTS 2025 Education Platform Paper (ArXiv)</a></div><div class="resource-desc">How 56 medical students improved neuroimaging skills through BraTS annotation. Proof this path works.</div></div><div class="resource-meta">2025<br>Open Access</div></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section class="section" id="competitions">
+  <div class="section-label">// Beyond BraTS</div>
+  <h2 class="section-title">Other Segmentation Competitions</h2>
+  <p class="section-subtitle">Apply your skills elsewhere and build your portfolio.</p>
+  <div class="content-card full" style="overflow-x:auto;">
+    <table class="comp-table">
+      <thead><tr><th>Competition</th><th>Target</th><th>Modality</th><th>Details</th><th>Link</th></tr></thead>
+      <tbody>
+        <tr><td>Medical Segmentation Decathlon</td><td>10 organs/tumors</td><td>CT &amp; MRI</td><td>Generalist benchmark. Rolling leaderboard still active.</td><td><a href="http://medicaldecathlon.com/" target="_blank">medicaldecathlon.com</a></td></tr>
+        <tr><td>AMOS</td><td>15 abdominal organs</td><td>CT &amp; MRI</td><td>500+ cases. Won by nnU-Net in 2022.</td><td><a href="https://amos22.grand-challenge.org/" target="_blank">grand-challenge.org</a></td></tr>
+        <tr><td>KiTS</td><td>Kidneys &amp; tumors</td><td>CT</td><td>300+ cases. Simpler &mdash; good stepping stone.</td><td><a href="https://kits-challenge.org/" target="_blank">kits-challenge.org</a></td></tr>
+        <tr><td>HECKTOR</td><td>Head &amp; neck tumors</td><td>PET/CT &amp; MRI</td><td>Multi-modal for radiation therapy planning.</td><td><a href="https://hecktor.grand-challenge.org/" target="_blank">grand-challenge.org</a></td></tr>
+        <tr><td>ISLES</td><td>Stroke lesions</td><td>MRI</td><td>Brain MRI like BraTS but for stroke.</td><td><a href="https://isles-challenge.org/" target="_blank">isles-challenge.org</a></td></tr>
+        <tr><td>Grand-Challenge.org</td><td>Dozens active</td><td>Various</td><td>Largest biomedical challenge platform.</td><td><a href="https://grand-challenge.org/challenges/" target="_blank">grand-challenge.org</a></td></tr>
+        <tr><td>Kaggle Medical Imaging</td><td>Various</td><td>Various</td><td>Beginner-friendly. Often has prize money.</td><td><a href="https://www.kaggle.com/competitions" target="_blank">kaggle.com</a></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section class="section" id="resources">
+  <div class="section-label">// Reference</div>
+  <h2 class="section-title">Essential Tools &amp; Additional Resources</h2>
+  <p class="section-subtitle">Tools you&rsquo;ll use throughout the curriculum and resources for going deeper.</p>
+  <div class="resource-list">
+    <div class="resource-item"><span class="resource-type tool">Tool</span><div><div class="resource-title"><a href="https://www.slicer.org/" target="_blank">3D Slicer</a></div><div class="resource-desc">Standard open-source medical image viewer. Load NIfTI, view all planes, overlay segmentations.</div></div><div class="resource-meta">Desktop<br>Free</div></div>
+    <div class="resource-item"><span class="resource-type tool">Tool</span><div><div class="resource-title"><a href="https://itksnap.org/" target="_blank">ITK-SNAP</a></div><div class="resource-desc">Lighter-weight 3D viewer with semi-automatic segmentation. Quick NIfTI checks.</div></div><div class="resource-meta">Desktop<br>Free</div></div>
+    <div class="resource-item"><span class="resource-type tool">Tool</span><div><div class="resource-title"><a href="https://nipy.org/nibabel/" target="_blank">NiBabel</a></div><div class="resource-desc">Python library for NIfTI files. <code>nib.load('scan.nii.gz').get_fdata()</code> gives you a NumPy array.</div></div><div class="resource-meta">pip install<br>Free</div></div>
+    <div class="resource-item"><span class="resource-type tool">Tool</span><div><div class="resource-title"><a href="https://simpleitk.org/" target="_blank">SimpleITK</a></div><div class="resource-desc">Medical image processing: resampling, registration, filtering. Used in nnU-Net&rsquo;s preprocessing.</div></div><div class="resource-meta">pip install<br>Free</div></div>
+    <div class="resource-item"><span class="resource-type tool">Tool</span><div><div class="resource-title"><a href="https://monai.io/" target="_blank">MONAI</a></div><div class="resource-desc">PyTorch framework for healthcare imaging. Core, Label, Auto3DSeg, Deploy. Central to months 3, 10.</div></div><div class="resource-meta">pip install<br>Free</div></div>
+    <div class="resource-item"><span class="resource-type tool">Tool</span><div><div class="resource-title"><a href="https://pyradiomics.readthedocs.io/" target="_blank">PyRadiomics</a></div><div class="resource-desc">Radiomics feature extraction: shape, texture, intensity. Central to month 12.</div></div><div class="resource-meta">pip install<br>Free</div></div>
+    <div class="resource-item"><span class="resource-type dataset">Dataset</span><div><div class="resource-title"><a href="https://www.med.upenn.edu/cbica/brats/" target="_blank">BraTS Datasets &mdash; CBICA, UPenn</a></div><div class="resource-desc">All BraTS datasets across years. The 2021 set (2,040 cases) is widely used for baselines.</div></div><div class="resource-meta">Multi-year<br>Free</div></div>
+    <div class="resource-item"><span class="resource-type dataset">Dataset</span><div><div class="resource-title"><a href="http://medicaldecathlon.com/" target="_blank">Medical Segmentation Decathlon</a></div><div class="resource-desc">10 diverse segmentation datasets. CC-BY-SA licensed.</div></div><div class="resource-meta">10 datasets<br>CC-BY-SA</div></div>
+    <div class="resource-item"><span class="resource-type video">Video</span><div><div class="resource-title"><a href="https://www.youtube.com/c/AndrejKarpathy" target="_blank">Andrej Karpathy&rsquo;s YouTube</a></div><div class="resource-desc">&ldquo;Neural Networks: Zero to Hero&rdquo; &mdash; builds NNs from raw Python. Deep intuition.</div></div><div class="resource-meta">Series<br>Free</div></div>
+    <div class="resource-item"><span class="resource-type course">Course</span><div><div class="resource-title"><a href="https://cs231n.github.io/" target="_blank">CS231n: CNNs &mdash; Stanford</a></div><div class="resource-desc">Legendary CV course. Free notes and assignments. Advanced &mdash; after your first model.</div></div><div class="resource-meta">Full semester<br>Free</div></div>
+    <div class="resource-item"><span class="resource-type course">Course</span><div><div class="resource-title"><a href="https://www.coursera.org/specializations/ai-for-medicine" target="_blank">AI for Medicine &mdash; deeplearning.ai</a></div><div class="resource-desc">AI applied to healthcare: diagnosis, prognosis, treatment. Class imbalance, clinical metrics.</div></div><div class="resource-meta">3 courses<br>Free audit</div></div>
+  </div>
+  <div class="callout" style="margin-top:2rem;"><div class="callout-icon">&#128421;&#65039;</div><div class="callout-text"><strong>GPU Access for Students:</strong> Free options: <strong>Google Colab</strong>, <strong>Kaggle Notebooks</strong> (30 hrs/week GPU), <strong>cloud student credits</strong> ($100&ndash;300). Ask your school&rsquo;s CS department about shared resources. Lambda Labs and Paperspace offer affordable GPU rentals.</div></div>
+</section>
+
+<div class="divider"></div>
+
+<footer>
+  <p style="font-family:var(--serif);font-size:1.1rem;color:var(--text);margin-bottom:0.75rem;">MedVision Academy</p>
+  <p>Built by a student to help others get started in medical AI research.</p>
+  <p style="margin-top:0.5rem;">All external resources linked remain the property of their respective creators.</p>
+  <p style="margin-top:1rem;">
+    <a href="http://braintumorsegmentation.org/" target="_blank">BraTS Official</a> &nbsp;&middot;&nbsp;
+    <a href="https://github.com/MIC-DKFZ/nnUNet" target="_blank">nnU-Net GitHub</a> &nbsp;&middot;&nbsp;
+    <a href="https://grand-challenge.org/challenges/" target="_blank">Grand Challenge</a> &nbsp;&middot;&nbsp;
+    <a href="https://radiopaedia.org/" target="_blank">Radiopaedia</a> &nbsp;&middot;&nbsp;
+    <a href="https://monai.io/" target="_blank">MONAI</a>
+  </p>
+</footer>
+
+</body>
+</html>
