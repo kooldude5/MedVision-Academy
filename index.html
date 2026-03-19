@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MedVision Academy — Learn Brain Tumor Segmentation from Scratch</title>
+
+<!-- Google Analytics 4 — Replace G-XXXXXXXXXX with your Measurement ID -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9LJGDZVJRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9LJGDZVJRW');
+</script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -94,6 +103,12 @@
   }
   .hero-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(74,240,192,0.25); }
   .hero-cta svg { width: 18px; height: 18px; }
+  .hero-link {
+    color: var(--text-muted); text-decoration: none; font-size: 0.9rem;
+    font-weight: 500; padding: 0.5rem 1rem; border-radius: 6px;
+    border: 1px solid var(--border); transition: all 0.25s;
+  }
+  .hero-link:hover { color: var(--accent); border-color: var(--accent-dim); background: var(--accent-glow); }
 
   .section { max-width: 1200px; margin: 0 auto; padding: 5rem 2rem; }
   .section-label {
@@ -319,6 +334,10 @@
       Start the 12-Month Path
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
     </a>
+    <div style="margin-top:1.5rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+      <a href="https://miccai.org/" target="_blank" class="tracked-link hero-link" data-link-name="MICCAI">MICCAI Conference &rarr;</a>
+      <a href="https://www.synapse.org/Synapse:syn64153130/wiki/630130" target="_blank" class="tracked-link hero-link" data-link-name="BraTS 2025 Challenge">BraTS 2025 Challenge &rarr;</a>
+    </div>
   </div>
 </section>
 
@@ -689,6 +708,8 @@
 
   <h3 style="font-family:var(--serif);font-size:1.4rem;margin:3rem 0 1.5rem;">BraTS Resources</h3>
   <div class="resource-list">
+    <div class="resource-item"><span class="resource-type site">Site</span><div><div class="resource-title"><a href="https://miccai.org/" target="_blank">MICCAI &mdash; Medical Image Computing and Computer Assisted Intervention</a></div><div class="resource-desc">The official website for the MICCAI conference &mdash; the premier international venue for medical image analysis research. BraTS is held here annually.</div></div><div class="resource-meta">Conference<br>Official</div></div>
+    <div class="resource-item"><span class="resource-type site">Site</span><div><div class="resource-title"><a href="https://www.synapse.org/Synapse:syn64153130/wiki/630130" target="_blank">BraTS 2025 Lighthouse Challenge &mdash; Synapse</a></div><div class="resource-desc">The official BraTS 2025 challenge page on Synapse. Register here, download training data, and submit your predictions for evaluation on the leaderboard.</div></div><div class="resource-meta">Challenge<br>Free</div></div>
     <div class="resource-item"><span class="resource-type site">Site</span><div><div class="resource-title"><a href="http://braintumorsegmentation.org/" target="_blank">braintumorsegmentation.org &mdash; Official BraTS Website</a></div><div class="resource-desc">Central hub for all past and current editions, datasets, leaderboards, and proceedings.</div></div><div class="resource-meta">Official<br>Free</div></div>
     <div class="resource-item"><span class="resource-type site">Site</span><div><div class="resource-title"><a href="https://www.synapse.org/" target="_blank">Synapse &mdash; Challenge Platform &amp; Data</a></div><div class="resource-desc">Data hosting and prediction submission platform. Also hosts many other medical imaging challenges.</div></div><div class="resource-meta">Platform<br>Free</div></div>
     <div class="resource-item"><span class="resource-type tutorial">Tutorial</span><div><div class="resource-title"><a href="https://blog.ovhcloud.com/image-segmentation-train-a-u-net-model-to-segment-brain-tumors/" target="_blank">Train a U-Net on BraTS &mdash; OVHcloud Blog</a></div><div class="resource-desc">Complete walkthrough with BraTS 2020: NIfTI handling, modalities, U-Net training, visualization. GitHub repo included.</div></div><div class="resource-meta">Full tutorial<br>Free + Code</div></div>
@@ -748,6 +769,8 @@
   <p>Built by a student to help others get started in medical AI research.</p>
   <p style="margin-top:0.5rem;">All external resources linked remain the property of their respective creators.</p>
   <p style="margin-top:1rem;">
+    <a href="https://miccai.org/" target="_blank">MICCAI</a> &nbsp;&middot;&nbsp;
+    <a href="https://www.synapse.org/Synapse:syn64153130/wiki/630130" target="_blank">BraTS 2025</a> &nbsp;&middot;&nbsp;
     <a href="http://braintumorsegmentation.org/" target="_blank">BraTS Official</a> &nbsp;&middot;&nbsp;
     <a href="https://github.com/MIC-DKFZ/nnUNet" target="_blank">nnU-Net GitHub</a> &nbsp;&middot;&nbsp;
     <a href="https://grand-challenge.org/challenges/" target="_blank">Grand Challenge</a> &nbsp;&middot;&nbsp;
@@ -755,6 +778,32 @@
     <a href="https://monai.io/" target="_blank">MONAI</a>
   </p>
 </footer>
+
+<!-- Outbound Link Click Tracking -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('click', function(e) {
+    var link = e.target.closest('a');
+    if (!link) return;
+    var href = link.getAttribute('href');
+    if (!href) return;
+
+    // Track outbound links (external URLs)
+    if (href.startsWith('http') && !href.includes(window.location.hostname)) {
+      // Use data-link-name if available, otherwise use link text
+      var linkName = link.getAttribute('data-link-name') || link.textContent.trim().substring(0, 60);
+
+      // Send GA4 event
+      if (typeof gtag === 'function') {
+        gtag('event', 'outbound_click', {
+          'link_url': href,
+          'link_text': linkName
+        });
+      }
+    }
+  });
+});
+</script>
 
 </body>
 </html>
