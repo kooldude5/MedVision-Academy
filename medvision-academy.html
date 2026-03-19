@@ -6,12 +6,12 @@
 <title>MedVision Academy — Learn Brain Tumor Segmentation from Scratch</title>
 
 <!-- Google Analytics 4 — Replace G-XXXXXXXXXX with your Measurement ID -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-9LJGDZVJRW"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-9LJGDZVJRW');
+  gtag('config', 'G-XXXXXXXXXX');
 </script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -132,6 +132,12 @@
     position: relative; overflow: hidden; transition: border-color 0.3s, transform 0.3s;
   }
   .curr-month:hover { border-color: var(--border-light); transform: translateY(-2px); }
+  .curr-month-link { text-decoration: none; color: inherit; display: block; }
+  .curr-month .curr-arrow {
+    font-family: var(--mono); font-size: 0.75rem; color: var(--text-dim);
+    margin-top: 0.75rem; transition: color 0.2s;
+  }
+  .curr-month:hover .curr-arrow { color: var(--accent); }
   .curr-month::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; }
   .curr-month.q1::before { background: var(--accent); }
   .curr-month.q2::before { background: var(--blue); }
@@ -351,7 +357,7 @@
   <div class="curriculum-grid">
     <div class="quarter-label q1"><span>Q1 &mdash; Clinical &amp; Preprocessing Foundations</span></div>
 
-    <div class="curr-month q1">
+    <a href="months/march.html" class="curr-month-link"><div class="curr-month q1">
       <div class="curr-header">
         <span class="curr-num">MONTH 01</span>
         <span class="curr-month-name">March</span>
@@ -365,9 +371,10 @@
         <span class="topic-tag">Tumor grading (WHO)</span>
         <span class="topic-tag">Treatment planning</span>
       </div>
-    </div>
+      <div class="curr-arrow">View lesson &rarr;</div>
+    </div></a>
 
-    <div class="curr-month q1">
+    <a href="months/april.html" class="curr-month-link"><div class="curr-month q1">
       <div class="curr-header">
         <span class="curr-num">MONTH 02</span>
         <span class="curr-month-name">April</span>
@@ -382,9 +389,11 @@
         <span class="topic-tag">nibabel &amp; SimpleITK</span>
         <span class="topic-tag">3D Slicer / ITK-SNAP</span>
       </div>
-    </div>
+    
+      <div class="curr-arrow">Coming soon &rarr;</div>
+    </div></a>
 
-    <div class="curr-month q1">
+    <a href="months/may.html" class="curr-month-link"><div class="curr-month q1">
       <div class="curr-header">
         <span class="curr-num">MONTH 03</span>
         <span class="curr-month-name">May</span>
@@ -399,11 +408,13 @@
         <span class="topic-tag">Medical image transforms</span>
         <span class="topic-tag">Interactive annotation</span>
       </div>
-    </div>
+    
+      <div class="curr-arrow">Coming soon &rarr;</div>
+    </div></a>
 
     <div class="quarter-label q2"><span>Q2 &mdash; Deep Learning &amp; nnU-Net Mastery</span></div>
 
-    <div class="curr-month q2">
+    <a href="months/june.html" class="curr-month-link"><div class="curr-month q2">
       <div class="curr-header">
         <span class="curr-num">MONTH 04</span>
         <span class="curr-month-name">June</span>
@@ -418,9 +429,11 @@
         <span class="topic-tag">nnU-Net overview</span>
         <span class="topic-tag">Loss functions</span>
       </div>
-    </div>
+    
+      <div class="curr-arrow">Coming soon &rarr;</div>
+    </div></a>
 
-    <div class="curr-month q2">
+    <a href="months/july.html" class="curr-month-link"><div class="curr-month q2">
       <div class="curr-header">
         <span class="curr-num">MONTH 05</span>
         <span class="curr-month-name">July</span>
@@ -435,9 +448,11 @@
         <span class="topic-tag">5-fold cross-validation</span>
         <span class="topic-tag">Post-processing</span>
       </div>
-    </div>
+    
+      <div class="curr-arrow">Coming soon &rarr;</div>
+    </div></a>
 
-    <div class="curr-month q2">
+    <a href="months/august.html" class="curr-month-link"><div class="curr-month q2">
       <div class="curr-header">
         <span class="curr-num">MONTH 06</span>
         <span class="curr-month-name">August</span>
@@ -452,11 +467,13 @@
         <span class="topic-tag">Training log analysis</span>
         <span class="topic-tag">GPU memory management</span>
       </div>
-    </div>
+    
+      <div class="curr-arrow">Coming soon &rarr;</div>
+    </div></a>
 
     <div class="quarter-label q3"><span>Q3 &mdash; Evaluation, Optimization &amp; Integration</span></div>
 
-    <div class="curr-month q3">
+    <a href="months/september.html" class="curr-month-link"><div class="curr-month q3">
       <div class="curr-header">
         <span class="curr-num">MONTH 07</span>
         <span class="curr-month-name">September</span>
@@ -471,9 +488,11 @@
         <span class="topic-tag">Per-region evaluation</span>
         <span class="topic-tag">Statistical significance</span>
       </div>
-    </div>
+    
+      <div class="curr-arrow">Coming soon &rarr;</div>
+    </div></a>
 
-    <div class="curr-month q3">
+    <a href="months/october.html" class="curr-month-link"><div class="curr-month q3">
       <div class="curr-header">
         <span class="curr-num">MONTH 08</span>
         <span class="curr-month-name">October</span>
@@ -488,9 +507,11 @@
         <span class="topic-tag">Custom post-processing</span>
         <span class="topic-tag">Error analysis</span>
       </div>
-    </div>
+    
+      <div class="curr-arrow">Coming soon &rarr;</div>
+    </div></a>
 
-    <div class="curr-month q3">
+    <a href="months/november.html" class="curr-month-link"><div class="curr-month q3">
       <div class="curr-header">
         <span class="curr-num">MONTH 09</span>
         <span class="curr-month-name">November</span>
@@ -505,11 +526,13 @@
         <span class="topic-tag">Domain shift</span>
         <span class="topic-tag">Ethics in medical AI</span>
       </div>
-    </div>
+    
+      <div class="curr-arrow">Coming soon &rarr;</div>
+    </div></a>
 
     <div class="quarter-label q4"><span>Q4 &mdash; Deployment &amp; Advanced Applications</span></div>
 
-    <div class="curr-month q4">
+    <a href="months/december.html" class="curr-month-link"><div class="curr-month q4">
       <div class="curr-header">
         <span class="curr-num">MONTH 10</span>
         <span class="curr-month-name">December</span>
@@ -524,9 +547,11 @@
         <span class="topic-tag">Inference pipelines</span>
         <span class="topic-tag">DICOM integration</span>
       </div>
-    </div>
+    
+      <div class="curr-arrow">Coming soon &rarr;</div>
+    </div></a>
 
-    <div class="curr-month q4">
+    <a href="months/january.html" class="curr-month-link"><div class="curr-month q4">
       <div class="curr-header">
         <span class="curr-num">MONTH 11</span>
         <span class="curr-month-name">January</span>
@@ -541,9 +566,11 @@
         <span class="topic-tag">Volumetric tracking</span>
         <span class="topic-tag">Clinical endpoints</span>
       </div>
-    </div>
+    
+      <div class="curr-arrow">Coming soon &rarr;</div>
+    </div></a>
 
-    <div class="curr-month q4">
+    <a href="months/february.html" class="curr-month-link"><div class="curr-month q4">
       <div class="curr-header">
         <span class="curr-num">MONTH 12</span>
         <span class="curr-month-name">February</span>
@@ -558,7 +585,9 @@
         <span class="topic-tag">Radiogenomics</span>
         <span class="topic-tag">Prognostic modeling</span>
       </div>
-    </div>
+    
+      <div class="curr-arrow">Coming soon &rarr;</div>
+    </div></a>
   </div>
 </section>
 
@@ -775,7 +804,8 @@
     <a href="https://github.com/MIC-DKFZ/nnUNet" target="_blank">nnU-Net GitHub</a> &nbsp;&middot;&nbsp;
     <a href="https://grand-challenge.org/challenges/" target="_blank">Grand Challenge</a> &nbsp;&middot;&nbsp;
     <a href="https://radiopaedia.org/" target="_blank">Radiopaedia</a> &nbsp;&middot;&nbsp;
-    <a href="https://monai.io/" target="_blank">MONAI</a>
+    <a href="https://monai.io/" target="_blank">MONAI</a> &nbsp;&middot;&nbsp;
+    <a href="https://www.linkedin.com/company/brats-2025-lighthouse" target="_blank">BraTS 2025 LinkedIn</a>
   </p>
 </footer>
 
