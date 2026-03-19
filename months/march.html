@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Month 01: Clinical AI in Neuro-Oncology — MedVision Academy</title>
+<!-- Google Analytics 4 — Replace G-XXXXXXXXXX with your Measurement ID -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXXXXX');
+</script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10; --surface: #12151c; --surface-2: #1a1e28; --surface-3: #222834;
+    --border: #2a3040; --border-light: #353d50;
+    --text: #e8eaf0; --text-muted: #8b92a8; --text-dim: #5c6478;
+    --accent: #4af0c0; --accent-dim: #2a8068; --accent-glow: rgba(74,240,192,0.12);
+    --warm: #f0a04a; --rose: #f06088; --blue: #4a90f0; --purple: #a06af0;
+    --serif: 'DM Serif Display', Georgia, serif;
+    --sans: 'Instrument Sans', -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  ::selection { background: var(--accent); color: var(--bg); }
+
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,12,16,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 0 2rem; }
+  .nav-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .nav-logo { font-family: var(--serif); font-size: 1.25rem; color: var(--accent); text-decoration: none; }
+  .nav-logo span { color: var(--text-muted); font-style: italic; font-size: 0.9rem; margin-left: 0.4rem; }
+  .nav-back { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 500; padding: 0.4rem 0.75rem; border-radius: 6px; border: 1px solid var(--border); transition: all 0.2s; }
+  .nav-back:hover { color: var(--text); border-color: var(--border-light); background: var(--surface-2); }
+
+  .lesson-hero { padding: 7rem 2rem 3rem; max-width: 900px; margin: 0 auto; }
+  .lesson-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(74,240,192,0.1); border: 1px solid var(--accent-dim); padding: 0.3rem 0.9rem; border-radius: 100px; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.25rem; }
+  .lesson-hero h1 { font-family: var(--serif); font-size: clamp(2rem, 4vw, 2.8rem); line-height: 1.15; letter-spacing: -0.025em; margin-bottom: 1rem; }
+  .lesson-hero h1 em { font-style: italic; color: var(--accent); }
+  .lesson-hero .subtitle { font-size: 1.05rem; color: var(--text-muted); max-width: 640px; line-height: 1.7; }
+
+  .lesson { max-width: 900px; margin: 0 auto; padding: 0 2rem 4rem; }
+  .divider { max-width: 900px; margin: 0 auto; padding: 0 2rem; border-top: 1px solid var(--border); }
+
+  .lesson-section { margin-top: 3.5rem; }
+  .lesson-section-label { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .lesson-section h2 { font-family: var(--serif); font-size: 1.6rem; line-height: 1.2; margin-bottom: 1rem; }
+  .lesson-section h3 { font-family: var(--serif); font-size: 1.2rem; line-height: 1.3; margin: 2rem 0 0.75rem; }
+  .lesson-section p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin-bottom: 1rem; }
+  .lesson-section p:last-child { margin-bottom: 0; }
+  .lesson-section strong { color: var(--text); }
+
+  .concept-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 1.75rem; margin: 1.5rem 0; }
+  .concept-card .concept-title { font-family: var(--serif); font-size: 1.1rem; margin-bottom: 0.75rem; }
+  .concept-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; }
+
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.5rem 0; }
+  .stat-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; text-align: center; }
+  .stat-box .stat-val { font-family: var(--serif); font-size: 1.5rem; color: var(--accent); margin-bottom: 0.25rem; }
+  .stat-box .stat-label { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; }
+
+  .callout { background: var(--accent-glow); border: 1px solid var(--accent-dim); border-radius: 10px; padding: 1.25rem 1.5rem; display: flex; gap: 1rem; align-items: start; margin: 1.5rem 0; }
+  .callout-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 0.1rem; }
+  .callout-text { font-size: 0.9rem; color: var(--text-muted); line-height: 1.65; }
+  .callout-text strong { color: var(--text); }
+
+  .callout-warn { background: rgba(240,160,74,0.08); border-color: rgba(240,160,74,0.3); }
+  .callout-info { background: rgba(74,144,240,0.08); border-color: rgba(74,144,240,0.3); }
+
+  .workflow-steps { display: flex; flex-direction: column; gap: 0; margin: 1.5rem 0; }
+  .workflow-step { display: flex; gap: 1.25rem; padding: 1.25rem 0; border-bottom: 1px solid var(--border); }
+  .workflow-step:last-child { border-bottom: none; }
+  .step-num { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; color: var(--accent); background: var(--accent-glow); padding: 0.2rem 0.5rem; border-radius: 4px; height: fit-content; white-space: nowrap; margin-top: 0.15rem; }
+  .step-content .step-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.3rem; }
+  .step-content p { color: var(--text-muted); font-size: 0.88rem; line-height: 1.65; margin: 0; }
+
+  .resource-list { display: flex; flex-direction: column; gap: 0.75rem; margin: 1.5rem 0; }
+  .resource-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; transition: border-color 0.3s; }
+  .resource-item:hover { border-color: var(--border-light); }
+  .resource-tag { font-family: var(--mono); font-size: 0.62rem; font-weight: 600; padding: 0.15rem 0.45rem; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.08em; margin-right: 0.5rem; display: inline-block; }
+  .resource-tag.paper { background: rgba(240,160,74,0.12); color: var(--warm); }
+  .resource-tag.video { background: rgba(240,96,136,0.15); color: var(--rose); }
+  .resource-tag.tool { background: rgba(160,106,240,0.12); color: var(--purple); }
+  .resource-tag.site { background: rgba(74,240,192,0.12); color: var(--accent); }
+  .resource-tag.course { background: rgba(74,144,240,0.12); color: var(--blue); }
+  .resource-title { font-weight: 600; font-size: 0.92rem; margin-bottom: 0.3rem; }
+  .resource-title a { color: var(--text); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.2s; }
+  .resource-title a:hover { border-bottom-color: var(--accent); }
+  .resource-desc { color: var(--text-muted); font-size: 0.82rem; line-height: 1.6; }
+  .resource-cite { font-family: var(--mono); font-size: 0.7rem; color: var(--text-dim); margin-top: 0.25rem; }
+
+  .nav-lesson { display: flex; justify-content: space-between; align-items: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); }
+  .nav-lesson a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid var(--border); transition: all 0.2s; }
+  .nav-lesson a:hover { color: var(--accent); border-color: var(--accent-dim); }
+
+  footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--text-dim); font-size: 0.8rem; max-width: 900px; margin: 0 auto; }
+  footer a { color: var(--text-muted); text-decoration: none; }
+  footer a:hover { color: var(--accent); }
+
+  @media (max-width: 700px) {
+    .stat-grid { grid-template-columns: 1fr; }
+    .workflow-step { flex-direction: column; gap: 0.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="../index.html">MedVision<span>Academy</span></a>
+    <a class="nav-back" href="../index.html#curriculum">&larr; Back to Curriculum</a>
+  </div>
+</nav>
+
+<div class="lesson-hero">
+  <div class="lesson-badge">Month 01 &mdash; March &mdash; Q1</div>
+  <h1>Clinical Uses of AI-Based Segmentation in <em>Neuro-Oncology</em></h1>
+  <p class="subtitle">Before you write a single line of code, you need to understand why this technology matters. This month, you&rsquo;ll learn how AI-powered brain tumor segmentation is being used in real hospitals to help real patients &mdash; from surgical planning to tracking whether treatment is working.</p>
+</div>
+
+<div class="divider"></div>
+
+<div class="lesson">
+
+  <!-- ═══════ SECTION 1: WHY THIS MATTERS ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 1.1 The Big Picture</div>
+    <h2>Why Brain Tumor Segmentation Matters</h2>
+
+    <p>Every year, hundreds of thousands of people worldwide are diagnosed with brain tumors. Treating them requires incredibly precise information: where exactly is the tumor? How big is it? Which parts are actively growing? Is the treatment shrinking it?</p>
+
+    <p>Doctors answer these questions using MRI scans. But here&rsquo;s the problem: a single brain MRI produces a 3D volume made of hundreds of individual image slices, across multiple imaging sequences (T1, T1ce, T2, FLAIR). A neuroradiologist must manually trace the tumor boundaries on every relevant slice, identifying different sub-regions &mdash; a process called <strong>segmentation</strong>. This can take <strong>30 minutes to several hours per patient</strong>, is highly subjective, and varies significantly between experts.</p>
+
+    <p>This is where AI comes in. Deep learning models &mdash; particularly architectures like U-Net and nnU-Net &mdash; can perform this segmentation automatically in seconds, with accuracy that matches or exceeds human experts.</p>
+
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="stat-val">0.86&ndash;0.93</div>
+        <div class="stat-label">Dice scores achieved by nnU-Net in multi-center clinical validation</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">30&ndash;45%</div>
+        <div class="stat-label">Time savings with AI-assisted segmentation across multiple studies</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">0.74&ndash;0.85</div>
+        <div class="stat-label">Typical human inter-rater agreement (Dice) &mdash; AI matches or exceeds this</div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-icon">&#128161;</div>
+      <div class="callout-text"><strong>Key insight:</strong> The goal of AI segmentation isn&rsquo;t to replace radiologists. It&rsquo;s to handle the tedious, time-consuming volumetric measurement work so doctors can focus on interpretation, clinical judgment, and patient care.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ SECTION 2: NEURO-ONCOLOGY BASICS ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 1.2 Clinical Foundations</div>
+    <h2>Neuro-Oncology: What You Need to Know</h2>
+
+    <p><strong>Neuro-oncology</strong> is the branch of medicine focused on cancers of the brain and nervous system. As someone building segmentation models, you don&rsquo;t need to become a doctor, but you do need to understand the basics of what you&rsquo;re looking at and why it matters clinically.</p>
+
+    <h3>Common Brain Tumor Types</h3>
+
+    <div class="concept-card">
+      <div class="concept-title">Gliomas (the BraTS focus)</div>
+      <p>Gliomas are the most common primary brain tumors, arising from glial cells that support neurons. They&rsquo;re classified by the World Health Organization (WHO) into grades 1&ndash;4, with grade 4 (glioblastoma / GBM) being the most aggressive. Glioblastomas have a median survival of roughly 15 months even with treatment. BraTS has historically focused on glioma segmentation, particularly distinguishing the enhancing tumor core, necrotic regions, and surrounding edema.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Brain Metastases</div>
+      <p>These are cancers that started elsewhere in the body (lung, breast, melanoma, etc.) and spread to the brain. They&rsquo;re actually the most commonly diagnosed brain tumors in adults. Patients often have multiple lesions of varying sizes, making manual segmentation extremely tedious. This is where AI tools are especially impactful &mdash; and it&rsquo;s the focus of the BraTS-METS 2025 challenge.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Meningiomas</div>
+      <p>Tumors arising from the meninges (the membranes surrounding the brain). Usually benign and slow-growing, but they can compress brain tissue and require surgery or radiation. BraTS 2025 includes dedicated meningioma tasks (Tasks 2&ndash;3).</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Pediatric Brain Tumors</div>
+      <p>Brain tumors are the leading cause of cancer death in children. They differ significantly from adult tumors in location, biology, and imaging appearance. nnU-Net has been validated on pediatric tumors, achieving Dice scores of 0.90 for whole tumor, though performance varies by sub-region. BraTS-PED (Task 6) addresses this population.</p>
+    </div>
+
+    <h3>The Treatment Pipeline</h3>
+    <p>Understanding where AI fits requires knowing the clinical workflow:</p>
+
+    <div class="workflow-steps">
+      <div class="workflow-step">
+        <span class="step-num">01</span>
+        <div class="step-content">
+          <div class="step-title">Diagnosis &amp; Imaging</div>
+          <p>Patient presents with symptoms (headaches, seizures, neurological deficits). MRI scans are acquired with multiple sequences (T1, T1ce, T2, FLAIR). A neuroradiologist interprets the images and identifies the tumor.</p>
+        </div>
+      </div>
+      <div class="workflow-step">
+        <span class="step-num">02</span>
+        <div class="step-content">
+          <div class="step-title">Tumor Characterization &amp; Grading</div>
+          <p>The tumor&rsquo;s size, location, and sub-regions are assessed. WHO grading may be estimated from imaging (later confirmed by biopsy). Segmentation provides the volumetric measurements needed for treatment decisions.</p>
+        </div>
+      </div>
+      <div class="workflow-step">
+        <span class="step-num">03</span>
+        <div class="step-content">
+          <div class="step-title">Surgical Planning</div>
+          <p>If surgery is indicated, precise 3D models of the tumor and surrounding anatomy are needed for navigation. AI segmentation can produce these models faster and more consistently than manual methods (mean 1,139 seconds vs 2,851 seconds for traditional approaches).</p>
+        </div>
+      </div>
+      <div class="workflow-step">
+        <span class="step-num">04</span>
+        <div class="step-content">
+          <div class="step-title">Radiation Therapy Planning</div>
+          <p>Radiation oncologists need to delineate the gross tumor volume (GTV) and clinical target volume (CTV). AI-assisted contouring improves inter-reader agreement (Dice from 0.86 to 0.90) and is especially helpful for less-experienced physicians.</p>
+        </div>
+      </div>
+      <div class="workflow-step">
+        <span class="step-num">05</span>
+        <div class="step-content">
+          <div class="step-title">Treatment &amp; Monitoring</div>
+          <p>After surgery, radiation, and/or chemotherapy, patients undergo regular follow-up MRI scans. AI-based volumetric tracking enables objective, reproducible measurement of whether the tumor is responding, stable, or progressing.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ SECTION 3: AI IN THE CLINICAL WORKFLOW ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 1.3 Where AI Fits In</div>
+    <h2>How AI Segmentation Is Used Clinically</h2>
+
+    <h3>Preoperative Planning &amp; Intraoperative Navigation</h3>
+    <p>Before brain surgery, neurosurgeons need detailed 3D models showing the tumor relative to critical structures (motor cortex, language areas, blood vessels). AI segmentation can generate these automatically from MRI in under 20 minutes, compared to nearly an hour with traditional mesh-growing algorithms. During surgery itself, these segmentations feed into neuronavigation systems that guide the surgeon in real-time.</p>
+
+    <h3>Stereotactic Radiosurgery (SRS)</h3>
+    <p>For brain metastases treatment with focused radiation, every lesion must be precisely contoured. A randomized multi-reader study showed that AI assistance improved lesion detection from 82.6% to 91.3% sensitivity, while providing a median 30.8% time savings. The benefit was greatest for less-experienced physicians, helping close the expertise gap.</p>
+
+    <h3>Treatment Response Assessment (RANO Criteria)</h3>
+    <p>This is one of the most impactful clinical applications. After treatment, doctors need to determine whether the tumor is responding. The <strong>RANO criteria</strong> (Response Assessment in Neuro-Oncology) define standardized rules for this assessment.</p>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">&#128218;</div>
+      <div class="callout-text"><strong>What are the RANO Criteria?</strong> RANO provides standardized definitions for treatment response: Complete Response (tumor disappears), Partial Response (significant shrinkage), Stable Disease (no major change), and Progressive Disease (growth). Traditionally based on 2D diameter measurements, the updated RANO 2.0 (2023) now includes volumetric 3D measurements as an option &mdash; which is exactly what AI segmentation provides.</div>
+    </div>
+
+    <p>A landmark study in <em>The Lancet Oncology</em> by Kickingereder et al. (2019) demonstrated this powerfully. Analyzing 532 patients from 34 institutions in the EORTC-26101 trial, they showed that AI-based volumetric response assessment was significantly more reliable than manual RANO assessment:</p>
+
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="stat-val">87%</div>
+        <div class="stat-label">Agreement for AI-based volumetric progression (vs 51% for manual RANO)</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">HR 2.59</div>
+        <div class="stat-label">Hazard ratio for predicting survival with AI (vs 2.07 for manual RANO)</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">~10 min</div>
+        <div class="stat-label">Median processing time per scan in simulated clinical environment</div>
+      </div>
+    </div>
+
+    <p>For brain metastases specifically, AI models have achieved 100% accuracy in predicting RANO-BM criteria compared to expert assessment, demonstrating that automated longitudinal tracking is clinically viable.</p>
+
+    <h3>PACS Integration: Making It Actually Usable</h3>
+    <p>One of the most exciting developments is embedding AI directly into the tools radiologists already use. A system at Yale New Haven Health integrated a deep learning algorithm directly into their Visage PACS diagnostic workstation, achieving segmentation in 4 seconds with radiomic feature extraction in under 6 seconds. The AI runs before the radiologist even opens the study &mdash; they just verify the result.</p>
+  </div>
+
+  <!-- ═══════ SECTION 4: AI VS HUMAN PERFORMANCE ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 1.4 How Good Is AI?</div>
+    <h2>AI Accuracy vs. Human Experts</h2>
+
+    <p>A natural question: how does AI actually compare to trained neuroradiologists? The answer is nuanced.</p>
+
+    <p>A systematic review and meta-analysis reported an overall Dice score of 0.84 (95% CI: 0.82&ndash;0.86) for ML-based glioma segmentation. State-of-the-art models on the BraTS 2021 benchmark achieve Dice scores of 0.936 for whole tumor, 0.921 for tumor core, and 0.872 for enhancing tumor &mdash; which is within or above the range of human inter-rater agreement (0.74&ndash;0.85).</p>
+
+    <div class="concept-card">
+      <div class="concept-title">Where AI Excels</div>
+      <p><strong>Round, well-demarcated tumors:</strong> AI correctly includes necrosis and contrast-enhanced regions in 97&ndash;100% of cases (vs 73.68% for manual segmentation). <strong>Consistency:</strong> AI produces identical results every time &mdash; no inter-rater variability. <strong>Speed:</strong> Seconds vs minutes or hours. <strong>Multi-lesion counting:</strong> For patients with many brain metastases, AI dramatically reduces the tedium and missed lesions.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Where Humans Still Win</div>
+      <p><strong>Complex, infiltrative tumors:</strong> For tumors with irregular borders and diffuse infiltration, manual segmentation outperforms automated methods (66.67% vs 37.50&ndash;50% accuracy). <strong>Clinical context:</strong> Radiologists integrate patient history, prior scans, and clinical knowledge that current AI models don&rsquo;t have access to. <strong>Post-treatment changes:</strong> Distinguishing true progression from pseudoprogression (treatment-related changes that mimic tumor growth) remains challenging for AI.</p>
+    </div>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">&#9888;&#65039;</div>
+      <div class="callout-text"><strong>Critical nuance:</strong> Technical accuracy (high Dice scores) doesn&rsquo;t always equal clinical utility. A 2025 study on automated glioblastoma response assessment showed moderate agreement with radiologist assessments (F1 = 0.587&ndash;0.755) but slightly worse stratification by overall survival compared to human assessment. The gap between &ldquo;accurate segmentation&rdquo; and &ldquo;clinically useful tool&rdquo; is still being bridged.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ SECTION 5: FDA-CLEARED TOOLS ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 1.5 Real-World Tools</div>
+    <h2>FDA-Cleared &amp; Clinical AI Segmentation Tools</h2>
+
+    <p>Several AI tools have moved beyond research into clinical practice:</p>
+
+    <div class="concept-card">
+      <div class="concept-title">VBrain by Vysioneer (FDA-Cleared)</div>
+      <p>An FDA-cleared deep learning algorithm for automated detection and contouring of metastatic brain tumors in stereotactic radiosurgery. Validated on 100 patients with 435 brain metastases: 89.3% overall sensitivity, reaching 99% for lesions &ge;10mm. Mean false positive rate of just 0.72 tumors per case. Performance was consistent across demographic and clinical subgroups.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">BraTS Toolkit (Open Source)</div>
+      <p>An open-source platform that makes BraTS challenge algorithms available for clinical use. Three components: BraTS Preprocessor (data standardization), BraTS Segmentor (algorithm orchestration), and BraTS Fusionator (consensus segmentation from multiple models using majority voting). This is how research algorithms get translated into usable tools.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Yale PACS-Integrated System</div>
+      <p>A novel system embedding a UNETR deep learning model directly into the Visage 7 diagnostic workstation at Yale New Haven Health. Achieves median Dice of 86% in 4 seconds, with automatic radiomic feature extraction. Represents the future of seamless clinical integration.</p>
+    </div>
+  </div>
+
+  <!-- ═══════ SECTION 6: CHALLENGES ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 1.6 The Hard Problems</div>
+    <h2>Challenges &amp; Barriers to Clinical Adoption</h2>
+
+    <p>Despite impressive results, widespread clinical adoption faces significant hurdles. Understanding these challenges is essential for anyone entering this field.</p>
+
+    <h3>The Generalizability Problem</h3>
+    <p>This is the biggest technical challenge. Models trained at one hospital often perform worse at another due to <strong>domain shift</strong> &mdash; differences in MRI scanners, imaging protocols, patient populations, and image quality. Cross-institutional studies show Dice score drops from 0.72&ndash;0.76 to 0.59&ndash;0.68 when models are tested at new institutions. BraTS dataset performance often overestimates real-world performance because BraTS data is heavily curated and standardized.</p>
+
+    <h3>Dataset Bias</h3>
+    <p>A 2026 study found that segmentation models trained on demographically homogeneous datasets exhibited the most bias. Models trained exclusively on one demographic group had lower Dice scores and showed biases related to age and other characteristics. The key finding: greater demographic diversity in training data reduced bias even without increasing dataset size.</p>
+
+    <h3>Regulatory Hurdles</h3>
+    <p>Getting AI tools approved for clinical use requires navigating FDA (US) and CE marking (Europe) pathways. The AI-RAPNO consensus identified key challenges: variability in imaging protocols, scarce annotated datasets for rare tumor types, lack of standardized validation frameworks, and ethical considerations around transparency and patient consent.</p>
+
+    <h3>The &ldquo;Black Box&rdquo; Problem</h3>
+    <p>Deep learning models are difficult to interpret &mdash; they produce results but can&rsquo;t explain their reasoning. This erodes clinical trust, especially in high-stakes medical decisions. Newer architectures are incorporating attention mechanisms and clinical knowledge to improve interpretability, but this remains an active research area.</p>
+
+    <h3>Integration Barriers</h3>
+    <p>Even when the AI works, deploying it in a hospital setting requires: IT infrastructure for GPU computing, interoperability with existing PACS and EMR systems, data privacy compliance (HIPAA/GDPR), trained staff to maintain the system, and reimbursement models to justify the cost.</p>
+  </div>
+
+  <!-- ═══════ SECTION 7: BraTS ROLE ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 1.7 The Bigger Picture</div>
+    <h2>The Role of BraTS &amp; MICCAI in Driving Progress</h2>
+
+    <p>The BraTS Challenge has been instrumental in everything described above. Since 2012, it has provided standardized datasets, evaluation metrics, and a competitive environment that pushed segmentation performance from research curiosity to clinical viability.</p>
+
+    <p>Key contributions: dataset growth from 65 cases (2012) to over 1,251 cases (2021) and expanding further; standardized preprocessing protocols; expansion from gliomas to metastases, meningiomas, pediatric tumors, and sub-Saharan African populations; and establishment of the Dice/Hausdorff/NSD evaluation framework used across the field.</p>
+
+    <p>The Federated Tumor Segmentation (FeTS) Challenge extended this further by allowing 32 institutions to collaboratively train models without sharing patient data &mdash; addressing privacy concerns while improving generalizability.</p>
+
+    <p>The upcoming BraTS 2025 Lighthouse Challenge continues to expand across additional clinical needs, including post-treatment scenarios and integration with genomic data.</p>
+  </div>
+
+  <!-- ═══════ RESOURCES ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 1.8 Resources &amp; Further Reading</div>
+    <h2>This Month&rsquo;s Learning Resources</h2>
+
+    <h3>Start Here (Beginner-Friendly)</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag video">Video</span><a href="https://www.youtube.com/@BraTS_METS_2025_Lighthouse/videos" target="_blank">BraTS-METS 2025 Lighthouse YouTube Channel</a></div>
+        <div class="resource-desc">Video lectures and talks from the BraTS challenge organizers covering brain metastases segmentation, dataset annotation, and challenge methodology. Great for seeing the people and context behind the data you&rsquo;ll be working with.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag site">Site</span><a href="https://radiopaedia.org/articles/brain-tumours" target="_blank">Radiopaedia &mdash; Brain Tumours Overview</a></div>
+        <div class="resource-desc">Free, visual encyclopedia of brain tumor types with real MRI examples and expert annotations. Start here to build visual intuition about what gliomas, metastases, and meningiomas look like on imaging.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag site">Site</span><a href="https://braintumor.org/brain-tumors/about-brain-tumors/brain-tumor-education/" target="_blank">National Brain Tumor Society &mdash; Brain Tumor Education</a></div>
+        <div class="resource-desc">Patient-oriented overview of brain tumor types, diagnosis, and treatment options. Useful for understanding the clinical context and why the work you&rsquo;re doing matters to real people.</div>
+      </div>
+    </div>
+
+    <h3>Key Papers (Read the Abstracts at Minimum)</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1016/S1470-2045(19)30098-1" target="_blank">Kickingereder et al. &mdash; Automated Quantitative Tumour Response Assessment (Lancet Oncology, 2019)</a></div>
+        <div class="resource-desc">The landmark study showing AI-based volumetric assessment outperforms manual RANO for predicting overall survival. 532 patients, 34 institutions. This paper is the strongest evidence for why automated segmentation matters clinically.</div>
+        <div class="resource-cite">Lancet Oncol. 2019;20(5):728&ndash;740</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1038/s41598-023-30040-w" target="_blank">Pemberton et al. &mdash; Multi-Class Glioma Segmentation on Real-World Data (Scientific Reports, 2023)</a></div>
+        <div class="resource-desc">Compares DeepMedic, nnU-Net, and NVIDIA-net across 12 hospitals. Shows nnU-Net achieves the highest accuracy with performance within human expert range even on messy real-world clinical data.</div>
+        <div class="resource-cite">Sci Rep. 2023;13:5765</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1200/JCO.23.01059" target="_blank">Wen et al. &mdash; RANO 2.0 Criteria (Journal of Clinical Oncology, 2023)</a></div>
+        <div class="resource-desc">The updated RANO 2.0 criteria that now include volumetric measurements. Essential context for understanding how AI segmentation connects to clinical treatment decisions.</div>
+        <div class="resource-cite">J Clin Oncol. 2023;41(18):3406&ndash;3418</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1186/s13014-023-02276-x" target="_blank">Wang et al. &mdash; Stratified Assessment of VBrain FDA-Cleared Algorithm (Radiation Oncology, 2023)</a></div>
+        <div class="resource-desc">Clinical validation of an FDA-cleared AI tool for brain metastasis detection and contouring. Shows what &ldquo;ready for clinical use&rdquo; actually looks like in terms of performance metrics.</div>
+        <div class="resource-cite">Radiat Oncol. 2023;18:54</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1093/neuonc/noac211" target="_blank">Vollmuth et al. &mdash; AI-Based Decision Support in Neuro-Oncology (Neuro-Oncology, 2023)</a></div>
+        <div class="resource-desc">International multi-reader study demonstrating how AI improves reproducibility of tumor response assessment. Key evidence that AI makes clinical decisions more consistent across different readers.</div>
+        <div class="resource-cite">Neuro-Oncology. 2023;25(3):533&ndash;543</div>
+      </div>
+    </div>
+
+    <h3>Deep Dives (Advanced Reading)</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1016/S2589-7500(25)00003-X" target="_blank">Voigtlaender et al. &mdash; Value of AI in Neuro-Oncology (Lancet Digital Health, 2025)</a></div>
+        <div class="resource-desc">Comprehensive review of data gaps, translation gaps, and implementation gaps preventing clinical adoption. Read this to understand the full landscape of challenges.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1016/S1470-2045(24)00658-8" target="_blank">Kazerooni et al. &mdash; AI-RAPNO Consensus: Challenges for Clinical Translation (Lancet Oncology, 2025)</a></div>
+        <div class="resource-desc">Consensus statement on translating AI for pediatric neuro-oncology. Outlines regulatory, ethical, and technical requirements for moving research to clinical practice.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1038/s41467-025-57015-5" target="_blank">Zenk et al. &mdash; Federated Tumor Segmentation Challenge (Nature Communications, 2025)</a></div>
+        <div class="resource-desc">The FeTS challenge: 32 institutions collaborating on segmentation without sharing data. Shows how federated learning addresses privacy and generalizability simultaneously.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1109/TMI.2014.2377694" target="_blank">Menze et al. &mdash; The BraTS Benchmark (IEEE Trans. Medical Imaging, 2015)</a></div>
+        <div class="resource-desc">The foundational BraTS paper that established the benchmark, evaluation metrics, and inter-rater variability baselines. Historical context for everything built since.</div>
+      </div>
+    </div>
+
+    <h3>Tools to Explore</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://github.com/neuronflow/BraTS-Toolkit" target="_blank">BraTS Toolkit (GitHub)</a></div>
+        <div class="resource-desc">Open-source platform for running BraTS segmentation algorithms. Preprocessor, Segmentor, and Fusionator components. This is how research algorithms get packaged for clinical use.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://www.slicer.org/" target="_blank">3D Slicer</a></div>
+        <div class="resource-desc">Download and install 3D Slicer this month. Load some publicly available brain MRI data and practice navigating through slices, identifying structures, and understanding what you&rsquo;re looking at before you try to teach a model to do it.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ MONTH NAVIGATION ═══════ -->
+  <div class="nav-lesson">
+    <a href="../index.html#curriculum">&larr; Curriculum Home</a>
+    <a href="april.html">Month 02: MRI Preprocessing &rarr;</a>
+  </div>
+</div>
+
+<footer>
+  <p><a href="../index.html">MedVision Academy</a> &nbsp;&middot;&nbsp; Month 01: Clinical AI in Neuro-Oncology</p>
+</footer>
+
+<!-- Outbound Link Click Tracking -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('click', function(e) {
+    var link = e.target.closest('a');
+    if (!link) return;
+    var href = link.getAttribute('href');
+    if (!href) return;
+    if (href.startsWith('http') && !href.includes(window.location.hostname)) {
+      var linkName = link.getAttribute('data-link-name') || link.textContent.trim().substring(0, 60);
+      if (typeof gtag === 'function') {
+        gtag('event', 'outbound_click', { 'link_url': href, 'link_text': linkName });
+      }
+    }
+  });
+});
+</script>
+
+</body>
+</html>
