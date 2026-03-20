@@ -6,12 +6,12 @@
 <title>MedVision Academy — Learn Brain Tumor Segmentation from Scratch</title>
 
 <!-- Google Analytics 4 — Replace G-XXXXXXXXXX with your Measurement ID -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9LJGDZVJRW"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-XXXXXXXXXX');
+  gtag('config', 'G-9LJGDZVJRW');
 </script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -300,6 +300,42 @@
   footer a { color: var(--text-muted); text-decoration: none; }
   footer a:hover { color: var(--accent); }
 
+  /* ─── ABOUT ─── */
+  .about-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; align-items: start; }
+  .about-highlight {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 2rem; text-align: center;
+  }
+  .about-highlight .award { font-family: var(--serif); font-size: 2.5rem; margin-bottom: 0.5rem; }
+  .about-highlight .award-label { font-family: var(--mono); font-size: 0.72rem; font-weight: 600; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.25rem; }
+  .about-highlight .award-detail { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
+  .about-text p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin-bottom: 1rem; }
+  .about-text p:last-child { margin-bottom: 0; }
+
+  /* ─── CONTACT FORM ─── */
+  .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+  .contact-info p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin-bottom: 1rem; }
+  .contact-form { display: flex; flex-direction: column; gap: 1rem; }
+  .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+  .form-group label {
+    font-family: var(--mono); font-size: 0.72rem; font-weight: 600;
+    color: var(--text-dim); letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .form-group input, .form-group textarea {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 0.75rem 1rem; color: var(--text); font-family: var(--sans); font-size: 0.9rem;
+    outline: none; transition: border-color 0.2s;
+  }
+  .form-group input:focus, .form-group textarea:focus { border-color: var(--accent); }
+  .form-group textarea { resize: vertical; min-height: 120px; }
+  .form-group input::placeholder, .form-group textarea::placeholder { color: var(--text-dim); }
+  .form-submit {
+    background: var(--accent); color: var(--bg); font-weight: 600;
+    padding: 0.75rem 2rem; border-radius: 8px; border: none; cursor: pointer;
+    font-family: var(--sans); font-size: 0.9rem; transition: all 0.25s; align-self: flex-start;
+  }
+  .form-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(74,240,192,0.25); }
+
   @media (max-width: 900px) {
     .curriculum-grid { grid-template-columns: 1fr; }
     .content-grid { grid-template-columns: 1fr; }
@@ -311,6 +347,8 @@
     .resource-meta { text-align: left; }
     .comp-table { font-size: 0.82rem; }
     .comp-table th, .comp-table td { padding: 0.6rem 0.5rem; }
+    .about-grid { grid-template-columns: 1fr; }
+    .contact-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -327,6 +365,8 @@
       <a href="#brats">BraTS</a>
       <a href="#competitions">Competitions</a>
       <a href="#resources">Resources</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
     </div>
   </div>
 </nav>
@@ -789,6 +829,62 @@
     <div class="resource-item"><span class="resource-type course">Course</span><div><div class="resource-title"><a href="https://www.coursera.org/specializations/ai-for-medicine" target="_blank">AI for Medicine &mdash; deeplearning.ai</a></div><div class="resource-desc">AI applied to healthcare: diagnosis, prognosis, treatment. Class imbalance, clinical metrics.</div></div><div class="resource-meta">3 courses<br>Free audit</div></div>
   </div>
   <div class="callout" style="margin-top:2rem;"><div class="callout-icon">&#128421;&#65039;</div><div class="callout-text"><strong>GPU Access for Students:</strong> Free options: <strong>Google Colab</strong>, <strong>Kaggle Notebooks</strong> (30 hrs/week GPU), <strong>cloud student credits</strong> ($100&ndash;300). Ask your school&rsquo;s CS department about shared resources. Lambda Labs and Paperspace offer affordable GPU rentals.</div></div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════ ABOUT ═══════ -->
+<section class="section" id="about">
+  <div class="section-label">// About</div>
+  <h2 class="section-title">The Story Behind MedVision Academy</h2>
+
+  <div class="about-grid">
+    <div class="about-highlight">
+      <div class="award">&#129352;</div>
+      <div class="award-label">BraTS 2025 Challenge</div>
+      <div class="award-detail">2nd Place<br>MICCAI Lighthouse</div>
+    </div>
+    <div class="about-text">
+      <p>MedVision Academy was created by a high school junior who, in the summer of 2025, competed in the Brain Tumor Segmentation (BraTS) Challenge at MICCAI &mdash; one of the most prestigious medical image analysis competitions in the world.</p>
+      <p>Going in, he had <strong>no prior experience in medicine, radiology, or AI for medical imaging</strong>. The learning curve was steep and often overwhelming. Understanding what a brain tumor looks like on an MRI, how different imaging sequences reveal different tissue properties, what the segmentation labels actually mean clinically, how to preprocess 3D volumetric data, and how to build and train deep learning models on that data &mdash; every single piece had to be learned from scratch.</p>
+      <p>Over the course of the summer, through educational resources provided by the BraTS organizers, dozens of research papers, YouTube tutorials, documentation deep-dives, and a lot of trial and error, he built a <strong>MONAI pipeline utilizing three separate architectures</strong> that was competitive enough to win <strong>2nd place</strong> in the challenge.</p>
+      <p>But the process revealed a real problem: there is no single, organized resource that walks a student through this entire journey. The knowledge is scattered across academic papers, GitHub repos, Coursera courses, and niche blog posts. You have to know what to search for before you can even find it.</p>
+      <p><strong>That&rsquo;s what MedVision Academy is.</strong> A structured, step-by-step collection of the resources, explanations, and context that would have saved months of confusion. The goal is to demystify the BraTS competition and make medical AI research accessible to any motivated student &mdash; regardless of their background.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════ CONTACT ═══════ -->
+<section class="section" id="contact">
+  <div class="section-label">// Get in Touch</div>
+  <h2 class="section-title">Contact</h2>
+
+  <div class="contact-grid">
+    <div class="contact-info">
+      <p>Have a question about the curriculum, the BraTS challenge, or getting started with medical AI research? Found a broken link or want to suggest a resource? Want to share your own experience competing?</p>
+      <p>Fill out the form and I&rsquo;ll get back to you as soon as I can.</p>
+    </div>
+    <div>
+      <!-- Formspree contact form — replace YOUR_FORM_ID with your Formspree endpoint -->
+      <form action="https://formspree.io/f/xqeynvlb" method="POST" class="contact-form">
+        <div class="form-group">
+          <label for="name">Name</label>
+          <input type="text" id="name" name="name" placeholder="Your name" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <label for="message">Message</label>
+          <textarea id="message" name="message" placeholder="Your question, comment, or suggestion..." required></textarea>
+        </div>
+        <button type="submit" class="form-submit">Send Message</button>
+      </form>
+    </div>
+  </div>
 </section>
 
 <div class="divider"></div>
