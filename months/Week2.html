@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 02: MRI Preprocessing — MedVision Academy</title>
+<!-- Google Analytics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9LJGDZVJRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9LJGDZVJRW');
+</script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10; --surface: #12151c; --surface-2: #1a1e28; --surface-3: #222834;
+    --border: #2a3040; --border-light: #353d50;
+    --text: #e8eaf0; --text-muted: #8b92a8; --text-dim: #5c6478;
+    --accent: #4af0c0; --accent-dim: #2a8068; --accent-glow: rgba(74,240,192,0.12);
+    --warm: #f0a04a; --rose: #f06088; --blue: #4a90f0; --purple: #a06af0;
+    --serif: 'DM Serif Display', Georgia, serif;
+    --sans: 'Instrument Sans', -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  ::selection { background: var(--accent); color: var(--bg); }
+
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,12,16,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 0 2rem; }
+  .nav-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .nav-logo { font-family: var(--serif); font-size: 1.25rem; color: var(--accent); text-decoration: none; }
+  .nav-logo span { color: var(--text-muted); font-style: italic; font-size: 0.9rem; margin-left: 0.4rem; }
+  .nav-back { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 500; padding: 0.4rem 0.75rem; border-radius: 6px; border: 1px solid var(--border); transition: all 0.2s; }
+  .nav-back:hover { color: var(--text); border-color: var(--border-light); background: var(--surface-2); }
+
+  .lesson-hero { padding: 7rem 2rem 3rem; max-width: 900px; margin: 0 auto; }
+  .lesson-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(74,240,192,0.1); border: 1px solid var(--accent-dim); padding: 0.3rem 0.9rem; border-radius: 100px; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.25rem; }
+  .lesson-hero h1 { font-family: var(--serif); font-size: clamp(2rem, 4vw, 2.8rem); line-height: 1.15; letter-spacing: -0.025em; margin-bottom: 1rem; }
+  .lesson-hero h1 em { font-style: italic; color: var(--accent); }
+  .lesson-hero .subtitle { font-size: 1.05rem; color: var(--text-muted); max-width: 640px; line-height: 1.7; }
+
+  .lesson { max-width: 900px; margin: 0 auto; padding: 0 2rem 4rem; }
+  .divider { max-width: 900px; margin: 0 auto; padding: 0 2rem; border-top: 1px solid var(--border); }
+
+  .lesson-section { margin-top: 3.5rem; }
+  .lesson-section-label { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .lesson-section h2 { font-family: var(--serif); font-size: 1.6rem; line-height: 1.2; margin-bottom: 1rem; }
+  .lesson-section h3 { font-family: var(--serif); font-size: 1.2rem; line-height: 1.3; margin: 2rem 0 0.75rem; }
+  .lesson-section p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin-bottom: 1rem; }
+  .lesson-section p:last-child { margin-bottom: 0; }
+  .lesson-section strong { color: var(--text); }
+  .lesson-section code { font-family: var(--mono); font-size: 0.85em; background: var(--surface-2); padding: 0.15rem 0.4rem; border-radius: 4px; color: var(--accent); }
+
+  .concept-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 1.75rem; margin: 1.5rem 0; }
+  .concept-card .concept-title { font-family: var(--serif); font-size: 1.1rem; margin-bottom: 0.75rem; }
+  .concept-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; }
+
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.5rem 0; }
+  .stat-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; text-align: center; }
+  .stat-box .stat-val { font-family: var(--serif); font-size: 1.5rem; color: var(--accent); margin-bottom: 0.25rem; }
+  .stat-box .stat-label { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; }
+
+  .callout { background: var(--accent-glow); border: 1px solid var(--accent-dim); border-radius: 10px; padding: 1.25rem 1.5rem; display: flex; gap: 1rem; align-items: start; margin: 1.5rem 0; }
+  .callout-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 0.1rem; }
+  .callout-text { font-size: 0.9rem; color: var(--text-muted); line-height: 1.65; }
+  .callout-text strong { color: var(--text); }
+  .callout-warn { background: rgba(240,160,74,0.08); border-color: rgba(240,160,74,0.3); }
+  .callout-info { background: rgba(74,144,240,0.08); border-color: rgba(74,144,240,0.3); }
+
+  .pipeline-steps { display: flex; flex-direction: column; gap: 0; margin: 1.5rem 0; }
+  .pipeline-step { display: flex; gap: 1.25rem; padding: 1.25rem 0; border-bottom: 1px solid var(--border); }
+  .pipeline-step:last-child { border-bottom: none; }
+  .step-num { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; color: var(--accent); background: var(--accent-glow); padding: 0.2rem 0.5rem; border-radius: 4px; height: fit-content; white-space: nowrap; margin-top: 0.15rem; }
+  .step-content .step-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.3rem; }
+  .step-content p { color: var(--text-muted); font-size: 0.88rem; line-height: 1.65; margin: 0; }
+
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+  .compare-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; }
+  .compare-card .compare-label { font-family: var(--mono); font-size: 0.68rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .compare-card.classic .compare-label { color: var(--warm); }
+  .compare-card.dl .compare-label { color: var(--accent); }
+  .compare-card p { color: var(--text-muted); font-size: 0.85rem; line-height: 1.65; margin: 0; }
+
+  .code-block { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin: 1.25rem 0; overflow-x: auto; }
+  .code-block code { font-family: var(--mono); font-size: 0.82rem; line-height: 1.8; color: var(--text-muted); }
+  .code-block .comment { color: var(--text-dim); }
+  .code-block .cmd { color: var(--accent); }
+  .code-block .str { color: var(--warm); }
+
+  .resource-list { display: flex; flex-direction: column; gap: 0.75rem; margin: 1.5rem 0; }
+  .resource-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; transition: border-color 0.3s; }
+  .resource-item:hover { border-color: var(--border-light); }
+  .resource-tag { font-family: var(--mono); font-size: 0.62rem; font-weight: 600; padding: 0.15rem 0.45rem; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.08em; margin-right: 0.5rem; display: inline-block; }
+  .resource-tag.paper { background: rgba(240,160,74,0.12); color: var(--warm); }
+  .resource-tag.video { background: rgba(240,96,136,0.15); color: var(--rose); }
+  .resource-tag.tool { background: rgba(160,106,240,0.12); color: var(--purple); }
+  .resource-tag.site { background: rgba(74,240,192,0.12); color: var(--accent); }
+  .resource-tag.course { background: rgba(74,144,240,0.12); color: var(--blue); }
+  .resource-title { font-weight: 600; font-size: 0.92rem; margin-bottom: 0.3rem; }
+  .resource-title a { color: var(--text); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.2s; }
+  .resource-title a:hover { border-bottom-color: var(--accent); }
+  .resource-desc { color: var(--text-muted); font-size: 0.82rem; line-height: 1.6; }
+  .resource-cite { font-family: var(--mono); font-size: 0.7rem; color: var(--text-dim); margin-top: 0.25rem; }
+
+  .nav-lesson { display: flex; justify-content: space-between; align-items: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); }
+  .nav-lesson a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid var(--border); transition: all 0.2s; }
+  .nav-lesson a:hover { color: var(--accent); border-color: var(--accent-dim); }
+
+  footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--text-dim); font-size: 0.8rem; max-width: 900px; margin: 0 auto; }
+  footer a { color: var(--text-muted); text-decoration: none; }
+  footer a:hover { color: var(--accent); }
+
+  @media (max-width: 700px) {
+    .stat-grid { grid-template-columns: 1fr; }
+    .compare-grid { grid-template-columns: 1fr; }
+    .pipeline-step { flex-direction: column; gap: 0.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="../index.html">MedVision<span>Academy</span></a>
+    <a class="nav-back" href="../index.html#curriculum">&larr; Back to Curriculum</a>
+  </div>
+</nav>
+
+<div class="lesson-hero">
+  <div class="lesson-badge">Week 02 &mdash; Q1</div>
+  <h1>MRI Preprocessing: <em>Skull-Stripping &amp; Intensity Normalization</em></h1>
+  <p class="subtitle">Raw MRI data straight from the scanner is messy. Before any segmentation model can work reliably, you need to clean, standardize, and prepare the images. This week covers the essential preprocessing steps that every brain tumor segmentation pipeline depends on.</p>
+</div>
+
+<div class="divider"></div>
+
+<div class="lesson">
+
+  <!-- ═══════ 2.1 WHY PREPROCESSING MATTERS ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 2.1 The Big Picture</div>
+    <h2>Why Can&rsquo;t We Just Use Raw MRI Data?</h2>
+
+    <p>If you&rsquo;ve ever taken a photo with your phone, you know the image looks different depending on lighting, camera settings, and the phone model. MRI is the same &mdash; except worse. The signal intensities in an MRI image are <strong>arbitrary</strong>. Unlike CT scans (where a Hounsfield unit of 0 always means water), a &ldquo;bright voxel&rdquo; on one MRI scanner might represent completely different tissue intensity on another.</p>
+
+    <p>On top of that, raw MRI scans include the skull, skin, fat, eyeballs, and other non-brain tissue. The images may have smooth intensity gradients across the volume caused by RF coil imperfections (called <strong>bias field</strong>). Different hospitals use different scanners, protocols, and resolutions. And patients&rsquo; heads are positioned differently in the scanner each time.</p>
+
+    <p>If you feed all of this variability into a deep learning model, it will learn the wrong things &mdash; latching onto scanner differences instead of tumor characteristics. Studies show that models trained at one hospital can drop from Dice scores of 0.72&ndash;0.76 down to 0.59&ndash;0.68 when tested at a different institution, largely due to these preprocessing-related differences.</p>
+
+    <div class="callout">
+      <div class="callout-icon">&#128161;</div>
+      <div class="callout-text"><strong>Key insight:</strong> Preprocessing errors propagate directly to segmentation errors. Research has shown that failure to reproduce the exact preprocessing pipeline of a published method makes it impossible to reproduce the segmentation results. Getting preprocessing right isn&rsquo;t optional &mdash; it&rsquo;s foundational.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 2.2 THE NIFTI FORMAT ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 2.2 Working with the Data</div>
+    <h2>Understanding NIfTI Files</h2>
+
+    <p>Before you preprocess anything, you need to understand the file format. Brain MRI data for research (including BraTS) comes in <strong>NIfTI format</strong> (.nii or .nii.gz). A NIfTI file contains two things: a <strong>header</strong> (metadata about the image) and the <strong>image data</strong> itself (a 3D array of voxel intensities).</p>
+
+    <div class="concept-card">
+      <div class="concept-title">What&rsquo;s in the Header?</div>
+      <p><strong>Dimensions:</strong> The size of the 3D volume (e.g., 240 &times; 240 &times; 155 voxels for BraTS). <strong>Voxel spacing (pixdim):</strong> The real-world size of each voxel in millimeters (e.g., 1mm &times; 1mm &times; 1mm). <strong>Orientation (qform/sform):</strong> How the voxel grid maps to physical patient space (left-right, anterior-posterior, superior-inferior). <strong>Data type:</strong> Whether intensities are stored as integers or floating-point numbers.</p>
+    </div>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">&#9888;&#65039;</div>
+      <div class="callout-text"><strong>Common pitfall &mdash; left-right flips:</strong> Research has documented widespread left-right orientation errors in MRI databases. If your orientation is wrong, the model may learn a mirror-image of reality. Always verify orientation visually in 3D Slicer or ITK-SNAP before processing. The original DICOM-to-NIfTI conversion step is where these errors typically originate.</div>
+    </div>
+
+    <p>In Python, you load and inspect NIfTI files with <strong>nibabel</strong>:</p>
+
+    <div class="code-block">
+      <code>
+<span class="cmd">import</span> nibabel <span class="cmd">as</span> nib<br>
+<span class="cmd">import</span> numpy <span class="cmd">as</span> np<br><br>
+<span class="comment"># Load a NIfTI file</span><br>
+img = nib.load(<span class="str">'BraTS_001_t1ce.nii.gz'</span>)<br><br>
+<span class="comment"># Access the header metadata</span><br>
+header = img.header<br>
+<span class="cmd">print</span>(header.get_zooms())    <span class="comment"># Voxel spacing, e.g. (1.0, 1.0, 1.0)</span><br>
+<span class="cmd">print</span>(header.get_data_shape()) <span class="comment"># Volume dimensions, e.g. (240, 240, 155)</span><br><br>
+<span class="comment"># Get the image data as a NumPy array</span><br>
+data = img.get_fdata()         <span class="comment"># Shape: (240, 240, 155)</span><br>
+<span class="cmd">print</span>(data.dtype, data.min(), data.max())
+      </code>
+    </div>
+  </div>
+
+  <!-- ═══════ 2.3 THE PREPROCESSING PIPELINE ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 2.3 The Standard Pipeline</div>
+    <h2>The MRI Preprocessing Pipeline, Step by Step</h2>
+
+    <p>There&rsquo;s a recommended order of operations based on how each step interacts with the others. This is the pipeline used in BraTS and most brain tumor segmentation research:</p>
+
+    <div class="pipeline-steps">
+      <div class="pipeline-step">
+        <span class="step-num">STEP 1</span>
+        <div class="step-content">
+          <div class="step-title">N4 Bias Field Correction</div>
+          <p>Remove the smooth intensity gradients caused by RF coil non-uniformity. This must come first because the bias field affects the entire image, and all subsequent steps assume relatively uniform tissue intensities.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">STEP 2</span>
+        <div class="step-content">
+          <div class="step-title">Co-Registration</div>
+          <p>Align all four MRI modalities (T1, T1ce, T2, FLAIR) to a common space so the same voxel coordinate refers to the same brain location across sequences. This uses rigid or affine registration.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">STEP 3</span>
+        <div class="step-content">
+          <div class="step-title">Atlas Registration / Spatial Normalization</div>
+          <p>Register the brain to a standard anatomical template (BraTS uses the SRI24 atlas). This puts every patient&rsquo;s brain into the same coordinate frame, making it possible to compare across subjects.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">STEP 4</span>
+        <div class="step-content">
+          <div class="step-title">Skull-Stripping (Brain Extraction)</div>
+          <p>Remove all non-brain tissue: skull bone, skin, fat, eyes, neck. This isolates the brain volume so the model only sees relevant tissue and isn&rsquo;t distracted by irrelevant anatomy.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">STEP 5</span>
+        <div class="step-content">
+          <div class="step-title">Intensity Normalization</div>
+          <p>Standardize the voxel intensity values so that the same tissue type has approximately the same intensity across different patients and scanners. Z-score normalization is the most common approach.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">STEP 6</span>
+        <div class="step-content">
+          <div class="step-title">Resampling to Target Resolution</div>
+          <p>Resample all images to a uniform voxel spacing (typically 1mm &times; 1mm &times; 1mm isotropic). Use trilinear interpolation for images and nearest-neighbor interpolation for segmentation labels.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">&#128218;</div>
+      <div class="callout-text"><strong>BraTS does this for you (mostly):</strong> The BraTS challenge dataset comes pre-processed &mdash; images are already co-registered, skull-stripped, and resampled to 1mm isotropic on the SRI24 atlas. This is great for getting started, but understanding what happened behind the scenes is critical because real-world clinical data won&rsquo;t be pre-processed for you.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 2.4 BIAS FIELD CORRECTION ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 2.4 Step 1 Deep Dive</div>
+    <h2>N4 Bias Field Correction</h2>
+
+    <p>Look at a raw brain MRI and you&rsquo;ll often notice that one side of the brain appears brighter than the other, or the center is darker than the edges. This isn&rsquo;t biology &mdash; it&rsquo;s an artifact from the RF receive coil&rsquo;s non-uniform sensitivity. This smooth, low-frequency intensity variation is called the <strong>bias field</strong> (or &ldquo;inhomogeneity field&rdquo;).</p>
+
+    <p><strong>N4ITK</strong> (an improvement over the earlier N3 algorithm) is the standard tool for correcting this. It estimates the bias field as a smooth B-spline surface and divides it out of the image. The original N4ITK paper by Tustison et al. (2010) remains the most cited reference for this step.</p>
+
+    <p>A 2024 study evaluated 240 different N4 parameter configurations and found that results are sensitive to parameter choices &mdash; but for brain MRI, the defaults in most tools (SimpleITK, ANTs) work well. The key takeaway from the literature: <strong>N4 alone is not enough</strong>. A study on 615 glioma patients showed that using N4 without subsequent intensity normalization caused dramatic performance drops (AUC dropping from 0.85 to 0.19&ndash;0.52 on external data). N4 must be paired with Z-score or WhiteStripe normalization.</p>
+
+    <div class="code-block">
+      <code>
+<span class="cmd">import</span> SimpleITK <span class="cmd">as</span> sitk<br><br>
+<span class="comment"># Load the image</span><br>
+input_img = sitk.ReadImage(<span class="str">'scan_t1ce.nii.gz'</span>, sitk.sitkFloat32)<br><br>
+<span class="comment"># Create a mask (optional but recommended)</span><br>
+mask = sitk.OtsuThreshold(input_img, 0, 1, 200)<br><br>
+<span class="comment"># Run N4 bias field correction</span><br>
+corrector = sitk.N4BiasFieldCorrectionImageFilter()<br>
+corrected = corrector.Execute(input_img, mask)<br><br>
+<span class="comment"># Save the result</span><br>
+sitk.WriteImage(corrected, <span class="str">'scan_t1ce_n4.nii.gz'</span>)
+      </code>
+    </div>
+  </div>
+
+  <!-- ═══════ 2.5 SKULL-STRIPPING ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 2.5 Step 4 Deep Dive</div>
+    <h2>Skull-Stripping (Brain Extraction)</h2>
+
+    <p>Skull-stripping removes everything that isn&rsquo;t brain: skull bone, scalp skin, fat, meninges, eyes, and neck tissue. It&rsquo;s one of the most critical preprocessing steps because errors here propagate to everything downstream &mdash; bad brain extraction means bad segmentation.</p>
+
+    <p>There are two generations of tools:</p>
+
+    <div class="compare-grid">
+      <div class="compare-card classic">
+        <div class="compare-label">Classical Methods</div>
+        <p><strong>FSL BET</strong> &mdash; Uses a deformable surface model. Fast but sensitive to parameter tuning and inconsistent across datasets. High failure rates on pathological brains. <strong>FreeSurfer</strong> &mdash; Hybrid watershed algorithm. Robust for T1-weighted images but very slow (hours per scan). <strong>ROBEX</strong> &mdash; Random Forest + point distribution model. Significantly outperformed BET and FreeSurfer across three public datasets with better cross-dataset consistency.</p>
+      </div>
+      <div class="compare-card dl">
+        <div class="compare-label">Deep Learning Methods</div>
+        <p><strong>HD-BET</strong> &mdash; Neural network trained on multisequence MRI. Outperformed 6 popular methods by +1.16 to +2.50 Dice points. Robust on brains with tumors. The top recommendation for tumor patients. <strong>SynthStrip</strong> &mdash; Trained entirely on synthetic data. Works across any contrast, resolution, and age group with a single model. ~7 seconds per scan. Best for general-purpose use. <strong>deepbet</strong> &mdash; Trained on 7,837 images from 191 datasets. State-of-the-art Dice of 99.0. Processes one image in ~2 seconds.</p>
+      </div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="stat-val">0.989</div>
+        <div class="stat-label">Dice score of nnU-Net-based brain extraction on tumor patients (multi-center)</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">~7 sec</div>
+        <div class="stat-label">SynthStrip processing time per scan (vs hours for FreeSurfer)</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">94%</div>
+        <div class="stat-label">Improvement of OptiBET over conventional tools on severely pathological brains</div>
+      </div>
+    </div>
+
+    <h3>The Tumor Problem</h3>
+    <p>Standard skull-stripping tools were designed for healthy brains. Tumors cause <strong>mass effect</strong> (pushing brain tissue aside), <strong>midline shift</strong> (displacing the brain&rsquo;s centerline), and <strong>disrupted boundaries</strong> (tumor breaking through normal tissue borders). Classical tools often fail catastrophically on these cases.</p>
+
+    <p>Solutions include: <strong>HD-BET</strong> (specifically trained on tumor cases), <strong>OptiBET</strong> (uses registration-based back-projection to handle severely pathological brains), and <strong>modality-agnostic training</strong> (Thakur et al., 2020 &mdash; evaluated on 3,340 brain tumor scans from multiple institutions and generalizes across available MRI sequences without retraining).</p>
+
+    <div class="callout">
+      <div class="callout-icon">&#128161;</div>
+      <div class="callout-text"><strong>Recommendation for BraTS work:</strong> Use <strong>HD-BET</strong> for brain tumor cases. It was developed by the same group that created nnU-Net (DKFZ) and is specifically validated on tumor patients. For non-tumor work or general-purpose use, <strong>SynthStrip</strong> is the most versatile single tool.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 2.6 REGISTRATION ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 2.6 Steps 2&ndash;3 Deep Dive</div>
+    <h2>Co-Registration &amp; Spatial Normalization</h2>
+
+    <p><strong>Co-registration</strong> aligns the four MRI modalities (T1, T1ce, T2, FLAIR) to each other. Since they&rsquo;re acquired in the same scanning session, the patient&rsquo;s head is in roughly the same position, but small movements between sequences mean the images aren&rsquo;t perfectly aligned. Rigid registration (translation + rotation, 6 parameters) usually suffices for within-session alignment.</p>
+
+    <p><strong>Atlas registration</strong> maps the patient&rsquo;s brain to a standard template (BraTS uses the SRI24 atlas, created from 24 normal adult brains at 3T). This puts all patients into a common coordinate frame. It typically uses affine registration (translation + rotation + scaling + shearing, 12 parameters).</p>
+
+    <h3>Which Registration Tool?</h3>
+    <p>The largest benchmark of 14 registration algorithms (Klein et al., 2009, over 45,000 registrations) found that <strong>ANTs SyN</strong> delivered the most consistently high accuracy. For linear registration, a comparison on nearly 10,000 images found that MINC&rsquo;s BestLinReg had the lowest failure rate (0.44%) while <strong>FSL FLIRT had 11.11% failures</strong> and SPM had 30.66%.</p>
+
+    <h3>The Tumor Challenge (Again)</h3>
+    <p>Registration is fundamentally harder with tumors because tumors have no correspondence in the template brain &mdash; they create tissue where none should exist. Research shows that lower-grade gliomas register more accurately than glioblastomas, and that for mapping tumor locations, linear registration actually works as well as non-linear approaches. Advanced solutions include tumor growth simulation, pathology-aware registration (PORTR), and deep learning methods that &ldquo;hallucinate&rdquo; what the brain would look like without the tumor before registering.</p>
+  </div>
+
+  <!-- ═══════ 2.7 INTENSITY NORMALIZATION ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 2.7 Step 5 Deep Dive</div>
+    <h2>Intensity Normalization</h2>
+
+    <p>This is arguably the most impactful preprocessing step for multi-site generalizability. Remember: MRI intensities are arbitrary. The same brain tissue can have completely different voxel values on different scanners. If you don&rsquo;t normalize, your model learns scanner-specific patterns instead of anatomy.</p>
+
+    <h3>Methods Compared</h3>
+
+    <div class="concept-card">
+      <div class="concept-title">Z-Score Normalization (Most Common)</div>
+      <p>Subtract the mean and divide by the standard deviation of brain voxels. Simple, effective, and the default in most deep learning pipelines (including nnU-Net). A study on multi-institutional brain MRI showed Z-score normalization increased tumor grade classification accuracy from 0.67 to 0.82 (p = .005). Set voxels outside the brain mask to zero after normalizing.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">WhiteStripe Normalization</div>
+      <p>Normalizes based on the intensity distribution of normal-appearing white matter. More principled than Z-score because it anchors to a specific tissue type, but requires identifying white matter voxels. Performs comparably to Z-score in most benchmarks.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Histogram Matching (Nyul)</div>
+      <p>Aligns the intensity histogram of each image to a reference histogram learned from a training set. Good for radiomic feature consistency. One systematic review of glioma studies found histogram matching produced the most reliable features, though Z-score is more widely used in segmentation pipelines.</p>
+    </div>
+
+    <p>The critical evidence comes from Foltyn-Dumitru et al. (2024): testing four strategies on 615 glioma patients, <strong>N4 + Z-score</strong> and <strong>N4 + WhiteStripe</strong> both maintained high performance on external data (AUC 0.85&ndash;0.87), while using N4 alone or no normalization caused AUC to plummet to 0.19&ndash;0.52. The lesson is clear: <strong>always normalize intensities after bias field correction</strong>.</p>
+
+    <div class="code-block">
+      <code>
+<span class="cmd">import</span> numpy <span class="cmd">as</span> np<br>
+<span class="cmd">import</span> nibabel <span class="cmd">as</span> nib<br><br>
+<span class="comment"># Load the bias-corrected, skull-stripped image</span><br>
+img = nib.load(<span class="str">'brain_t1ce_n4_stripped.nii.gz'</span>)<br>
+data = img.get_fdata()<br><br>
+<span class="comment"># Create brain mask (non-zero voxels)</span><br>
+brain_mask = data > 0<br><br>
+<span class="comment"># Z-score normalize within the brain</span><br>
+brain_voxels = data[brain_mask]<br>
+mean_val = np.mean(brain_voxels)<br>
+std_val = np.std(brain_voxels)<br>
+data[brain_mask] = (data[brain_mask] - mean_val) / std_val<br>
+data[~brain_mask] = 0  <span class="comment"># Set non-brain to zero</span><br><br>
+<span class="comment"># Save</span><br>
+out = nib.Nifti1Image(data, img.affine, img.header)<br>
+nib.save(out, <span class="str">'brain_t1ce_normalized.nii.gz'</span>)
+      </code>
+    </div>
+  </div>
+
+  <!-- ═══════ 2.8 DOMAIN HARMONIZATION ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 2.8 Advanced Topic</div>
+    <h2>Domain Harmonization: The Multi-Site Problem</h2>
+
+    <p>Even after standard preprocessing, scanner-related differences persist. This is called the <strong>scanner effect</strong> or <strong>domain shift</strong>, and it&rsquo;s one of the biggest unsolved problems in medical image analysis. When your model trained at Hospital A performs poorly at Hospital B, this is usually why.</p>
+
+    <p>Advanced harmonization techniques aim to explicitly remove scanner effects:</p>
+
+    <div class="concept-card">
+      <div class="concept-title">ComBat</div>
+      <p>A statistical method originally from genomics, now widely used in neuroimaging. It models and removes batch effects (scanner differences) from extracted features. A comprehensive 2025 study on 28 MR scanners found ComBat effective for most metrics but less successful for functional connectivity measures. The <strong>Longitudinal ComBat</strong> variant handles data collected over time. Multiple studies confirm ComBat is essential for radiomic analyses.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Deep Learning Approaches (CycleGAN, Style Transfer)</div>
+      <p>Neural networks that translate images from one scanner&rsquo;s &ldquo;style&rdquo; to another&rsquo;s. A style transfer GAN framework achieved 94.41% balanced accuracy harmonizing images from unseen scanners across five large-scale datasets. However, a comparison study found that no current method fully harmonizes longitudinal multi-scanner data &mdash; this remains an active research frontier.</p>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">&#128218;</div>
+      <div class="callout-text"><strong>For BraTS beginners:</strong> Don&rsquo;t worry about advanced harmonization yet. Standard preprocessing (N4 + skull-stripping + Z-score normalization + resampling) is what you need for BraTS data. Harmonization becomes important when you work with your own multi-institutional clinical data or do radiomic feature extraction (Week 12).</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 2.9 QUALITY CONTROL ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 2.9 Don&rsquo;t Skip This</div>
+    <h2>Quality Control: Checking Your Work</h2>
+
+    <p>Automated preprocessing can fail silently. A skull-stripping algorithm might clip off part of the cerebellum, or registration might subtly misalign a scan. These errors are invisible in aggregate metrics but devastating for individual predictions. <strong>Always visually inspect your preprocessed data.</strong></p>
+
+    <h3>What to Check</h3>
+    <p><strong>After skull-stripping:</strong> Load the brain mask overlaid on the original image in 3D Slicer. Scroll through all three planes (axial, sagittal, coronal). Look for: brain tissue outside the mask (under-stripping), non-brain tissue inside the mask (over-inclusion), or clipped regions (especially cerebellum and temporal lobes).</p>
+    <p><strong>After registration:</strong> Overlay the registered image on the atlas template. Structures should roughly align. Major misalignment is obvious visually. A deep learning QC tool called RegQCNET can automatically estimate registration error, but visual checks remain the gold standard.</p>
+    <p><strong>After normalization:</strong> Check that the intensity histogram looks reasonable &mdash; roughly Gaussian for brain voxels, no extreme outliers, zero-centered after Z-score.</p>
+
+    <h3>Automated QC Tools</h3>
+    <p><strong>MRIQC</strong> extracts quality metrics from MRI scans and can flag problematic images (76% accuracy on new sites). <strong>MRQy</strong> is an open-source tool that can identify site-specific variations. However, a study comparing 12 QC strategies found that manual visual inspection still outperforms all automated alternatives &mdash; so don&rsquo;t skip the eyeballing.</p>
+  </div>
+
+  <!-- ═══════ 2.10 TOOLS ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 2.10 Your Toolkit</div>
+    <h2>Essential Tools for This Week</h2>
+
+    <div class="concept-card">
+      <div class="concept-title">The Software You Need Installed</div>
+      <p><strong>3D Slicer</strong> or <strong>ITK-SNAP</strong> &mdash; For visual inspection. Load NIfTI files, scroll through slices, overlay masks. Non-negotiable. <strong>Python + nibabel</strong> &mdash; For loading and manipulating NIfTI files programmatically. <strong>SimpleITK</strong> &mdash; For N4 bias field correction, resampling, and registration. More feature-rich than nibabel for processing operations. <strong>ANTsPy</strong> &mdash; Python wrapper for ANTs, the top-performing registration toolkit. Also includes N4 and brain extraction. <strong>HD-BET</strong> &mdash; For skull-stripping on tumor cases (install via pip: <code>pip install hd-bet</code>).</p>
+    </div>
+  </div>
+
+  <!-- ═══════ RESOURCES ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 2.11 Resources &amp; Further Reading</div>
+    <h2>This Week&rsquo;s Learning Resources</h2>
+
+    <h3>Start Here (Beginner-Friendly)</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://www.slicer.org/" target="_blank">3D Slicer &mdash; Download &amp; Install</a></div>
+        <div class="resource-desc">Download 3D Slicer this week. Load some BraTS NIfTI files, overlay the segmentation labels, and practice navigating axial/sagittal/coronal views. This is your visual verification tool for every preprocessing step.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://nipy.org/nibabel/" target="_blank">NiBabel Documentation</a></div>
+        <div class="resource-desc">The Python library you&rsquo;ll use constantly for loading and saving NIfTI files. Read the quickstart guide and try loading a BraTS scan, printing its header info, and visualizing a single slice with matplotlib.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://simpleitk.org/" target="_blank">SimpleITK Documentation</a></div>
+        <div class="resource-desc">Your Swiss Army knife for image processing: N4 correction, resampling, registration, filtering. The SimpleITK Notebooks on GitHub have worked examples for every operation you&rsquo;ll need.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://github.com/MIC-DKFZ/HD-BET" target="_blank">HD-BET GitHub Repository</a></div>
+        <div class="resource-desc">The recommended skull-stripping tool for brain tumor cases. From the same DKFZ group that built nnU-Net. Install with pip, run on your MRI, and compare the output mask to the original image in 3D Slicer.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://surfer.nmr.mgh.harvard.edu/docs/synthstrip/" target="_blank">SynthStrip &mdash; FreeSurfer</a></div>
+        <div class="resource-desc">Best general-purpose skull-stripping tool. Works on any MRI contrast, resolution, or age group with a single model. ~7 seconds per scan. Good alternative to HD-BET for non-tumor cases.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag site">Site</span><a href="https://www.imaios.com/en/e-mri" target="_blank">e-MRI &mdash; Interactive MRI Physics Course</a></div>
+        <div class="resource-desc">If you want to understand why bias fields exist and how MRI signal formation works, this award-winning interactive course is the best free resource. Helps you understand what you&rsquo;re correcting and why.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag site">Site</span><a href="https://github.com/neuronflow/BraTS-Toolkit" target="_blank">BraTS Toolkit &mdash; Preprocessing Module</a></div>
+        <div class="resource-desc">Open-source preprocessing pipeline that reproduces the BraTS challenge preprocessing. The BraTS Preprocessor component handles image conversion, registration, and brain extraction in the same way the official challenge data is prepared.</div>
+      </div>
+    </div>
+
+    <h3>Key Papers</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1002/hbm.24600" target="_blank">Isensee et al. &mdash; HD-BET: Automated Brain Extraction (Human Brain Mapping, 2019)</a></div>
+        <div class="resource-desc">The HD-BET paper. Validated on multisequence MRI including brain tumor patients. Outperformed six popular methods. Read this to understand why deep learning skull-stripping beats classical approaches on pathological brains.</div>
+        <div class="resource-cite">Hum Brain Mapp. 2019;40(17):4952&ndash;4964</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1016/j.neuroimage.2022.119474" target="_blank">Hoopes et al. &mdash; SynthStrip: Skull-Stripping for Any Brain Image (NeuroImage, 2022)</a></div>
+        <div class="resource-desc">The SynthStrip paper. Demonstrates that training on entirely synthetic data can produce a single model that generalizes across contrasts, resolutions, and age groups. A paradigm shift in brain extraction methodology.</div>
+        <div class="resource-cite">NeuroImage. 2022;260:119474</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1007/s00330-023-10034-2" target="_blank">Foltyn-Dumitru et al. &mdash; Impact of Intensity Normalization on Generalizability (European Radiology, 2024)</a></div>
+        <div class="resource-desc">The strongest evidence that intensity normalization is essential. Shows N4 alone causes AUC to collapse on external data, while N4 + Z-score maintains performance. 615 glioma patients across institutions.</div>
+        <div class="resource-cite">Eur Radiol. 2024;34(4):2535&ndash;2544</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1038/s41598-020-69298-z" target="_blank">Carr&eacute; et al. &mdash; Standardization of Brain MR Images (Scientific Reports, 2020)</a></div>
+        <div class="resource-desc">Systematic comparison of normalization methods on multi-institutional data. Z-score normalization increased classification accuracy from 0.67 to 0.82. Essential reading for understanding why normalization matters.</div>
+        <div class="resource-cite">Sci Rep. 2020;10:12340</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1109/TMI.2010.2046908" target="_blank">Tustison et al. &mdash; N4ITK: Improved N3 Bias Correction (IEEE TMI, 2010)</a></div>
+        <div class="resource-desc">The foundational N4 bias field correction paper. Describes the B-spline approximation and hierarchical optimization that made N4 the standard. Still the most cited reference for bias correction.</div>
+        <div class="resource-cite">IEEE Trans Med Imaging. 2010;29(6):1310&ndash;1320</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1109/TMI.2014.2377694" target="_blank">Menze et al. &mdash; The BraTS Benchmark (IEEE TMI, 2015)</a></div>
+        <div class="resource-desc">The foundational BraTS paper describing the standardized preprocessing protocol (SRI24 atlas registration, skull-stripping, 1mm isotropic resampling) used for all BraTS datasets. Context for why the data you download looks the way it does.</div>
+        <div class="resource-cite">IEEE Trans Med Imaging. 2015;34(10):1993&ndash;2024</div>
+      </div>
+    </div>
+
+    <h3>Deep Dives (Advanced)</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1016/j.neuroimage.2008.11.025" target="_blank">Klein et al. &mdash; Evaluation of 14 Registration Algorithms (NeuroImage, 2009)</a></div>
+        <div class="resource-desc">The definitive benchmark: 45,000+ registrations comparing ANTs, FSL, SPM, and 11 others. ANTs SyN won. Read this when you&rsquo;re choosing a registration tool for your own pipeline.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1016/j.neuroimage.2020.117242" target="_blank">Wrobel et al. &mdash; Intensity Warping for Multi-Site Harmonization (NeuroImage, 2020)</a></div>
+        <div class="resource-desc">Introduces the MICA tool for harmonizing images across scanners by aligning intensity distributions. Relevant when you move beyond BraTS to multi-site clinical data.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1038/s41598-021-04806-z" target="_blank">Tustison et al. &mdash; The ANTsX Ecosystem (Scientific Reports, 2021)</a></div>
+        <div class="resource-desc">Comprehensive overview of ANTs, ANTsPy, and ANTsPyNet for registration, bias correction, segmentation, and deep learning. The complete reference for the ANTs ecosystem.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1016/j.neuroimage.2020.116845" target="_blank">Thakur et al. &mdash; Brain Extraction on Tumor Scans (NeuroImage, 2020)</a></div>
+        <div class="resource-desc">Multi-institutional evaluation of deep learning skull-stripping on 3,340 brain tumor scans. Introduces modality-agnostic training that works across any available MRI sequences.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ MONTH NAVIGATION ═══════ -->
+  <div class="nav-lesson">
+    <a href="march.html">&larr; Week 01: Clinical AI in Neuro-Oncology</a>
+    <a href="may.html">Week 03: MONAI Ecosystem &rarr;</a>
+  </div>
+</div>
+
+<footer>
+  <p><a href="../index.html">MedVision Academy</a> &nbsp;&middot;&nbsp; Week 02: MRI Preprocessing</p>
+</footer>
+
+<!-- Outbound Link Click Tracking -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('click', function(e) {
+    var link = e.target.closest('a');
+    if (!link) return;
+    var href = link.getAttribute('href');
+    if (!href) return;
+    if (href.startsWith('http') && !href.includes(window.location.hostname)) {
+      var linkName = link.getAttribute('data-link-name') || link.textContent.trim().substring(0, 60);
+      if (typeof gtag === 'function') {
+        gtag('event', 'outbound_click', { 'link_url': href, 'link_text': linkName });
+      }
+    }
+  });
+});
+</script>
+
+</body>
+</html>
