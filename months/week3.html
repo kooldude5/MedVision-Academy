@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 03: Open-Source Segmentation Tools — MedVision Academy</title>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9LJGDZVJRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9LJGDZVJRW');
+</script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10; --surface: #12151c; --surface-2: #1a1e28; --surface-3: #222834;
+    --border: #2a3040; --border-light: #353d50;
+    --text: #e8eaf0; --text-muted: #8b92a8; --text-dim: #5c6478;
+    --accent: #4af0c0; --accent-dim: #2a8068; --accent-glow: rgba(74,240,192,0.12);
+    --warm: #f0a04a; --rose: #f06088; --blue: #4a90f0; --purple: #a06af0;
+    --serif: 'DM Serif Display', Georgia, serif;
+    --sans: 'Instrument Sans', -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  ::selection { background: var(--accent); color: var(--bg); }
+
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,12,16,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 0 2rem; }
+  .nav-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .nav-logo { font-family: var(--serif); font-size: 1.25rem; color: var(--accent); text-decoration: none; }
+  .nav-logo span { color: var(--text-muted); font-style: italic; font-size: 0.9rem; margin-left: 0.4rem; }
+  .nav-back { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 500; padding: 0.4rem 0.75rem; border-radius: 6px; border: 1px solid var(--border); transition: all 0.2s; }
+  .nav-back:hover { color: var(--text); border-color: var(--border-light); background: var(--surface-2); }
+
+  .lesson-hero { padding: 7rem 2rem 3rem; max-width: 900px; margin: 0 auto; }
+  .lesson-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(74,240,192,0.1); border: 1px solid var(--accent-dim); padding: 0.3rem 0.9rem; border-radius: 100px; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.25rem; }
+  .lesson-hero h1 { font-family: var(--serif); font-size: clamp(2rem, 4vw, 2.8rem); line-height: 1.15; letter-spacing: -0.025em; margin-bottom: 1rem; }
+  .lesson-hero h1 em { font-style: italic; color: var(--accent); }
+  .lesson-hero .subtitle { font-size: 1.05rem; color: var(--text-muted); max-width: 640px; line-height: 1.7; }
+
+  .lesson { max-width: 900px; margin: 0 auto; padding: 0 2rem 4rem; }
+  .divider { max-width: 900px; margin: 0 auto; padding: 0 2rem; border-top: 1px solid var(--border); }
+
+  .lesson-section { margin-top: 3.5rem; }
+  .lesson-section-label { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .lesson-section h2 { font-family: var(--serif); font-size: 1.6rem; line-height: 1.2; margin-bottom: 1rem; }
+  .lesson-section h3 { font-family: var(--serif); font-size: 1.2rem; line-height: 1.3; margin: 2rem 0 0.75rem; }
+  .lesson-section p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin-bottom: 1rem; }
+  .lesson-section p:last-child { margin-bottom: 0; }
+  .lesson-section strong { color: var(--text); }
+  .lesson-section code { font-family: var(--mono); font-size: 0.85em; background: var(--surface-2); padding: 0.15rem 0.4rem; border-radius: 4px; color: var(--accent); }
+
+  .concept-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 1.75rem; margin: 1.5rem 0; }
+  .concept-card .concept-title { font-family: var(--serif); font-size: 1.1rem; margin-bottom: 0.75rem; }
+  .concept-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; margin-bottom: 0.5rem; }
+  .concept-card p:last-child { margin-bottom: 0; }
+
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.5rem 0; }
+  .stat-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; text-align: center; }
+  .stat-box .stat-val { font-family: var(--serif); font-size: 1.5rem; color: var(--accent); margin-bottom: 0.25rem; }
+  .stat-box .stat-label { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; }
+
+  .callout { background: var(--accent-glow); border: 1px solid var(--accent-dim); border-radius: 10px; padding: 1.25rem 1.5rem; display: flex; gap: 1rem; align-items: start; margin: 1.5rem 0; }
+  .callout-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 0.1rem; }
+  .callout-text { font-size: 0.9rem; color: var(--text-muted); line-height: 1.65; }
+  .callout-text strong { color: var(--text); }
+  .callout-warn { background: rgba(240,160,74,0.08); border-color: rgba(240,160,74,0.3); }
+  .callout-info { background: rgba(74,144,240,0.08); border-color: rgba(74,144,240,0.3); }
+
+  .tool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+  .tool-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; transition: border-color 0.3s; }
+  .tool-card:hover { border-color: var(--border-light); }
+  .tool-card .tool-name { font-family: var(--mono); font-size: 0.82rem; font-weight: 600; color: var(--accent); margin-bottom: 0.4rem; }
+  .tool-card .tool-use { font-size: 0.78rem; font-weight: 600; color: var(--text); margin-bottom: 0.3rem; }
+  .tool-card p { color: var(--text-muted); font-size: 0.82rem; line-height: 1.6; margin: 0; }
+
+  .code-block { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin: 1.25rem 0; overflow-x: auto; }
+  .code-block code { font-family: var(--mono); font-size: 0.82rem; line-height: 1.8; color: var(--text-muted); }
+  .code-block .comment { color: var(--text-dim); }
+  .code-block .cmd { color: var(--accent); }
+  .code-block .str { color: var(--warm); }
+
+  .arch-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+  .arch-table th { font-family: var(--mono); font-size: 0.68rem; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.06em; text-align: left; padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--border); }
+  .arch-table td { padding: 0.75rem; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid var(--border); vertical-align: top; }
+  .arch-table tr:last-child td { border-bottom: none; }
+  .arch-table td:first-child { font-weight: 600; color: var(--text); font-size: 0.82rem; }
+
+  .resource-list { display: flex; flex-direction: column; gap: 0.75rem; margin: 1.5rem 0; }
+  .resource-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; transition: border-color 0.3s; }
+  .resource-item:hover { border-color: var(--border-light); }
+  .resource-tag { font-family: var(--mono); font-size: 0.62rem; font-weight: 600; padding: 0.15rem 0.45rem; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.08em; margin-right: 0.5rem; display: inline-block; }
+  .resource-tag.paper { background: rgba(240,160,74,0.12); color: var(--warm); }
+  .resource-tag.video { background: rgba(240,96,136,0.15); color: var(--rose); }
+  .resource-tag.tool { background: rgba(160,106,240,0.12); color: var(--purple); }
+  .resource-tag.site { background: rgba(74,240,192,0.12); color: var(--accent); }
+  .resource-tag.course { background: rgba(74,144,240,0.12); color: var(--blue); }
+  .resource-title { font-weight: 600; font-size: 0.92rem; margin-bottom: 0.3rem; }
+  .resource-title a { color: var(--text); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.2s; }
+  .resource-title a:hover { border-bottom-color: var(--accent); }
+  .resource-desc { color: var(--text-muted); font-size: 0.82rem; line-height: 1.6; }
+  .resource-cite { font-family: var(--mono); font-size: 0.7rem; color: var(--text-dim); margin-top: 0.25rem; }
+
+  .nav-lesson { display: flex; justify-content: space-between; align-items: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); }
+  .nav-lesson a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid var(--border); transition: all 0.2s; }
+  .nav-lesson a:hover { color: var(--accent); border-color: var(--accent-dim); }
+
+  footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--text-dim); font-size: 0.8rem; max-width: 900px; margin: 0 auto; }
+  footer a { color: var(--text-muted); text-decoration: none; }
+  footer a:hover { color: var(--accent); }
+
+  @media (max-width: 700px) {
+    .stat-grid { grid-template-columns: 1fr; }
+    .tool-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="../index.html">MedVision<span>Academy</span></a>
+    <a class="nav-back" href="../index.html#curriculum">&larr; Back to Curriculum</a>
+  </div>
+</nav>
+
+<div class="lesson-hero">
+  <div class="lesson-badge">Week 03 &mdash; Q1</div>
+  <h1>Open-Source Tools for <em>Automated Image Segmentation</em></h1>
+  <p class="subtitle">You now understand the clinical context (Week 1) and how to preprocess MRI data (Week 2). This week, you&rsquo;ll explore the software ecosystem that makes it possible to actually build segmentation models &mdash; with a focus on MONAI, the framework purpose-built for medical imaging AI.</p>
+</div>
+
+<div class="divider"></div>
+
+<div class="lesson">
+
+  <!-- ═══════ 3.1 THE LANDSCAPE ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 3.1 The Big Picture</div>
+    <h2>The Open-Source Medical Segmentation Ecosystem</h2>
+
+    <p>Five years ago, building a medical image segmentation model meant writing everything from scratch &mdash; custom data loaders for 3D NIfTI files, hand-coded augmentations that respected voxel spacing, and training loops that handled the quirks of volumetric data. Today, a rich ecosystem of open-source tools does most of that for you.</p>
+
+    <p>The key insight for beginners: <strong>you don&rsquo;t need to choose just one tool.</strong> These frameworks serve different purposes and are often used together. 3D Slicer for visualization and manual annotation, MONAI for building custom deep learning pipelines, nnU-Net for achieving state-of-the-art results out of the box, and SimpleITK for preprocessing. Understanding what each tool does and when to reach for it is the skill you&rsquo;re building this week.</p>
+
+    <div class="tool-grid">
+      <div class="tool-card">
+        <div class="tool-name">MONAI</div>
+        <div class="tool-use">Build custom DL pipelines</div>
+        <p>PyTorch-based framework for medical imaging AI. Medical-specific transforms, architectures, data loaders. Maximum flexibility for research.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tool-name">nnU-Net</div>
+        <div class="tool-use">State-of-the-art out of the box</div>
+        <p>Self-configuring segmentation. Give it data, it handles everything. Won most MICCAI challenges. Minimal tuning needed.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tool-name">3D Slicer</div>
+        <div class="tool-use">Visualize &amp; annotate</div>
+        <p>Desktop app for viewing medical images, manual/semi-auto segmentation, and verifying AI outputs. Your visual workbench.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tool-name">SimpleITK</div>
+        <div class="tool-use">Image processing in Python</div>
+        <p>Preprocessing powerhouse: registration, filtering, resampling, bias correction. Bridges clinical imaging and code.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tool-name">TotalSegmentator</div>
+        <div class="tool-use">Multi-organ segmentation</div>
+        <p>Pre-trained nnU-Net for 80+ anatomical structures. Works on CT and MRI. Ready to use with minimal setup.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tool-name">TorchIO</div>
+        <div class="tool-use">Medical data augmentation</div>
+        <p>PyTorch library for loading, augmenting, and patch-sampling 3D medical images. MRI artifact simulation built in.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 3.2 MONAI ECOSYSTEM ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 3.2 The Core Framework</div>
+    <h2>MONAI: The Medical AI Framework</h2>
+
+    <p>MONAI (Medical Open Network for Artificial Intelligence) is an open-source, PyTorch-based framework developed by NVIDIA and an international research community specifically for healthcare imaging. If PyTorch is the general-purpose deep learning language, MONAI is the medical dialect &mdash; it adds everything that&rsquo;s missing when you try to use vanilla PyTorch on 3D medical data.</p>
+
+    <h3>Why Not Just Use Raw PyTorch?</h3>
+    <p>You <em>can</em> build medical image segmentation in pure PyTorch. But you&rsquo;ll immediately hit problems that MONAI solves out of the box: <strong>3D volumetric data</strong> (torchvision expects 2D images); <strong>NIfTI/DICOM file formats</strong> (PyTorch doesn&rsquo;t know what these are); <strong>voxel spacing</strong> (a rotation of 10 degrees in a 1mm&sup3; image is very different from a 0.5&times;0.5&times;3mm image &mdash; MONAI transforms respect physical dimensions); <strong>medical-specific augmentations</strong> (bias field simulation, elastic deformations appropriate for anatomy); and <strong>patch-based training</strong> (brain MRI volumes are too large to fit in GPU memory whole, so you train on patches).</p>
+
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="stat-val">94&ndash;97%</div>
+        <div class="stat-label">DSC achieved with MONAI&rsquo;s 3D UNet on multi-organ segmentation benchmarks</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">4</div>
+        <div class="stat-label">Components: Core, Label, Auto3DSeg, Deploy &mdash; covering the full pipeline</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">0.926</div>
+        <div class="stat-label">Dice achieved by a clinician using MONAI Label for mandibular segmentation</div>
+      </div>
+    </div>
+
+    <h3>The Four Components of MONAI</h3>
+
+    <div class="concept-card">
+      <div class="concept-title">MONAI Core</div>
+      <p>The foundation. Provides medical imaging-specific data loaders (reads NIfTI, DICOM natively), transforms (spacing-aware rotations, Z-score normalization, random cropping for 3D patches), loss functions (Dice loss, generalized Dice, focal loss), and network architectures (U-Net, SegResNet, UNETR, SwinUNETR). This is what you&rsquo;ll use to build your training pipeline.</p>
+      <p>Install: <code>pip install monai</code></p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">MONAI Label</div>
+      <p>An interactive annotation framework that connects AI models to 3D Slicer or the OHIF web viewer. Instead of manually tracing every slice, you make a few clicks, the AI suggests a segmentation, you correct it, and the model learns from your corrections through <strong>active learning</strong>. A 2025 study showed that a novice with no medical imaging experience used MONAI Label to achieve a Dice of 0.831 on spleen segmentation &mdash; within the range of published expert results &mdash; in less than a month.</p>
+      <p>Install: <code>pip install monailabel</code></p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">MONAI Auto3DSeg</div>
+      <p>The &ldquo;nnU-Net competitor.&rdquo; An automated pipeline that analyzes your dataset and automatically selects architectures (DiNTS, SegResNet, SwinUNETR), configures hyperparameters, trains multiple models, and ensembles them. Like nnU-Net, the goal is state-of-the-art results with minimal manual configuration. In benchmarks, MONAI architectures are competitive with nnU-Net, though nnU-Net often edges ahead on boundary accuracy.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">MONAI Deploy</div>
+      <p>Takes your trained model and packages it for clinical use. Creates inference pipelines, handles DICOM input/output, and integrates with hospital IT systems (PACS). This bridges the gap between &ldquo;my model works in a Jupyter notebook&rdquo; and &ldquo;a radiologist can use this on real patients.&rdquo; You&rsquo;ll explore this in depth in Week 10.</p>
+    </div>
+
+    <h3>Your First MONAI Pipeline</h3>
+    <p>Here&rsquo;s what a minimal MONAI training setup looks like &mdash; notice how medical-specific it is compared to vanilla PyTorch:</p>
+
+    <div class="code-block">
+      <code>
+<span class="cmd">import</span> monai<br>
+<span class="cmd">from</span> monai.transforms <span class="cmd">import</span> (<br>
+&nbsp;&nbsp;Compose, LoadImaged, EnsureChannelFirstd,<br>
+&nbsp;&nbsp;Spacingd, Orientationd, ScaleIntensityRanged,<br>
+&nbsp;&nbsp;CropForegroundd, RandCropByPosNegLabeld,<br>
+&nbsp;&nbsp;RandFlipd, RandRotate90d, EnsureTyped<br>
+)<br>
+<span class="cmd">from</span> monai.networks.nets <span class="cmd">import</span> UNet<br>
+<span class="cmd">from</span> monai.losses <span class="cmd">import</span> DiceLoss<br><br>
+<span class="comment"># Medical-specific transforms</span><br>
+train_transforms = Compose([<br>
+&nbsp;&nbsp;LoadImaged(keys=[<span class="str">"image"</span>, <span class="str">"label"</span>]),  <span class="comment"># Reads NIfTI natively</span><br>
+&nbsp;&nbsp;EnsureChannelFirstd(keys=[<span class="str">"image"</span>, <span class="str">"label"</span>]),<br>
+&nbsp;&nbsp;Spacingd(keys=[<span class="str">"image"</span>, <span class="str">"label"</span>],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pixdim=(1.0, 1.0, 1.0)),  <span class="comment"># Resample to 1mm isotropic</span><br>
+&nbsp;&nbsp;Orientationd(keys=[<span class="str">"image"</span>, <span class="str">"label"</span>],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;axcodes=<span class="str">"RAS"</span>),  <span class="comment"># Standardize orientation</span><br>
+&nbsp;&nbsp;ScaleIntensityRanged(keys=[<span class="str">"image"</span>],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a_min=-175, a_max=250,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;b_min=0.0, b_max=1.0, clip=True),<br>
+&nbsp;&nbsp;CropForegroundd(keys=[<span class="str">"image"</span>, <span class="str">"label"</span>],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;source_key=<span class="str">"image"</span>),  <span class="comment"># Remove empty space</span><br>
+&nbsp;&nbsp;RandCropByPosNegLabeld(keys=[<span class="str">"image"</span>, <span class="str">"label"</span>],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;label_key=<span class="str">"label"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;spatial_size=(96, 96, 96),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pos=1, neg=1, num_samples=4),  <span class="comment"># 3D patch sampling</span><br>
+&nbsp;&nbsp;RandFlipd(keys=[<span class="str">"image"</span>, <span class="str">"label"</span>], prob=0.5),<br>
+&nbsp;&nbsp;RandRotate90d(keys=[<span class="str">"image"</span>, <span class="str">"label"</span>], prob=0.5),<br>
+])<br><br>
+<span class="comment"># 3D U-Net model</span><br>
+model = UNet(<br>
+&nbsp;&nbsp;spatial_dims=3,<br>
+&nbsp;&nbsp;in_channels=4,   <span class="comment"># T1, T1ce, T2, FLAIR</span><br>
+&nbsp;&nbsp;out_channels=4,  <span class="comment"># Background + 3 tumor regions</span><br>
+&nbsp;&nbsp;channels=(16, 32, 64, 128, 256),<br>
+&nbsp;&nbsp;strides=(2, 2, 2, 2),<br>
+)<br><br>
+loss_fn = DiceLoss(to_onehot_y=True, softmax=True)
+      </code>
+    </div>
+
+    <div class="callout">
+      <div class="callout-icon">&#128161;</div>
+      <div class="callout-text"><strong>Notice the &ldquo;d&rdquo; suffix:</strong> MONAI transforms like <code>LoadImaged</code>, <code>Spacingd</code>, <code>RandFlipd</code> end in &ldquo;d&rdquo; for &ldquo;dictionary.&rdquo; They operate on dictionaries with keys like &ldquo;image&rdquo; and &ldquo;label,&rdquo; applying the same spatial transform to both so your image and segmentation mask stay aligned. This is different from torchvision transforms which operate on single tensors.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 3.3 nnU-Net vs MONAI ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 3.3 The Key Decision</div>
+    <h2>nnU-Net vs. MONAI: When to Use Which</h2>
+
+    <p>This is the question every beginner asks: should I use nnU-Net or MONAI? The honest answer is that they serve different purposes and you&rsquo;ll likely use both.</p>
+
+    <div class="concept-card">
+      <div class="concept-title">Use nnU-Net When&hellip;</div>
+      <p>You want the <strong>best possible results with minimal effort.</strong> nnU-Net is a complete, self-configuring pipeline &mdash; give it data in the right format and it handles preprocessing, architecture selection, training, post-processing, and ensembling automatically. It surpassed most existing approaches on 23 public datasets without any manual tuning. In multi-center brain tumor studies, it consistently achieves the highest Dice scores (0.86&ndash;0.93). Nine out of ten MICCAI 2020 challenge winners built on nnU-Net.</p>
+      <p><strong>Trade-off:</strong> Less flexibility. nnU-Net is opinionated &mdash; it decides most things for you. Customizing the architecture or loss function requires modifying the framework itself.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Use MONAI When&hellip;</div>
+      <p>You want <strong>full control over your pipeline.</strong> MONAI gives you building blocks &mdash; transforms, architectures, losses, data loaders &mdash; and lets you assemble them however you want. Need to combine three different architectures? Use a custom loss function? Integrate active learning? Build a deployment pipeline? MONAI is the tool. It&rsquo;s also the better educational tool because you understand every piece of your pipeline.</p>
+      <p><strong>Trade-off:</strong> More decisions to make. You choose the architecture, hyperparameters, augmentation strategy, and post-processing yourself. More rope, more flexibility, more ways to hang yourself.</p>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">&#128218;</div>
+      <div class="callout-text"><strong>What the BraTS 2nd-place solution used:</strong> A MONAI pipeline with three separate architectures ensembled together. MONAI&rsquo;s flexibility made it possible to combine models in ways that nnU-Net&rsquo;s fixed pipeline doesn&rsquo;t easily support. But many top BraTS teams use nnU-Net as their backbone and add customizations on top.</div>
+    </div>
+
+    <p>A useful benchmark: Gut et al. (2022) compared U-Net and five architectural variants under identical conditions across nine datasets and found that <strong>architecture variants don&rsquo;t consistently improve over basic U-Net</strong> while resource demands increase. This suggests that automated configuration (what nnU-Net and Auto3DSeg do) matters more than architectural novelty &mdash; supporting a strategy of starting with nnU-Net for baselines and switching to MONAI when you need customization.</p>
+  </div>
+
+  <!-- ═══════ 3.4 KEY ARCHITECTURES ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 3.4 What&rsquo;s Inside the Toolbox</div>
+    <h2>Segmentation Architectures You Should Know</h2>
+
+    <p>Both MONAI and nnU-Net are built around specific neural network architectures. You don&rsquo;t need to deeply understand all of these right now, but knowing what they are and when each shines will help you make informed choices later.</p>
+
+    <table class="arch-table">
+      <thead>
+        <tr><th>Architecture</th><th>Core Innovation</th><th>Best For</th><th>Available In</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>U-Net</td><td>Encoder-decoder with skip connections. The foundation of medical segmentation since 2015.</td><td>Default starting point for any task. Well-understood, widely validated.</td><td>MONAI, nnU-Net, PyTorch</td></tr>
+        <tr><td>SegResNet</td><td>Residual connections for deeper networks and better gradient flow.</td><td>Complex features needing deeper networks. Competitive in brain tumor segmentation (Dice 0.843&ndash;0.869 on pediatric BraTS).</td><td>MONAI, Auto3DSeg</td></tr>
+        <tr><td>UNETR</td><td>Replaces the CNN encoder with a Vision Transformer to capture long-range dependencies.</td><td>Tasks where global context matters (multi-organ, whole-body). Dice up to 0.962 on skull structures.</td><td>MONAI</td></tr>
+        <tr><td>SwinUNETR</td><td>Uses Swin Transformer encoder with shifted windows for efficient hierarchical features.</td><td>BraTS and similar challenges. 0.84&ndash;0.91 Dice on brain tumor sub-regions. Good balance of accuracy and efficiency.</td><td>MONAI, Auto3DSeg</td></tr>
+        <tr><td>DiNTS</td><td>Automated architecture design through differentiable neural architecture search.</td><td>When you want the architecture itself to be optimized for your data. Computationally expensive.</td><td>MONAI, Auto3DSeg</td></tr>
+        <tr><td>nnU-Net</td><td>Self-configuring pipeline that auto-tunes preprocessing, architecture depth, patch size, and post-processing.</td><td>Achieving state-of-the-art with zero manual tuning. The benchmark to beat.</td><td>nnU-Net framework</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">&#9888;&#65039;</div>
+      <div class="callout-text"><strong>Don&rsquo;t over-focus on architectures.</strong> A study comparing Slim UNETR to Swin UNETR showed you can get 92.44% Dice while being 34.6x smaller and 13.4x faster. And a critical 2026 study found that a standard UNet outperformed the SAM and MedSAM foundation models even with very limited training data (median Dice 0.88 vs 0.82&ndash;0.84). The architecture matters less than data quality, preprocessing, and training strategy.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 3.5 DATA AUGMENTATION ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 3.5 Making More From Less</div>
+    <h2>Data Augmentation for 3D Medical Images</h2>
+
+    <p>Medical imaging datasets are small by deep learning standards. BraTS has ~1,200 cases; ImageNet has 14 million images. <strong>Data augmentation</strong> &mdash; artificially expanding your training set by applying random transformations &mdash; is essential for preventing overfitting.</p>
+
+    <p>But medical augmentation is different from natural image augmentation. You can&rsquo;t just apply random color jittering to an MRI &mdash; it needs to produce <em>plausible</em> medical images. A systematic review of 300+ articles found that augmentation is effective across organs, modalities, and dataset sizes, but the techniques must be chosen carefully for each imaging type.</p>
+
+    <h3>MONAI Transforms vs. torchvision</h3>
+    <p>Standard torchvision transforms work on 2D images with pixel coordinates. MONAI transforms work on 3D volumes with <strong>physical coordinates</strong> (millimeters). This means:</p>
+
+    <div class="concept-card">
+      <div class="concept-title">Spacing-Aware Transforms</div>
+      <p>When MONAI rotates an image, it accounts for anisotropic voxel spacing. A 10-degree rotation in a volume with 1&times;1&times;1mm voxels looks different than in a volume with 0.5&times;0.5&times;3mm voxels. MONAI handles this automatically; torchvision does not.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Medical-Specific Augmentations</div>
+      <p><strong>Bias field simulation:</strong> Artificially adds the kind of intensity inhomogeneity you&rsquo;d see from RF coils, training the model to be robust to this artifact. <strong>Elastic deformation:</strong> Warps the image in anatomically plausible ways. <strong>Intensity augmentations:</strong> Gamma correction, Gaussian noise, brightness/contrast shifts calibrated for MRI intensity ranges. <strong>Patch sampling:</strong> <code>RandCropByPosNegLabeld</code> samples 3D patches ensuring a specified ratio contain foreground (tumor) vs background &mdash; critical for class-imbalanced medical data.</p>
+    </div>
+
+    <h3>TorchIO: A Specialized Alternative</h3>
+    <p><strong>TorchIO</strong> is a complementary library focused specifically on 3D medical image loading, augmentation, and patch-based sampling. It follows PyTorch conventions, supports invertible transforms (useful for test-time augmentation), and includes MRI-specific artifact simulation (motion artifacts, ghosting, spike noise). It integrates seamlessly with both MONAI and raw PyTorch pipelines. Think of TorchIO as the augmentation specialist and MONAI as the full-stack framework.</p>
+  </div>
+
+  <!-- ═══════ 3.6 PRETRAINED MODELS ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 3.6 Standing on Shoulders</div>
+    <h2>Pre-Trained Models &amp; Transfer Learning</h2>
+
+    <p>Do you need to train every model from scratch? Not necessarily. Pre-trained models and transfer learning can give you a head start, but the picture in medical imaging is more nuanced than in natural image processing.</p>
+
+    <h3>The Transfer Learning Reality Check</h3>
+    <p>In computer vision, starting from an ImageNet-pretrained model is standard practice. In medical imaging, the evidence is mixed:</p>
+
+    <div class="concept-card">
+      <div class="concept-title">When Transfer Learning Helps</div>
+      <p><strong>Small datasets:</strong> When you have limited training data, pre-trained weights provide a better starting point than random initialization. A 2016 study showed pre-trained CNNs outperformed from-scratch training across four medical imaging tasks and were more robust to small training sets. <strong>Similar domains:</strong> Transfer from medical-to-medical (e.g., CT-to-CT) outperforms ImageNet-to-medical by about +2% Dice. <strong>Cross-dimensional:</strong> A clever 2023 approach embedded 2D pre-trained encoders into 3D U-Nets, achieving 91.69% Dice for whole tumor on BraTS 2022.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">When It Doesn&rsquo;t Matter (Much)</div>
+      <p><strong>Sufficient data:</strong> When you have enough training data (like full BraTS), models trained from scratch perform just as well. <strong>Foundation model hype:</strong> A critical 2026 study found that a standard UNet outperformed fine-tuned SAM and MedSAM for neuroanatomic segmentation &mdash; even when SAM had orders of magnitude more pretraining data. <strong>The surprising finding:</strong> You can freeze the encoder at random values and only train the decoder, and still get competitive results &mdash; challenging the assumption that encoders must learn task-specific features.</p>
+    </div>
+
+    <h3>Where to Find Pre-Trained Models</h3>
+    <p><strong>MONAI Model Zoo:</strong> Pre-trained models for various medical imaging tasks, directly loadable into MONAI pipelines. <strong>TotalSegmentator:</strong> A pre-trained nnU-Net for 80 anatomical structures in CT and MRI (Dice 0.839 on MRI, 0.966 on CT). Useful as a ready-to-use tool or as a starting point for fine-tuning. <strong>MedSAM / SAM-Med3D:</strong> Foundation models for interactive medical segmentation, though current evidence suggests they don&rsquo;t consistently outperform well-trained task-specific models.</p>
+  </div>
+
+  <!-- ═══════ 3.7 PRACTICAL SETUP ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 3.7 Getting Started</div>
+    <h2>Practical Setup: GPU Access &amp; Installation</h2>
+
+    <p>Deep learning on 3D medical images is computationally demanding. A single BraTS MRI volume is 240&times;240&times;155 voxels across 4 channels &mdash; over 35 million values per patient. Training a 3D U-Net on this data requires a GPU.</p>
+
+    <h3>GPU Options for Students</h3>
+
+    <div class="concept-card">
+      <div class="concept-title">Free Tier</div>
+      <p><strong>Google Colab:</strong> Free GPU access (T4, sometimes V100). Limited session time (~12 hours) and RAM. Good for learning and small experiments. <strong>Kaggle Notebooks:</strong> 30 hours/week of GPU time (P100 or T4). Slightly more generous than Colab. Both platforms can run MONAI and nnU-Net for educational purposes, but serious training runs may time out.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Paid / Institutional Options</div>
+      <p><strong>Cloud credits:</strong> Google Cloud, AWS, and Azure all offer $100&ndash;300 in student credits. Enough for several full nnU-Net training runs. <strong>Lambda Labs / Paperspace:</strong> Affordable GPU rentals ($0.50&ndash;2/hour for an A100). Good for serious training. <strong>Your school:</strong> Ask your CS department &mdash; many have shared GPU servers that students can access.</p>
+    </div>
+
+    <h3>Installation Checklist</h3>
+    <div class="code-block">
+      <code>
+<span class="comment"># 1. Create a clean environment</span><br>
+<span class="cmd">conda</span> create -n medseg python=3.10<br>
+<span class="cmd">conda</span> activate medseg<br><br>
+<span class="comment"># 2. Install PyTorch with CUDA</span><br>
+<span class="cmd">pip</span> install torch torchvision --index-url https://download.pytorch.org/whl/cu121<br><br>
+<span class="comment"># 3. Install MONAI (full version with all dependencies)</span><br>
+<span class="cmd">pip</span> install <span class="str">"monai[all]"</span><br><br>
+<span class="comment"># 4. Install additional tools</span><br>
+<span class="cmd">pip</span> install nibabel simpleitk torchio matplotlib<br><br>
+<span class="comment"># 5. (Optional) Install nnU-Net for comparison</span><br>
+<span class="cmd">pip</span> install nnunetv2<br><br>
+<span class="comment"># 6. Verify GPU access</span><br>
+<span class="cmd">python</span> -c <span class="str">"import torch; print(torch.cuda.is_available())"</span>
+      </code>
+    </div>
+  </div>
+
+  <!-- ═══════ 3.8 RECOMMENDED LEARNING PATH ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 3.8 Your Learning Path</div>
+    <h2>Recommended Order of Exploration</h2>
+
+    <p>Don&rsquo;t try to learn everything at once. Here&rsquo;s a structured path for this week:</p>
+
+    <div class="concept-card">
+      <div class="concept-title">Day 1&ndash;2: Explore 3D Slicer + MONAI Label</div>
+      <p>If you haven&rsquo;t already, install 3D Slicer and load some BraTS data. Then install MONAI Label and connect it to 3D Slicer. Try the interactive segmentation &mdash; click on a tumor, let the AI suggest a boundary, correct it. This gives you intuition for what annotation feels like and why AI assistance matters.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Day 3&ndash;4: MONAI Core Tutorials</div>
+      <p>Work through the official MONAI tutorials. Start with the &ldquo;MONAI 101&rdquo; notebook, then the spleen segmentation tutorial. Pay attention to the transform pipeline &mdash; understand how <code>LoadImaged</code>, <code>Spacingd</code>, <code>RandCropByPosNegLabeld</code> work and why each exists. Try modifying parameters and see what changes.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Day 5&ndash;6: Build a Minimal Brain Tumor Pipeline</div>
+      <p>Using what you&rsquo;ve learned, build a minimal MONAI pipeline that loads BraTS data, applies transforms, creates a 3D U-Net, trains for a few epochs, and produces a segmentation prediction. It won&rsquo;t be good yet &mdash; that&rsquo;s fine. The goal is to have a working end-to-end pipeline you understand.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Day 7: Compare with nnU-Net</div>
+      <p>Run nnU-Net on the same data (even just one fold). Compare its output to your MONAI pipeline. Notice the performance gap &mdash; this gap is what nnU-Net&rsquo;s automated optimization is worth. In Weeks 4&ndash;6, you&rsquo;ll learn to close it.</p>
+    </div>
+  </div>
+
+  <!-- ═══════ RESOURCES ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 3.9 Resources &amp; Further Reading</div>
+    <h2>This Week&rsquo;s Learning Resources</h2>
+
+    <h3>Start Here (Hands-On)</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://monai.io/started.html" target="_blank">MONAI Getting Started Guide</a></div>
+        <div class="resource-desc">Official quickstart. Installation, first pipeline, core concepts. This is your Week 3 homepage.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://github.com/Project-MONAI/tutorials" target="_blank">MONAI Tutorials (GitHub)</a></div>
+        <div class="resource-desc">Jupyter notebooks for every MONAI feature: 3D segmentation, transforms, architectures, training loops. Start with the spleen segmentation tutorial, then brain tumor segmentation.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://github.com/Project-MONAI/MONAILabel" target="_blank">MONAI Label (GitHub)</a></div>
+        <div class="resource-desc">Interactive annotation framework. Follow the setup guide to connect to 3D Slicer. The &ldquo;radiology&rdquo; sample app is a good starting point for brain segmentation.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://github.com/MIC-DKFZ/nnUNet" target="_blank">nnU-Net Official Repository</a></div>
+        <div class="resource-desc">Install alongside MONAI for comparison. Read <code>documentation/how_to_use_nnunet.md</code> for the step-by-step guide.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://torchio.readthedocs.io/" target="_blank">TorchIO Documentation</a></div>
+        <div class="resource-desc">Medical image augmentation library. Browse the transform gallery to see what each augmentation does visually. Great complement to MONAI transforms.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag site">Site</span><a href="https://www.slicer.org/" target="_blank">3D Slicer &mdash; Download</a></div>
+        <div class="resource-desc">Your visual workbench for verifying everything. If you installed it in Week 2, explore the segmentation editor module and MONAI Label integration this week.</div>
+      </div>
+    </div>
+
+    <h3>Key Papers</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1016/j.media.2024.103207" target="_blank">Diaz-Pinto et al. &mdash; MONAI Label (Medical Image Analysis, 2024)</a></div>
+        <div class="resource-desc">The foundational MONAI Label paper. Describes the framework, active learning strategies, and demonstrates significant annotation time reductions.</div>
+        <div class="resource-cite">Med Image Anal. 2024;95:103207</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1038/s41592-020-01008-z" target="_blank">Isensee et al. &mdash; nnU-Net (Nature Methods, 2021)</a></div>
+        <div class="resource-desc">The nnU-Net paper. Essential for understanding the self-configuring approach and why automated pipeline design outperforms manual architecture selection.</div>
+        <div class="resource-cite">Nat Methods. 2021;18(2):203&ndash;211</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1038/s41467-022-30695-9" target="_blank">Antonelli et al. &mdash; Medical Segmentation Decathlon (Nature Communications, 2022)</a></div>
+        <div class="resource-desc">The MSD paper proving that well-configured algorithms generalize across tasks. Key conclusion: training accurate AI segmentation models is now &ldquo;commoditized&rdquo; through tools like nnU-Net.</div>
+        <div class="resource-cite">Nat Commun. 2022;13:4128</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1109/TMI.2022.3180435" target="_blank">Gut et al. &mdash; Benchmarking Deep Architectures for Segmentation (IEEE TMI, 2022)</a></div>
+        <div class="resource-desc">Fair comparison of U-Net variants showing that fancier architectures don&rsquo;t reliably beat basic U-Net. Important for calibrating expectations about architecture choices.</div>
+        <div class="resource-cite">IEEE Trans Med Imaging. 2022;41(11):3128&ndash;3141</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1016/j.cmpb.2021.106236" target="_blank">P&eacute;rez-Garc&iacute;a et al. &mdash; TorchIO (Comput Methods Programs Biomed, 2021)</a></div>
+        <div class="resource-desc">The TorchIO paper. Covers the philosophy of medical-specific data loading and augmentation, with practical examples.</div>
+        <div class="resource-cite">Comput Methods Programs Biomed. 2021;208:106236</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1148/radiol.241613" target="_blank">Akinci D&rsquo;Antonoli et al. &mdash; TotalSegmentator MRI (Radiology, 2025)</a></div>
+        <div class="resource-desc">Extension of TotalSegmentator to MRI: 80 anatomical structures, sequence-independent. Shows where pre-trained segmentation tools are heading.</div>
+        <div class="resource-cite">Radiology. 2025;314(1):e241613</div>
+      </div>
+    </div>
+
+    <h3>Deep Dives (Advanced)</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1109/TPAMI.2024.3381956" target="_blank">Azad et al. &mdash; Medical Image Segmentation Review: The Success of U-Net (IEEE TPAMI, 2024)</a></div>
+        <div class="resource-desc">Comprehensive taxonomy of U-Net variants with fair evaluations. The reference for understanding the architecture landscape.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1038/s41467-024-44824-z" target="_blank">Ma et al. &mdash; MedSAM: Segment Anything in Medical Images (Nature Communications, 2024)</a></div>
+        <div class="resource-desc">Foundation model for medical segmentation trained on 1.57M image-mask pairs. Important to understand the promise and current limitations of foundation models in medical imaging.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1016/j.artmed.2021.101985" target="_blank">Karimi et al. &mdash; Transfer Learning in Medical Segmentation: New Insights (AI in Medicine, 2021)</a></div>
+        <div class="resource-desc">Critical analysis showing transfer learning benefits are task/data-dependent. The surprising finding about random encoder weights challenges common assumptions.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ NAVIGATION ═══════ -->
+  <div class="nav-lesson">
+    <a href="week2.html">&larr; Week 02: MRI Preprocessing</a>
+    <a href="week4.html">Week 04: CNN Fundamentals &rarr;</a>
+  </div>
+</div>
+
+<footer>
+  <p><a href="../index.html">MedVision Academy</a> &nbsp;&middot;&nbsp; Week 03: Open-Source Segmentation Tools</p>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('click', function(e) {
+    var link = e.target.closest('a');
+    if (!link) return;
+    var href = link.getAttribute('href');
+    if (!href) return;
+    if (href.startsWith('http') && !href.includes(window.location.hostname)) {
+      var linkName = link.getAttribute('data-link-name') || link.textContent.trim().substring(0, 60);
+      if (typeof gtag === 'function') {
+        gtag('event', 'outbound_click', { 'link_url': href, 'link_text': linkName });
+      }
+    }
+  });
+});
+</script>
+
+</body>
+</html>
