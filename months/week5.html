@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 05: nnU-Net Deep Dive — MedVision Academy</title>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9LJGDZVJRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9LJGDZVJRW');
+</script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10; --surface: #12151c; --surface-2: #1a1e28; --surface-3: #222834;
+    --border: #2a3040; --border-light: #353d50;
+    --text: #e8eaf0; --text-muted: #8b92a8; --text-dim: #5c6478;
+    --accent: #4af0c0; --accent-dim: #2a8068; --accent-glow: rgba(74,240,192,0.12);
+    --warm: #f0a04a; --rose: #f06088; --blue: #4a90f0; --purple: #a06af0;
+    --serif: 'DM Serif Display', Georgia, serif;
+    --sans: 'Instrument Sans', -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  ::selection { background: var(--accent); color: var(--bg); }
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,12,16,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 0 2rem; }
+  .nav-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .nav-logo { font-family: var(--serif); font-size: 1.25rem; color: var(--accent); text-decoration: none; }
+  .nav-logo span { color: var(--text-muted); font-style: italic; font-size: 0.9rem; margin-left: 0.4rem; }
+  .nav-back { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 500; padding: 0.4rem 0.75rem; border-radius: 6px; border: 1px solid var(--border); transition: all 0.2s; }
+  .nav-back:hover { color: var(--text); border-color: var(--border-light); background: var(--surface-2); }
+  .lesson-hero { padding: 7rem 2rem 3rem; max-width: 900px; margin: 0 auto; }
+  .lesson-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(74,144,240,0.1); border: 1px solid rgba(74,144,240,0.3); padding: 0.3rem 0.9rem; border-radius: 100px; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; color: var(--blue); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.25rem; }
+  .lesson-hero h1 { font-family: var(--serif); font-size: clamp(2rem, 4vw, 2.8rem); line-height: 1.15; letter-spacing: -0.025em; margin-bottom: 1rem; }
+  .lesson-hero h1 em { font-style: italic; color: var(--accent); }
+  .lesson-hero .subtitle { font-size: 1.05rem; color: var(--text-muted); max-width: 640px; line-height: 1.7; }
+  .lesson { max-width: 900px; margin: 0 auto; padding: 0 2rem 4rem; }
+  .divider { max-width: 900px; margin: 0 auto; padding: 0 2rem; border-top: 1px solid var(--border); }
+  .lesson-section { margin-top: 3.5rem; }
+  .lesson-section-label { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .lesson-section h2 { font-family: var(--serif); font-size: 1.6rem; line-height: 1.2; margin-bottom: 1rem; }
+  .lesson-section h3 { font-family: var(--serif); font-size: 1.2rem; line-height: 1.3; margin: 2rem 0 0.75rem; }
+  .lesson-section p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin-bottom: 1rem; }
+  .lesson-section p:last-child { margin-bottom: 0; }
+  .lesson-section strong { color: var(--text); }
+  .lesson-section code { font-family: var(--mono); font-size: 0.85em; background: var(--surface-2); padding: 0.15rem 0.4rem; border-radius: 4px; color: var(--accent); }
+  .concept-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 1.75rem; margin: 1.5rem 0; }
+  .concept-card .concept-title { font-family: var(--serif); font-size: 1.1rem; margin-bottom: 0.75rem; }
+  .concept-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; margin-bottom: 0.5rem; }
+  .concept-card p:last-child { margin-bottom: 0; }
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.5rem 0; }
+  .stat-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; text-align: center; }
+  .stat-box .stat-val { font-family: var(--serif); font-size: 1.5rem; color: var(--accent); margin-bottom: 0.25rem; }
+  .stat-box .stat-label { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; }
+  .callout { background: var(--accent-glow); border: 1px solid var(--accent-dim); border-radius: 10px; padding: 1.25rem 1.5rem; display: flex; gap: 1rem; align-items: start; margin: 1.5rem 0; }
+  .callout-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 0.1rem; }
+  .callout-text { font-size: 0.9rem; color: var(--text-muted); line-height: 1.65; }
+  .callout-text strong { color: var(--text); }
+  .callout-warn { background: rgba(240,160,74,0.08); border-color: rgba(240,160,74,0.3); }
+  .callout-info { background: rgba(74,144,240,0.08); border-color: rgba(74,144,240,0.3); }
+  .pipeline-steps { display: flex; flex-direction: column; gap: 0; margin: 1.5rem 0; }
+  .pipeline-step { display: flex; gap: 1.25rem; padding: 1.25rem 0; border-bottom: 1px solid var(--border); }
+  .pipeline-step:last-child { border-bottom: none; }
+  .step-num { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; color: var(--accent); background: var(--accent-glow); padding: 0.2rem 0.5rem; border-radius: 4px; height: fit-content; white-space: nowrap; margin-top: 0.15rem; }
+  .step-content .step-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.3rem; }
+  .step-content p { color: var(--text-muted); font-size: 0.88rem; line-height: 1.65; margin: 0; }
+  .code-block { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin: 1.25rem 0; overflow-x: auto; }
+  .code-block code { font-family: var(--mono); font-size: 0.82rem; line-height: 1.8; color: var(--text-muted); }
+  .code-block .comment { color: var(--text-dim); }
+  .code-block .cmd { color: var(--accent); }
+  .code-block .str { color: var(--warm); }
+  .code-block .key { color: var(--blue); }
+  .resource-list { display: flex; flex-direction: column; gap: 0.75rem; margin: 1.5rem 0; }
+  .resource-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; transition: border-color 0.3s; }
+  .resource-item:hover { border-color: var(--border-light); }
+  .resource-tag { font-family: var(--mono); font-size: 0.62rem; font-weight: 600; padding: 0.15rem 0.45rem; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.08em; margin-right: 0.5rem; display: inline-block; }
+  .resource-tag.paper { background: rgba(240,160,74,0.12); color: var(--warm); }
+  .resource-tag.video { background: rgba(240,96,136,0.15); color: var(--rose); }
+  .resource-tag.tool { background: rgba(160,106,240,0.12); color: var(--purple); }
+  .resource-tag.site { background: rgba(74,240,192,0.12); color: var(--accent); }
+  .resource-tag.course { background: rgba(74,144,240,0.12); color: var(--blue); }
+  .resource-title { font-weight: 600; font-size: 0.92rem; margin-bottom: 0.3rem; }
+  .resource-title a { color: var(--text); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.2s; }
+  .resource-title a:hover { border-bottom-color: var(--accent); }
+  .resource-desc { color: var(--text-muted); font-size: 0.82rem; line-height: 1.6; }
+  .resource-cite { font-family: var(--mono); font-size: 0.7rem; color: var(--text-dim); margin-top: 0.25rem; }
+  .nav-lesson { display: flex; justify-content: space-between; align-items: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); }
+  .nav-lesson a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid var(--border); transition: all 0.2s; }
+  .nav-lesson a:hover { color: var(--accent); border-color: var(--accent-dim); }
+  footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--text-dim); font-size: 0.8rem; max-width: 900px; margin: 0 auto; }
+  footer a { color: var(--text-muted); text-decoration: none; }
+  footer a:hover { color: var(--accent); }
+  @media (max-width: 700px) {
+    .stat-grid { grid-template-columns: 1fr; }
+    .pipeline-step { flex-direction: column; gap: 0.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="../index.html">MedVision<span>Academy</span></a>
+    <a class="nav-back" href="../index.html#curriculum">&larr; Back to Curriculum</a>
+  </div>
+</nav>
+
+<div class="lesson-hero">
+  <div class="lesson-badge">Week 05 &mdash; Q2</div>
+  <h1>In-Depth Understanding of <em>nnU-Net</em></h1>
+  <p class="subtitle">Last week you learned what nnU-Net does. This week you learn <em>how</em> it does it &mdash; every internal decision, from how the dataset fingerprint drives architecture choices to exactly what happens during inference. By the end, you&rsquo;ll be able to read an <code>nnUNetPlans.json</code> file and understand every line.</p>
+</div>
+
+<div class="divider"></div>
+
+<div class="lesson">
+
+  <!-- ═══════ 5.1 FINGERPRINTING ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 5.1 Where It All Starts</div>
+    <h2>Dataset Fingerprinting: How nnU-Net Reads Your Data</h2>
+
+    <p>When you run <code>nnUNetv2_plan_and_preprocess</code>, the first thing nnU-Net does is create a <strong>dataset fingerprint</strong> &mdash; a JSON file containing every property of your data that matters for pipeline design. This fingerprint drives every subsequent decision. Understanding it is the key to understanding nnU-Net.</p>
+
+    <h3>What Gets Extracted</h3>
+
+    <div class="concept-card">
+      <div class="concept-title">Image Properties</div>
+      <p><strong>Median image shape:</strong> The typical volume dimensions across your dataset (e.g., 240&times;240&times;155 for BraTS). Determines the upper bound on patch size and whether a cascade is needed. <strong>Voxel spacing distribution:</strong> The physical size of each voxel in mm (e.g., 1.0&times;1.0&times;1.0 for BraTS). Determines the target resampling resolution. If one axis has much larger spacing than others (anisotropic data), nnU-Net uses special handling. <strong>Intensity statistics per modality:</strong> Mean, standard deviation, percentiles of voxel intensities. Determines whether CT-style (global) or MRI-style (per-image) normalization is used.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Label Properties</div>
+      <p><strong>Class frequencies:</strong> How many voxels belong to each class. For BraTS, the background vastly outnumbers all tumor classes. This influences post-processing decisions (whether to remove small connected components). <strong>Number of classes:</strong> Determines the output channels of the network. <strong>Dataset size:</strong> Number of training cases. Affects batch size and whether all configurations are worth training.</p>
+    </div>
+
+    <p>After fingerprinting, examine the output:</p>
+
+    <div class="code-block">
+      <code>
+<span class="comment"># After running plan_and_preprocess, look at these files:</span><br>
+nnUNet_preprocessed/Dataset001_BraTS/<br>
+&nbsp;&nbsp;├── dataset_fingerprint.json&nbsp;&nbsp;&nbsp;<span class="comment"># Raw dataset properties</span><br>
+&nbsp;&nbsp;├── nnUNetPlans.json&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># All pipeline decisions</span><br>
+&nbsp;&nbsp;├── nnUNetPlans_2d/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># 2D config preprocessed data</span><br>
+&nbsp;&nbsp;└── nnUNetPlans_3d_fullres/&nbsp;&nbsp;&nbsp;<span class="comment"># 3D config preprocessed data</span>
+      </code>
+    </div>
+
+    <div class="callout">
+      <div class="callout-icon">&#128161;</div>
+      <div class="callout-text"><strong>Hands-on exercise:</strong> After running <code>nnUNetv2_plan_and_preprocess -d 001 --verify_dataset_integrity</code>, open <code>dataset_fingerprint.json</code> and <code>nnUNetPlans.json</code> in a text editor. Trace each value in the fingerprint to the decisions in the plans file. This exercise is worth more than reading ten tutorials.</div>
+    </div>
+
+    <h3>How the Fingerprint Drives Decisions</h3>
+    <p>Every property maps to specific pipeline choices. Here&rsquo;s the chain of logic:</p>
+
+    <div class="pipeline-steps">
+      <div class="pipeline-step">
+        <span class="step-num">SPACING</span>
+        <div class="step-content">
+          <div class="step-title">Voxel spacing &rarr; Target resolution</div>
+          <p>nnU-Net sets the target resampling resolution to the <strong>median voxel spacing</strong> across the dataset. For anisotropic data (e.g., thick-slice CT with 0.7&times;0.7&times;5.0mm), it uses a lower percentile for the coarse axis to avoid excessive upsampling. BraTS is already 1mm isotropic, so no resampling is needed.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">SIZE</span>
+        <div class="step-content">
+          <div class="step-title">Image shape &rarr; Patch size &amp; cascade decision</div>
+          <p>If the median image (after resampling) is small enough to cover with a single 3D patch within GPU memory, no cascade is needed. If images are very large, the 3D low-resolution + cascade configuration is generated. For BraTS (240&times;240&times;155), the full-resolution 3D config can use patches of ~128&times;128&times;128, which is sufficient &mdash; no cascade needed.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">DEPTH</span>
+        <div class="step-content">
+          <div class="step-title">Patch size &rarr; Network depth</div>
+          <p>Downsampling continues until the feature map drops below 4&ndash;8 voxels per axis. A 128&times;128&times;128 patch with stride-2 downsampling yields: 64&rarr;32&rarr;16&rarr;8&rarr;4, giving 5 downsampling stages. Each stage doubles the feature channels: 32&rarr;64&rarr;128&rarr;256&rarr;320 (capped at 320 for 3D).</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">MEMORY</span>
+        <div class="step-content">
+          <div class="step-title">GPU memory &rarr; Batch size</div>
+          <p>Given the network topology and patch size, nnU-Net maximizes batch size to fill available GPU memory. For BraTS on a typical GPU (8&ndash;12GB), this usually means batch size 2. The patch size, network depth, and batch size are <strong>jointly optimized</strong> &mdash; they can&rsquo;t be set independently.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">INTENSITY</span>
+        <div class="step-content">
+          <div class="step-title">Modality type &rarr; Normalization scheme</div>
+          <p>CT images get global Z-score normalization (mean and std computed across the entire dataset). MRI images get per-image Z-score normalization (each scan normalized using its own foreground statistics), because MRI intensities are arbitrary and vary across scanners. nnU-Net detects CT vs MRI from the <code>dataset.json</code> channel names.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 5.2 PREPROCESSING INTERNALS ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 5.2 Under the Hood</div>
+    <h2>Preprocessing: What Happens to Your Data</h2>
+
+    <p>Once the plan is made, nnU-Net preprocesses every training case and saves the result. Understanding these steps helps you debug when things go wrong.</p>
+
+    <div class="concept-card">
+      <div class="concept-title">Step 1: Cropping to Non-Zero Region</div>
+      <p>The image is cropped to the bounding box of non-zero voxels, removing empty background. This reduces the volume the network needs to process. For skull-stripped brain MRI, this removes the empty space around the brain. The crop coordinates are saved so they can be reversed during inference.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Step 2: Resampling</div>
+      <p>Images are resampled to the target spacing using <strong>third-order spline interpolation</strong> (preserves smooth intensity gradients). Labels are resampled using <strong>nearest-neighbor interpolation</strong> (preserves discrete class boundaries without creating invalid intermediate values). For anisotropic data, the low-resolution axis may use first-order interpolation to avoid ringing artifacts.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Step 3: Intensity Normalization</div>
+      <p>For MRI (including BraTS): each image is independently Z-score normalized using its <strong>foreground mask</strong> statistics. The foreground is defined as all non-zero voxels. This means: <code>normalized = (image - foreground_mean) / foreground_std</code>. Voxels outside the foreground remain zero. This per-image approach handles the arbitrary intensity scale of MRI across different scanners and protocols.</p>
+    </div>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">&#9888;&#65039;</div>
+      <div class="callout-text"><strong>Critical: preprocessing must match between training and inference.</strong> nnU-Net handles this automatically &mdash; the same preprocessing is applied during both phases. But if you&rsquo;re building a custom pipeline that feeds into nnU-Net, any mismatch (different normalization, different resampling) will silently degrade performance. One study showed that using N4 bias correction alone without intensity normalization caused AUC to drop from 0.85 to 0.19 on external data.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 5.3 THREE CONFIGS ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 5.3 The Three Configurations</div>
+    <h2>2D, 3D Full-Res, and 3D Cascade</h2>
+
+    <p>nnU-Net doesn&rsquo;t just train one model &mdash; it trains up to three fundamentally different configurations and then selects the best. Understanding when each configuration is generated and when it excels is essential for interpreting your results.</p>
+
+    <div class="concept-card">
+      <div class="concept-title">2D Configuration</div>
+      <p><strong>Always generated.</strong> Processes individual 2D slices extracted along the axis with the highest in-plane resolution. Uses 2D convolutions with up to 512 feature channels (more than 3D because memory is cheaper in 2D). The 2D config serves as a baseline and sometimes wins on datasets with extreme anisotropy (thick slices) or very high in-plane resolution where 3D patches would be too small to capture context.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">3D Full-Resolution Configuration</div>
+      <p><strong>Generated when images fit in GPU memory.</strong> Processes 3D patches at the dataset&rsquo;s native (post-resampling) resolution. Feature channels capped at 320 to fit memory constraints. This is the configuration that usually wins for brain tumor segmentation because full 3D context matters for distinguishing enhancing tumor, tumor core, and edema. On BraTS, it typically achieves Dice scores 2&ndash;4 points higher than the 2D config.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">3D Low-Resolution + Cascade</div>
+      <p><strong>Generated only when images are too large for full-resolution 3D processing.</strong> Stage 1 trains a 3D U-Net at reduced resolution to capture global context. Stage 2 trains another 3D U-Net at full resolution, receiving the Stage 1 prediction as an additional input channel. The cascade is <strong>omitted for BraTS</strong> because the volumes (240&times;240&times;155) are manageable at full resolution. It&rsquo;s more relevant for tasks like full-body CT segmentation.</p>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="stat-val">0.924</div>
+        <div class="stat-label">nnU-Net Dice on AMOS challenge &mdash; significantly outperforming Auto3DSeg (0.902)</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">0.965</div>
+        <div class="stat-label">Dice on neuroblastic tumors &mdash; matching inter-observer variability (0.969)</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">92.8%</div>
+        <div class="stat-label">Time savings vs manual segmentation in clinical validation study</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 5.4 AUGMENTATION ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 5.4 Data Augmentation Deep Dive</div>
+    <h2>nnU-Net&rsquo;s Augmentation Pipeline</h2>
+
+    <p>Data augmentation is applied <strong>on-the-fly</strong> during training &mdash; each batch sees a different random transformation of the same training data, effectively creating infinite training variety without storage overhead. Here&rsquo;s exactly what nnU-Net applies and why:</p>
+
+    <h3>Spatial Augmentations (Applied First)</h3>
+    <div class="concept-card">
+      <div class="concept-title">Rotation, Scaling, Elastic Deformation</div>
+      <p><strong>Rotation:</strong> Random rotations of &plusmn;15&deg; to &plusmn;30&deg; around each axis. Simulates different head positions in the scanner. <strong>Scaling:</strong> Random zoom between 0.85&times; and 1.25&times;. Accounts for natural variation in brain and tumor size. <strong>Elastic deformation:</strong> Controlled by &alpha; (deformation magnitude, ~1000) and &sigma; (smoothness, ~10). Produces anatomically plausible shape variations. <strong>Mirroring:</strong> Random flipping along all applicable axes. Near-free augmentation since brains are roughly symmetric.</p>
+    </div>
+
+    <h3>Intensity Augmentations (Applied Second)</h3>
+    <div class="concept-card">
+      <div class="concept-title">Gamma, Noise, Brightness</div>
+      <p><strong>Gamma correction:</strong> Random gamma values (typically 0.7&ndash;1.5) to simulate scanner brightness/contrast variations. <strong>Gaussian noise:</strong> Small random noise added to improve robustness to image quality differences. <strong>Brightness/contrast shifts:</strong> Simulate the inter-scanner intensity variability that is the bane of multi-institutional MRI studies.</p>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">&#128218;</div>
+      <div class="callout-text"><strong>Why this specific combination?</strong> These augmentation parameters were determined empirically across nnU-Net&rsquo;s evaluation on 23 diverse datasets. No single augmentation is responsible for nnU-Net&rsquo;s success &mdash; it&rsquo;s the full combination that works. A systematic review of 300+ articles confirmed that data augmentation is effective across organs, modalities, and dataset sizes, but the specific strategies must produce <strong>plausible</strong> medical images.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 5.5 TRAINING INTERNALS ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 5.5 The Training Loop</div>
+    <h2>Training: The 1000-Epoch Grind</h2>
+
+    <h3>5-Fold Cross-Validation</h3>
+    <p>nnU-Net splits training data into 5 folds. <strong>Critical rule:</strong> all scans from the same patient stay in the same fold to prevent data leakage. Each fold uses 80% for training and 20% for validation. This produces 5 independently trained models, each seeing a different validation set.</p>
+
+    <p>Cross-validation serves three purposes: (1) <strong>robust performance estimation</strong> &mdash; averaging across 5 validation sets is more reliable than a single split; (2) <strong>configuration selection</strong> &mdash; comparing 2D vs 3D vs cascade performance; (3) <strong>ensemble at inference</strong> &mdash; averaging predictions from all 5 models.</p>
+
+    <h3>Fixed Training Parameters</h3>
+    <div class="concept-card">
+      <div class="concept-title">The Recipe That Never Changes</div>
+      <p><strong>Loss:</strong> Dice + cross-entropy (equally weighted). The Dice component handles class imbalance; the CE component provides stable gradients. <strong>Optimizer:</strong> SGD with Nesterov momentum (momentum = 0.99, weight decay = 3&times;10&#8315;&#8309;). <strong>Learning rate:</strong> Initial LR = 0.01, polynomial decay to near zero over 1000 epochs. Formula: <code>lr = initial_lr &times; (1 - epoch/max_epoch)^0.9</code>. <strong>Epochs:</strong> 1000 (each epoch = 250 training iterations). No early stopping &mdash; the final model is used, not the best checkpoint. <strong>Normalization:</strong> Instance normalization (not batch norm). <strong>Activation:</strong> LeakyReLU (slope = 0.01). <strong>Deep supervision:</strong> Loss computed at multiple decoder resolutions during training; only full-resolution output used at inference.</p>
+    </div>
+
+    <h3>Foreground Oversampling</h3>
+    <p>One-third of patches in each batch are guaranteed to contain at least one foreground (tumor) voxel. This prevents the model from only seeing background patches, which would teach it to predict &ldquo;no tumor everywhere.&rdquo; This is nnU-Net&rsquo;s solution to the class imbalance problem at the data level (complementing the Dice loss solution at the objective level).</p>
+
+    <h3>Training Time Expectations</h3>
+    <p>For BraTS on a single NVIDIA A100 or V100: expect roughly <strong>12&ndash;24 hours per fold</strong>, so <strong>2.5&ndash;5 days for all 5 folds</strong> of one configuration. Training both 2D and 3D configs across all folds can take over a week on a single GPU. A study on dataset size requirements found that performance plateaus at roughly 80% of the available data, with the BraTS task reaching a Dice plateau around 0.79 with a 3D config.</p>
+  </div>
+
+  <!-- ═══════ 5.6 INFERENCE ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 5.6 From Model to Prediction</div>
+    <h2>Inference: Sliding Window &amp; Ensembling</h2>
+
+    <p>Training processes patches. But inference must produce a prediction for the <strong>entire volume</strong>. Here&rsquo;s exactly how nnU-Net does it:</p>
+
+    <div class="pipeline-steps">
+      <div class="pipeline-step">
+        <span class="step-num">01</span>
+        <div class="step-content">
+          <div class="step-title">Preprocessing (Identical to Training)</div>
+          <p>The input image is cropped, resampled, and normalized using the exact same parameters determined during planning. Any deviation here silently breaks everything.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">02</span>
+        <div class="step-content">
+          <div class="step-title">Sliding Window Prediction</div>
+          <p>A patch-sized window slides across the full volume with <strong>50% overlap</strong> (default). At each position, the model produces softmax probabilities for every voxel in the patch. The 50% overlap means most voxels are predicted by multiple patches.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">03</span>
+        <div class="step-content">
+          <div class="step-title">Gaussian Weighting</div>
+          <p>Each patch prediction is multiplied by a <strong>Gaussian kernel</strong> &mdash; center voxels get full weight, edge voxels get lower weight. This prevents boundary artifacts where patches meet. The weighted predictions are summed across all overlapping patches and then normalized.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">04</span>
+        <div class="step-content">
+          <div class="step-title">Fold Ensembling</div>
+          <p>The sliding window process is repeated for each of the 5 fold models. Softmax probabilities from all 5 models are <strong>averaged</strong> before taking the final argmax. This ensemble typically adds 1&ndash;2 Dice points over any single model.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">05</span>
+        <div class="step-content">
+          <div class="step-title">Post-Processing</div>
+          <p>nnU-Net automatically determines (during cross-validation) whether to apply connected component analysis &mdash; removing small isolated predictions that are likely false positives. The argmax converts probabilities to discrete labels, and the result is resampled back to the original image resolution and un-cropped to restore the original spatial dimensions.</p>
+        </div>
+      </div>
+    </div>
+
+    <p>Inference speed is fast: a benchmarking study found nnU-Net achieved best-in-class segmentation in <strong>1.456 seconds</strong> for midbrain structures. For BraTS-sized volumes with 5-fold ensembling, expect roughly 30&ndash;60 seconds per case on a modern GPU.</p>
+  </div>
+
+  <!-- ═══════ 5.7 V2 ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 5.7 The Latest Version</div>
+    <h2>nnU-Net v2: What&rsquo;s New and Why It Matters</h2>
+
+    <p>nnU-Net v2 is a significant rewrite that maintains the same philosophy while adding capabilities specifically relevant to BraTS-style challenges.</p>
+
+    <div class="concept-card">
+      <div class="concept-title">Residual Encoder (ResEnc)</div>
+      <p>v2 adds an optional residual encoder that adds skip connections <em>within</em> encoder blocks (in addition to the U-Net skip connections between encoder and decoder). This improves gradient flow in deeper networks and can improve performance on challenging tasks. Studies confirm that residual connections within encoder blocks enhance segmentation, particularly with limited training data.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Region-Based Training (Critical for BraTS)</div>
+      <p>BraTS uses <strong>hierarchical labels</strong>: enhancing tumor (ET) is a subset of tumor core (TC), which is a subset of whole tumor (WT). Standard multi-class segmentation treats these as independent classes, but they&rsquo;re nested. v2 supports <strong>region-based training</strong> where the model predicts regions (WT, TC, ET) as separate binary tasks, naturally encoding the hierarchy. This is how top BraTS teams configure their nnU-Net submissions.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">New Dataset Format</div>
+      <p>v2 uses <code>DatasetXXX_Name</code> instead of v1&rsquo;s <code>TaskXXX_Name</code>. The <code>dataset.json</code> format is also updated, with more explicit channel and label definitions. If you&rsquo;re following older tutorials, watch for this naming difference &mdash; it&rsquo;s the most common source of &ldquo;dataset not found&rdquo; errors.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Modular Configuration System</div>
+      <p>v2 is far more extensible than v1. Custom trainers, planners, and architectures can be plugged in without modifying core framework code. This makes it practical to use nnU-Net as a <strong>framework</strong> (modifying components) rather than just a <strong>tool</strong> (running as-is). The nnUnetFormer paper demonstrated this by fusing transformer modules into nnU-Net&rsquo;s deeper layers, achieving 0.936/0.921/0.872 Dice for WT/TC/ET on BraTS 2021.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Federated Learning Extension</div>
+      <p>FednnU-Net (2025) adds federated learning to nnU-Net, allowing multiple institutions to collaboratively train a model without sharing patient data. It introduces Federated Fingerprint Extraction and Asymmetric Federated Averaging, demonstrating consistent performance across 18 institutions. This is the future of multi-institutional brain tumor segmentation research.</p>
+    </div>
+  </div>
+
+  <!-- ═══════ 5.8 CUSTOMIZATION ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 5.8 Making It Yours</div>
+    <h2>Customizing nnU-Net for BraTS</h2>
+
+    <p>nnU-Net works remarkably well out of the box, but top challenge teams always customize. Here are the modifications that matter most for brain tumor segmentation:</p>
+
+    <div class="concept-card">
+      <div class="concept-title">Enable Region-Based Training</div>
+      <p>Configure <code>dataset.json</code> to define regions instead of classes. For BraTS: Whole Tumor = labels {1, 2, 3}, Tumor Core = labels {1, 3}, Enhancing Tumor = label {3}. This aligns the training objective with BraTS&rsquo;s evaluation metrics and typically improves Dice by 1&ndash;2 points on the nested sub-regions.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Custom Trainer for Learning Rate or Loss</div>
+      <p>Create a custom trainer class that inherits from nnU-Net&rsquo;s default trainer. Override the loss function (e.g., add focal loss or boundary loss), change the optimizer (switch to Adam), or modify the learning rate schedule. Challenge-winning modifications are often surprisingly small &mdash; a different loss weighting or an additional augmentation can be the difference.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Handling Missing MRI Sequences</div>
+      <p>Real clinical data often has missing modalities (e.g., no T2 or no FLAIR). A multi-center study on 1,731 cases from 12 hospitals showed that <strong>sparsified training</strong> &mdash; randomly dropping input channels during training &mdash; allows nnU-Net to handle missing sequences at inference without significant performance loss. This is invaluable for clinical deployment.</p>
+    </div>
+
+    <div class="callout">
+      <div class="callout-icon">&#128161;</div>
+      <div class="callout-text"><strong>The competition strategy:</strong> Start with nnU-Net out of the box as your baseline. Record the Dice scores. Then make one modification at a time: enable region-based training, try the residual encoder, add test-time augmentation, experiment with post-processing. Keep every change that improves validation performance, revert those that don&rsquo;t. This disciplined approach is how top teams iterate &mdash; not by rewriting everything from scratch.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 5.9 nnU-Net vs EVERYTHING ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 5.9 Where nnU-Net Stands</div>
+    <h2>nnU-Net vs. Other Frameworks: The Evidence</h2>
+
+    <p>How does nnU-Net compare when tested head-to-head against other automated frameworks on identical benchmarks?</p>
+
+    <div class="concept-card">
+      <div class="concept-title">nnU-Net vs. MONAI Auto3DSeg (AMOS Challenge)</div>
+      <p>A 2025 study evaluated both on the AMOS abdominal segmentation challenge. <strong>nnU-Net: Dice 0.924. Auto3DSeg: Dice 0.902.</strong> The difference was statistically significant, and physicians qualitatively preferred nnU-Net outputs (P=0.0027). On breast MRI, the gap was much smaller (0.946 vs 0.940), suggesting Auto3DSeg is competitive for some tasks.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">nnU-Net vs. DeepMedic &amp; NVIDIA-net (Brain Tumors)</div>
+      <p>Tested on 1,251 BraTS cases plus 480 real-world clinical cases from 12 hospitals. nnU-Net achieved the highest Dice (0.86 internal, 0.93 external) and lowest Hausdorff distances for all tumor classes (P&lt;0.001). DeepMedic and NVIDIA-net were competitive but consistently lower.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">nnU-Net vs. SwinUNETR (AMOS)</div>
+      <p>In the same AMOS study: nnU-Net 0.924 vs SwinUNETR 0.837. The transformer-based architecture lagged significantly behind, reinforcing the pattern from Week 4 &mdash; systematic optimization of the full pipeline beats architectural novelty.</p>
+    </div>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">&#9888;&#65039;</div>
+      <div class="callout-text"><strong>An important caveat:</strong> A study on stroke lesion segmentation found that nnU-Net achieved excellent segmentation metrics but <strong>failed to detect therapy-induced volume reductions</strong>, leading to false-negative study outcomes. High Dice scores don&rsquo;t always mean clinical utility. Always validate against the actual clinical question, not just overlap metrics.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ RESOURCES ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 5.10 Resources &amp; Further Reading</div>
+    <h2>This Week&rsquo;s Learning Resources</h2>
+
+    <h3>Hands-On (Do These This Week)</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://github.com/MIC-DKFZ/nnUNet/blob/master/documentation/how_to_use_nnunet.md" target="_blank">nnU-Net v2 Usage Documentation</a></div>
+        <div class="resource-desc">The official step-by-step guide. This week, work through it end-to-end on BraTS data: plan, preprocess, train one fold, run inference, examine outputs. Read the Plans JSON file.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://github.com/MIC-DKFZ/nnUNet/blob/master/documentation/explanation_plans_files.md" target="_blank">nnU-Net Plans File Explanation</a></div>
+        <div class="resource-desc">Official documentation explaining every field in <code>nnUNetPlans.json</code>. Cross-reference this with your own Plans file to understand every decision nnU-Net made about your data.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://github.com/MIC-DKFZ/nnUNet/blob/master/documentation/set_environment_variables.md" target="_blank">nnU-Net Environment Setup Guide</a></div>
+        <div class="resource-desc">Make sure your three environment variables (<code>nnUNet_raw</code>, <code>nnUNet_preprocessed</code>, <code>nnUNet_results</code>) are correctly set. Misconfigured paths are the #1 source of beginner errors.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tutorial">Tutorial</span><a href="https://towardsdatascience.com/the-ultimate-guide-to-nnu-net-for-state-of-the-art-image-segmentation-6dda7f44b935/" target="_blank">The Ultimate Guide to nnU-Net &mdash; Fran&ccedil;ois Porcher</a></div>
+        <div class="resource-desc">The most comprehensive written tutorial. Covers both theory and practice: fingerprinting, the three configurations, and running on custom datasets. Written during a Cambridge research internship.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tutorial">Tutorial</span><a href="https://medium.com/miccai-educational-initiative/nnu-net-the-no-new-unet-for-automatic-segmentation-8d655f3f6d2a" target="_blank">nnU-Net &mdash; MICCAI Educational Initiative</a></div>
+        <div class="resource-desc">Includes a Google Colab notebook. Run nnU-Net without local GPU setup. Great for a first end-to-end experiment.</div>
+      </div>
+    </div>
+
+    <h3>Key Papers</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1038/s41592-020-01008-z" target="_blank">Isensee et al. &mdash; nnU-Net (Nature Methods, 2021)</a></div>
+        <div class="resource-desc">The foundational paper. This week, read beyond the abstract &mdash; study the Methods section, Supplementary Tables, and especially the ablation experiments. This is the primary source for understanding every design decision.</div>
+        <div class="resource-cite">Nat Methods. 2021;18(2):203&ndash;211</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1088/1361-6560/ad0c8d" target="_blank">Guo et al. &mdash; nnUnetFormer: nnU-Net + Transformer for BraTS (Phys Med Biol, 2023)</a></div>
+        <div class="resource-desc">Demonstrates how to extend nnU-Net by fusing transformer modules into deeper layers. Achieved 0.936/0.921/0.872 Dice on BraTS 2021 for WT/TC/ET. A model for how top teams customize the framework.</div>
+        <div class="resource-cite">Phys Med Biol. 2023;68(23):235009</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1038/s41598-023-44794-0" target="_blank">Pemberton et al. &mdash; Multi-Class Glioma Segmentation on Real-World Data (Sci Reports, 2023)</a></div>
+        <div class="resource-desc">The definitive real-world clinical validation: 12 hospitals, 480 clinical cases, missing sequences handled via sparsified training. Proves nnU-Net works outside of curated challenge datasets.</div>
+        <div class="resource-cite">Sci Rep. 2023;13:19474</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1016/j.intonc.2025.03.003" target="_blank">Ram et al. &mdash; nnU-Net vs Auto3DSeg vs SwinUNETR on AMOS (Intelligent Oncology, 2025)</a></div>
+        <div class="resource-desc">Head-to-head comparison on identical benchmarks with physician evaluation. nnU-Net significantly outperformed both alternatives. The quantitative evidence for nnU-Net&rsquo;s dominance.</div>
+        <div class="resource-cite">Intell Oncol. 2025;4(1):100119</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1148/ryai.230115" target="_blank">Bareja et al. &mdash; nnU-Net for Pediatric Medulloblastoma (Radiology: AI, 2024)</a></div>
+        <div class="resource-desc">Multi-institutional pediatric study proving nnU-Net&rsquo;s robustness across sites (Dice 0.80&ndash;0.86). Shows how 5-fold cross-validation handles site-specific variation.</div>
+        <div class="resource-cite">Radiol Artif Intell. 2024;6(3):e230115</div>
+      </div>
+    </div>
+
+    <h3>Deep Dives (Advanced)</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1038/s41598-025-22239-0" target="_blank">Skorupko et al. &mdash; FednnU-Net: Federated Learning Extension (Scientific Reports, 2025)</a></div>
+        <div class="resource-desc">Federated fingerprint extraction and asymmetric federated averaging across 18 institutions. The future of privacy-preserving multi-institutional segmentation.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1038/s41598-023-34484-2" target="_blank">Gonz&aacute;lez et al. &mdash; Lifelong nnU-Net (Scientific Reports, 2023)</a></div>
+        <div class="resource-desc">Continual learning framework built on nnU-Net. How to train models that learn new tasks without forgetting old ones. Relevant for clinical deployment where new data arrives continuously.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1016/j.compbiomed.2021.104658" target="_blank">Zhang et al. &mdash; Conditional nnU-Net for Partially Labeled Datasets (Comput Biol Med, 2021)</a></div>
+        <div class="resource-desc">How to train nnU-Net when different subsets of your data have different labels annotated. Relevant when combining data from multiple sources with inconsistent annotations.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1148/radiol.241613" target="_blank">Akinci D&rsquo;Antonoli et al. &mdash; TotalSegmentator MRI (Radiology, 2025)</a></div>
+        <div class="resource-desc">An nnU-Net model trained to segment 80 anatomical structures across any MRI sequence. Demonstrates the scale of what&rsquo;s possible with nnU-Net as a foundation.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ NAVIGATION ═══════ -->
+  <div class="nav-lesson">
+    <a href="week4.html">&larr; Week 04: CNN Fundamentals</a>
+    <a href="week6.html">Week 06: Dataset Preparation &rarr;</a>
+  </div>
+</div>
+
+<footer>
+  <p><a href="../index.html">MedVision Academy</a> &nbsp;&middot;&nbsp; Week 05: nnU-Net Deep Dive</p>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('click', function(e) {
+    var link = e.target.closest('a');
+    if (!link) return;
+    var href = link.getAttribute('href');
+    if (!href) return;
+    if (href.startsWith('http') && !href.includes(window.location.hostname)) {
+      var linkName = link.getAttribute('data-link-name') || link.textContent.trim().substring(0, 60);
+      if (typeof gtag === 'function') {
+        gtag('event', 'outbound_click', { 'link_url': href, 'link_text': linkName });
+      }
+    }
+  });
+});
+</script>
+
+</body>
+</html>
