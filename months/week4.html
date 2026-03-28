@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 04: CNN Fundamentals &amp; Intro to nnU-Net — MedVision Academy</title>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9LJGDZVJRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9LJGDZVJRW');
+</script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10; --surface: #12151c; --surface-2: #1a1e28; --surface-3: #222834;
+    --border: #2a3040; --border-light: #353d50;
+    --text: #e8eaf0; --text-muted: #8b92a8; --text-dim: #5c6478;
+    --accent: #4af0c0; --accent-dim: #2a8068; --accent-glow: rgba(74,240,192,0.12);
+    --warm: #f0a04a; --rose: #f06088; --blue: #4a90f0; --purple: #a06af0;
+    --serif: 'DM Serif Display', Georgia, serif;
+    --sans: 'Instrument Sans', -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  ::selection { background: var(--accent); color: var(--bg); }
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,12,16,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 0 2rem; }
+  .nav-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .nav-logo { font-family: var(--serif); font-size: 1.25rem; color: var(--accent); text-decoration: none; }
+  .nav-logo span { color: var(--text-muted); font-style: italic; font-size: 0.9rem; margin-left: 0.4rem; }
+  .nav-back { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 500; padding: 0.4rem 0.75rem; border-radius: 6px; border: 1px solid var(--border); transition: all 0.2s; }
+  .nav-back:hover { color: var(--text); border-color: var(--border-light); background: var(--surface-2); }
+  .lesson-hero { padding: 7rem 2rem 3rem; max-width: 900px; margin: 0 auto; }
+  .lesson-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(74,144,240,0.1); border: 1px solid rgba(74,144,240,0.3); padding: 0.3rem 0.9rem; border-radius: 100px; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; color: var(--blue); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.25rem; }
+  .lesson-hero h1 { font-family: var(--serif); font-size: clamp(2rem, 4vw, 2.8rem); line-height: 1.15; letter-spacing: -0.025em; margin-bottom: 1rem; }
+  .lesson-hero h1 em { font-style: italic; color: var(--accent); }
+  .lesson-hero .subtitle { font-size: 1.05rem; color: var(--text-muted); max-width: 640px; line-height: 1.7; }
+  .lesson { max-width: 900px; margin: 0 auto; padding: 0 2rem 4rem; }
+  .divider { max-width: 900px; margin: 0 auto; padding: 0 2rem; border-top: 1px solid var(--border); }
+  .lesson-section { margin-top: 3.5rem; }
+  .lesson-section-label { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .lesson-section h2 { font-family: var(--serif); font-size: 1.6rem; line-height: 1.2; margin-bottom: 1rem; }
+  .lesson-section h3 { font-family: var(--serif); font-size: 1.2rem; line-height: 1.3; margin: 2rem 0 0.75rem; }
+  .lesson-section p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin-bottom: 1rem; }
+  .lesson-section p:last-child { margin-bottom: 0; }
+  .lesson-section strong { color: var(--text); }
+  .lesson-section code { font-family: var(--mono); font-size: 0.85em; background: var(--surface-2); padding: 0.15rem 0.4rem; border-radius: 4px; color: var(--accent); }
+  .concept-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 1.75rem; margin: 1.5rem 0; }
+  .concept-card .concept-title { font-family: var(--serif); font-size: 1.1rem; margin-bottom: 0.75rem; }
+  .concept-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; margin-bottom: 0.5rem; }
+  .concept-card p:last-child { margin-bottom: 0; }
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.5rem 0; }
+  .stat-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; text-align: center; }
+  .stat-box .stat-val { font-family: var(--serif); font-size: 1.5rem; color: var(--accent); margin-bottom: 0.25rem; }
+  .stat-box .stat-label { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; }
+  .callout { background: var(--accent-glow); border: 1px solid var(--accent-dim); border-radius: 10px; padding: 1.25rem 1.5rem; display: flex; gap: 1rem; align-items: start; margin: 1.5rem 0; }
+  .callout-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 0.1rem; }
+  .callout-text { font-size: 0.9rem; color: var(--text-muted); line-height: 1.65; }
+  .callout-text strong { color: var(--text); }
+  .callout-warn { background: rgba(240,160,74,0.08); border-color: rgba(240,160,74,0.3); }
+  .callout-info { background: rgba(74,144,240,0.08); border-color: rgba(74,144,240,0.3); }
+  .pipeline-steps { display: flex; flex-direction: column; gap: 0; margin: 1.5rem 0; }
+  .pipeline-step { display: flex; gap: 1.25rem; padding: 1.25rem 0; border-bottom: 1px solid var(--border); }
+  .pipeline-step:last-child { border-bottom: none; }
+  .step-num { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; color: var(--accent); background: var(--accent-glow); padding: 0.2rem 0.5rem; border-radius: 4px; height: fit-content; white-space: nowrap; margin-top: 0.15rem; }
+  .step-content .step-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.3rem; }
+  .step-content p { color: var(--text-muted); font-size: 0.88rem; line-height: 1.65; margin: 0; }
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+  .compare-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; }
+  .compare-card .compare-label { font-family: var(--mono); font-size: 0.68rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .compare-card.a .compare-label { color: var(--warm); }
+  .compare-card.b .compare-label { color: var(--accent); }
+  .compare-card.c .compare-label { color: var(--blue); }
+  .compare-card p { color: var(--text-muted); font-size: 0.85rem; line-height: 1.65; margin: 0; }
+  .code-block { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin: 1.25rem 0; overflow-x: auto; }
+  .code-block code { font-family: var(--mono); font-size: 0.82rem; line-height: 1.8; color: var(--text-muted); }
+  .code-block .comment { color: var(--text-dim); }
+  .code-block .cmd { color: var(--accent); }
+  .code-block .str { color: var(--warm); }
+  .resource-list { display: flex; flex-direction: column; gap: 0.75rem; margin: 1.5rem 0; }
+  .resource-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; transition: border-color 0.3s; }
+  .resource-item:hover { border-color: var(--border-light); }
+  .resource-tag { font-family: var(--mono); font-size: 0.62rem; font-weight: 600; padding: 0.15rem 0.45rem; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.08em; margin-right: 0.5rem; display: inline-block; }
+  .resource-tag.paper { background: rgba(240,160,74,0.12); color: var(--warm); }
+  .resource-tag.video { background: rgba(240,96,136,0.15); color: var(--rose); }
+  .resource-tag.tool { background: rgba(160,106,240,0.12); color: var(--purple); }
+  .resource-tag.site { background: rgba(74,240,192,0.12); color: var(--accent); }
+  .resource-tag.course { background: rgba(74,144,240,0.12); color: var(--blue); }
+  .resource-title { font-weight: 600; font-size: 0.92rem; margin-bottom: 0.3rem; }
+  .resource-title a { color: var(--text); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.2s; }
+  .resource-title a:hover { border-bottom-color: var(--accent); }
+  .resource-desc { color: var(--text-muted); font-size: 0.82rem; line-height: 1.6; }
+  .resource-cite { font-family: var(--mono); font-size: 0.7rem; color: var(--text-dim); margin-top: 0.25rem; }
+  .nav-lesson { display: flex; justify-content: space-between; align-items: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); }
+  .nav-lesson a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid var(--border); transition: all 0.2s; }
+  .nav-lesson a:hover { color: var(--accent); border-color: var(--accent-dim); }
+  footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--text-dim); font-size: 0.8rem; max-width: 900px; margin: 0 auto; }
+  footer a { color: var(--text-muted); text-decoration: none; }
+  footer a:hover { color: var(--accent); }
+  @media (max-width: 700px) {
+    .stat-grid { grid-template-columns: 1fr; }
+    .compare-grid { grid-template-columns: 1fr; }
+    .pipeline-step { flex-direction: column; gap: 0.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="../index.html">MedVision<span>Academy</span></a>
+    <a class="nav-back" href="../index.html#curriculum">&larr; Back to Curriculum</a>
+  </div>
+</nav>
+
+<div class="lesson-hero">
+  <div class="lesson-badge">Week 04 &mdash; Q2</div>
+  <h1>Fundamentals of CNNs &amp; <em>Introduction to nnU-Net</em></h1>
+  <p class="subtitle">You&rsquo;ve seen the tools (Week 3). Now it&rsquo;s time to understand what&rsquo;s actually happening inside them. This week builds your deep learning foundations &mdash; from how a single convolution works to how nnU-Net assembles an entire self-configuring segmentation pipeline.</p>
+</div>
+
+<div class="divider"></div>
+
+<div class="lesson">
+
+  <!-- ═══════ 4.1 WHAT IS A CNN ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 4.1 The Building Blocks</div>
+    <h2>What Is a Convolutional Neural Network?</h2>
+
+    <p>A convolutional neural network (CNN) is a type of neural network specifically designed to process grid-structured data &mdash; images. Instead of connecting every input pixel to every neuron (which would require billions of connections for a brain MRI), CNNs use a clever trick: <strong>small, sliding filters</strong> that scan across the image to detect patterns. These filters share their weights everywhere they look, dramatically reducing the number of parameters while making the network naturally good at recognizing patterns regardless of where they appear.</p>
+
+    <p>Think of it like this: instead of memorizing the entire image, the CNN learns a set of &ldquo;pattern detectors.&rdquo; Early layers learn simple patterns (edges, bright spots, dark lines), and deeper layers combine those simple patterns into complex ones (a ring of enhancement around a necrotic core, the fuzzy boundary of edema). This <strong>hierarchical feature extraction</strong> is what makes CNNs so powerful for medical imaging.</p>
+
+    <h3>The Core Components</h3>
+
+    <div class="concept-card">
+      <div class="concept-title">Convolution Layers</div>
+      <p>The heart of a CNN. A small filter (typically 3&times;3 pixels in 2D, or 3&times;3&times;3 voxels in 3D) slides across the image, computing a dot product at each position. Each filter learns to detect a specific pattern. The output &mdash; called a <strong>feature map</strong> &mdash; highlights where that pattern appears in the image. A layer may have 16, 32, 64, or more filters running in parallel, each detecting different features.</p>
+      <p>In 3D medical imaging, convolutions operate on volumes, meaning a 3&times;3&times;3 filter examines a small cube of voxels at a time. This captures spatial relationships in all three dimensions &mdash; critical for brain MRI where tumors are 3D structures.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Activation Functions (ReLU)</div>
+      <p>After each convolution, an activation function introduces <strong>non-linearity</strong> &mdash; without it, stacking multiple convolution layers would be mathematically equivalent to a single layer, and the network couldn&rsquo;t learn complex patterns. <strong>ReLU</strong> (Rectified Linear Unit) is the most common: it simply sets all negative values to zero. <strong>LeakyReLU</strong> (used by nnU-Net) lets a small fraction of negative values through, which prevents &ldquo;dead neurons&rdquo; &mdash; neurons that stop learning because they always output zero.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Pooling Layers</div>
+      <p>These <strong>downsample</strong> the feature maps, reducing spatial resolution by a factor of 2 (typically). <strong>Max pooling</strong> keeps the highest value in each small region; <strong>average pooling</strong> takes the mean. Downsampling serves two purposes: it reduces computation, and it increases the <strong>receptive field</strong> &mdash; how much of the original image each neuron &ldquo;sees.&rdquo; This is how deeper layers capture larger-scale context (the overall shape of a tumor) rather than just local details (a single edge).</p>
+      <p>In nnU-Net, strided convolutions (convolutions with a step size of 2) are used instead of pooling layers, which achieves downsampling while learning the downsampling operation rather than using a fixed rule.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Normalization Layers</div>
+      <p>These stabilize training by normalizing the internal activations of the network. <strong>Batch normalization</strong> normalizes across the mini-batch dimension &mdash; it works well with large batch sizes but breaks down when batches are small (common in 3D medical imaging where GPU memory limits batch size to 1&ndash;2). <strong>Instance normalization</strong> normalizes each sample independently and is often better for medical imaging &mdash; studies show it consistently outperforms batch normalization on medical image segmentation tasks. nnU-Net uses instance normalization by default.</p>
+    </div>
+
+    <div class="callout">
+      <div class="callout-icon">&#128161;</div>
+      <div class="callout-text"><strong>Why instance normalization for medical imaging?</strong> With 3D brain volumes, your batch size is often just 1 or 2 due to GPU memory limits. Batch normalization computes statistics across the batch &mdash; with batch size 1, those statistics are meaningless. Instance normalization computes statistics per sample, so it works regardless of batch size. Additionally, batch normalization with Dice loss can produce poorly calibrated, overconfident predictions.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 4.2 U-NET ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 4.2 The Architecture That Changed Everything</div>
+    <h2>U-Net: The Backbone of Medical Segmentation</h2>
+
+    <p>If there is one architecture you must understand, it&rsquo;s U-Net. Published in 2015 by Ronneberger, Fischer, and Brox, it revolutionized medical image segmentation and remains the most widely used architecture in the field nearly a decade later. A 2024 IEEE TPAMI review called it &ldquo;the most widespread image segmentation architecture&rdquo; across all medical imaging modalities. Every tool you&rsquo;ve explored &mdash; MONAI, nnU-Net, Auto3DSeg &mdash; is built on the U-Net foundation.</p>
+
+    <h3>The Encoder-Decoder Structure</h3>
+    <p>U-Net has a distinctive U-shaped architecture with two halves:</p>
+
+    <div class="compare-grid">
+      <div class="compare-card a">
+        <div class="compare-label">Encoder (Contracting Path)</div>
+        <p>The left side of the U. Repeated blocks of convolution + ReLU + downsampling progressively shrink the spatial resolution while increasing the number of feature channels. A 240&times;240 input might become 120&times;120, then 60&times;60, then 30&times;30. Each level captures increasingly abstract, high-level features &mdash; from &ldquo;edges&rdquo; to &ldquo;tumor-like patterns.&rdquo; This is the <strong>context</strong> arm: it understands <em>what</em> is in the image.</p>
+      </div>
+      <div class="compare-card b">
+        <div class="compare-label">Decoder (Expanding Path)</div>
+        <p>The right side of the U. Upsampling operations progressively restore the spatial resolution: 30&times;30 back to 60&times;60, then 120&times;120, then 240&times;240. At each level, the decoder combines upsampled features with corresponding encoder features through <strong>skip connections</strong>. The final output is a per-voxel probability map the same size as the input. This is the <strong>localization</strong> arm: it determines <em>where</em> things are.</p>
+      </div>
+    </div>
+
+    <h3>Skip Connections: The Key Innovation</h3>
+    <p>The single most important feature of U-Net is the <strong>skip connections</strong> that directly connect each encoder level to the corresponding decoder level. Without them, the decoder would have to reconstruct fine spatial details from only the highly compressed bottleneck representation &mdash; like trying to draw a detailed map of a city from only the knowledge that &ldquo;it&rsquo;s a city with a river.&rdquo;</p>
+    <p>Skip connections pass the high-resolution, low-level features (exact edges, textures, boundaries) directly to the decoder, which combines them with the high-level semantic understanding from the upsampling path. This is why U-Net produces such sharp segmentation boundaries &mdash; it has access to both the &ldquo;what&rdquo; (encoder features) and the &ldquo;where&rdquo; (skip connection features) simultaneously.</p>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">&#128218;</div>
+      <div class="callout-text"><strong>Why U-Net was revolutionary for medicine:</strong> Medical datasets are tiny by deep learning standards. U-Net was explicitly designed to work with very few training images. Its symmetric architecture with heavy data augmentation can learn effective segmentation from just dozens of examples &mdash; exactly the situation in medical imaging where expert annotations are expensive and scarce.</div>
+    </div>
+
+    <h3>UNet++ and Beyond</h3>
+    <p>Since 2015, many variants have been proposed. <strong>UNet++</strong> (Zhou et al., 2020) redesigned skip connections to aggregate features at multiple semantic scales and allows efficient ensembling of U-Nets at different depths. <strong>Attention U-Net</strong> adds gating mechanisms to skip connections so the decoder can focus on relevant regions. However, a critical benchmarking study (Gut et al., 2022) compared U-Net against five extensions under identical conditions across nine datasets and found that <strong>architectural variants don&rsquo;t consistently improve over basic U-Net</strong> while resource demands increase. The takeaway: U-Net itself is not the bottleneck &mdash; how you configure everything around it matters more.</p>
+  </div>
+
+  <!-- ═══════ 4.3 2D vs 3D ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 4.3 Dimensionality Matters</div>
+    <h2>2D, 2.5D, and 3D: Processing Brain Volumes</h2>
+
+    <p>Brain MRIs are 3D volumes, but you have three fundamentally different ways to process them with a CNN. This is one of the most important practical decisions in medical image segmentation.</p>
+
+    <div class="concept-card">
+      <div class="concept-title">2D U-Net (Slice by Slice)</div>
+      <p>Treat each 2D slice of the 3D volume independently. The model sees one slice at a time &mdash; like looking at a single page of a book. <strong>Pros:</strong> Low GPU memory, fast training, can use pre-trained 2D models. <strong>Cons:</strong> Ignores spatial continuity between slices &mdash; the model doesn&rsquo;t know that the tumor in slice 42 is connected to the tumor in slice 43. Can produce &ldquo;flickering&rdquo; predictions that jump between slices. Still surprisingly effective &mdash; studies report Dice scores as high as 0.990 for some tasks.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">3D U-Net (Full Volume)</div>
+      <p>Process the entire 3D volume (or large 3D patches) with 3D convolutions. Each filter is a 3&times;3&times;3 cube that captures spatial relationships in all three dimensions. <strong>Pros:</strong> Captures full 3D context, smoother predictions across slices, generally better performance (Dice 0.925 vs 0.902 in one cardiac study). <strong>Cons:</strong> Much higher GPU memory (a 3D volume has orders of magnitude more voxels than a 2D slice), requires patch-based training for large images, slower training.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">2.5D (Multi-Slice Input)</div>
+      <p>A compromise: feed several adjacent slices (typically 3&ndash;5) as multi-channel input to a 2D network. The model gets some inter-slice context without the full memory cost of 3D. A large-scale empirical study found that 2.5D methods consistently improve over 2D baselines, but <strong>3D CNNs are not always the best choice</strong> &mdash; performance depends on the specific dataset and task. One study on brain metastases found 2.5D had better detection rates (79% vs 71%) while 3D had fewer false positives.</p>
+    </div>
+
+    <div class="callout">
+      <div class="callout-icon">&#128161;</div>
+      <div class="callout-text"><strong>What nnU-Net does:</strong> It doesn&rsquo;t choose for you based on theory &mdash; it trains all applicable configurations (2D, 3D full-resolution, and optionally a 3D cascade) and empirically selects the best one based on cross-validation performance. For brain tumor segmentation on BraTS data, the 3D full-resolution configuration typically wins because the volumes are manageable in size (240&times;240&times;155) and 3D context is important for distinguishing tumor sub-regions.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 4.4 LOSS FUNCTIONS ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 4.4 How the Model Learns</div>
+    <h2>Loss Functions: Teaching the Model What &ldquo;Wrong&rdquo; Means</h2>
+
+    <p>A loss function measures how bad the model&rsquo;s predictions are. During training, the optimizer adjusts the model&rsquo;s weights to minimize this loss. The choice of loss function profoundly affects what the model learns &mdash; different losses reward different behaviors.</p>
+
+    <h3>The Class Imbalance Problem</h3>
+    <p>Before diving into specific losses, understand the core challenge: in brain tumor segmentation, the tumor is <strong>tiny compared to the brain</strong>. An enhancing tumor might occupy 1&ndash;2% of the total brain volume. If the model predicts &ldquo;no tumor anywhere,&rdquo; it&rsquo;s correct for 98% of voxels. A naive loss function would reward this lazy behavior. Every loss function choice in medical segmentation is, at its core, a strategy for handling this imbalance.</p>
+
+    <div class="concept-card">
+      <div class="concept-title">Cross-Entropy Loss</div>
+      <p>The standard classification loss, applied independently to each voxel. It penalizes confident wrong predictions heavily. <strong>Problem:</strong> It treats every voxel equally, so the overwhelming majority of &ldquo;background&rdquo; voxels dominate the loss. The model can minimize cross-entropy by getting background right and largely ignoring the tumor. <strong>Strength:</strong> Provides stable gradients everywhere, even when predictions are far from ground truth, which helps training converge.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Dice Loss</div>
+      <p>Directly optimizes the Dice similarity coefficient &mdash; the same metric used to evaluate BraTS submissions. It measures overlap between prediction and ground truth, and is <strong>naturally robust to class imbalance</strong> because it normalizes by the size of the prediction and ground truth. A study across six medical segmentation tasks showed that Dice-based losses are superior to cross-entropy when evaluating with Dice Score. <strong>Caveat:</strong> Dice loss has a theoretical bias toward specific region sizes and can produce poorly calibrated confidence scores.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Combined Dice + Cross-Entropy (What nnU-Net Uses)</div>
+      <p>The best of both worlds. The Dice component handles class imbalance and directly optimizes the evaluation metric. The cross-entropy component provides stable, well-behaved gradients that help training converge, especially early on. The first large-scale analysis of 20 loss functions across six datasets (Ma et al., 2021) found that <strong>compound loss functions are the most robust</strong>, with no single loss consistently winning across all tasks. nnU-Net uses an equally-weighted sum of Dice loss and cross-entropy loss.</p>
+    </div>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">&#9888;&#65039;</div>
+      <div class="callout-text"><strong>If your model predicts all background:</strong> This is the most common beginner failure. It means the class imbalance is overwhelming your loss function. Solutions: switch from pure cross-entropy to Dice loss or Dice + CE, ensure your patch sampling includes foreground voxels (MONAI&rsquo;s <code>RandCropByPosNegLabeld</code> forces a 1:1 ratio), check that your labels are correctly loaded (a surprisingly common bug), and verify your learning rate isn&rsquo;t too high.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 4.5 TRAINING STRATEGY ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 4.5 The Training Recipe</div>
+    <h2>Training Strategies That Actually Work</h2>
+
+    <p>Knowing the architecture and loss function isn&rsquo;t enough &mdash; <em>how</em> you train matters just as much. These are the key decisions and their evidence-backed defaults.</p>
+
+    <div class="concept-card">
+      <div class="concept-title">Optimizer: SGD vs Adam</div>
+      <p>The optimizer is the algorithm that updates the model&rsquo;s weights based on the loss gradients. <strong>Adam</strong> adapts the learning rate per-parameter and is generally easier to use &mdash; a systematic evaluation on 534 brain tumor patients found Adam with polynomial decay significantly outperformed other combinations (p&lt;10&#8315;&#8308;). <strong>SGD with Nesterov momentum</strong> is what nnU-Net uses (momentum=0.99). It&rsquo;s more sensitive to learning rate settings but can find better optima on some tasks. For beginners, Adam is more forgiving. For challenge submissions, follow nnU-Net&rsquo;s SGD approach.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Learning Rate Schedule</div>
+      <p>The learning rate controls how large each weight update is. Too high: training is unstable. Too low: training is too slow. The <strong>polynomial decay</strong> schedule (used by nnU-Net) starts at 0.01 and smoothly decreases toward zero over the course of training. This allows large updates early (rapid learning) and fine adjustments later (polishing). A cosine annealing schedule works similarly and is common in MONAI pipelines.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Data Augmentation</div>
+      <p>With only ~1,200 BraTS cases, augmentation is critical. nnU-Net applies augmentations <strong>on-the-fly</strong> during training: random rotations (&plusmn;30&deg; per axis), scaling (0.7&ndash;1.4&times;), elastic deformations, gamma correction for intensity, Gaussian noise, and mirroring. A systematic review of 300+ articles confirmed augmentation is effective across organs, modalities, and dataset sizes. The key: augmentations must produce <strong>plausible</strong> medical images. Random color jittering is nonsensical for MRI.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Patch-Based Training</div>
+      <p>A 240&times;240&times;155 brain MRI with 4 channels doesn&rsquo;t fit in GPU memory alongside a 3D U-Net. The solution: train on random <strong>patches</strong> (sub-volumes) of the full image, typically 128&times;128&times;128 voxels. During inference, use a sliding window across the full volume with overlapping patches, averaging predictions in overlap regions. nnU-Net automatically determines the optimal patch size based on your GPU memory and dataset properties.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Deep Supervision</div>
+      <p>Instead of only computing loss at the final output, deep supervision computes loss at multiple resolution levels of the decoder. This provides gradient signal directly to earlier layers, helping them learn meaningful features faster. An optimized Residual U-Net with deep supervision achieved a Dice score of 0.9498 on BraTS 2018. nnU-Net uses deep supervision during training but only uses the full-resolution output during inference.</p>
+    </div>
+  </div>
+
+  <!-- ═══════ 4.6 INTRO TO nnU-NET ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 4.6 The Gold Standard</div>
+    <h2>Introduction to nnU-Net</h2>
+
+    <p>Now that you understand the building blocks, you can appreciate what nnU-Net actually does: it takes <em>all</em> of the decisions described above &mdash; architecture depth, patch size, batch size, normalization, loss function, augmentation, optimizer, learning rate, post-processing &mdash; and <strong>automatically configures every single one</strong> based on the properties of your dataset. The name &ldquo;no-new-Net&rdquo; is the point: there&rsquo;s no architectural innovation. The innovation is in the systematic optimization of every other component.</p>
+
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="stat-val">23</div>
+        <div class="stat-label">Public datasets where nnU-Net surpassed most existing approaches without manual tuning</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">9/10</div>
+        <div class="stat-label">MICCAI 2020 challenge winners built their methods on top of nnU-Net</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">0.93</div>
+        <div class="stat-label">External validation Dice on real-world clinical brain tumor data from 12 hospitals</div>
+      </div>
+    </div>
+
+    <h3>The Three-Step Pipeline</h3>
+
+    <div class="pipeline-steps">
+      <div class="pipeline-step">
+        <span class="step-num">STEP 1</span>
+        <div class="step-content">
+          <div class="step-title">Dataset Fingerprinting</div>
+          <p>nnU-Net automatically analyzes your dataset: image sizes, voxel spacings, intensity distributions, class frequencies, and number of training cases. This &ldquo;fingerprint&rdquo; drives all subsequent decisions. You trigger this with <code>nnUNetv2_plan_and_preprocess</code>.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">STEP 2</span>
+        <div class="step-content">
+          <div class="step-title">Rule-Based Configuration</div>
+          <p>Hard-coded heuristic rules translate the fingerprint into a pipeline configuration: resampling target resolution, whether to use 2D or 3D architecture, network depth (how many downsampling stages), number of feature channels per stage, patch size, and batch size &mdash; all optimized to fit in GPU memory while maximizing performance.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">STEP 3</span>
+        <div class="step-content">
+          <div class="step-title">Empirical Optimization</div>
+          <p>Some decisions can&rsquo;t be made by rules alone. nnU-Net trains all applicable configurations with 5-fold cross-validation, then selects the best one (or ensembles multiple). It also empirically determines post-processing (whether to remove small connected components). This is the &ldquo;trial-and-error&rdquo; step, done automatically.</p>
+        </div>
+      </div>
+    </div>
+
+    <h3>What nnU-Net Fixes for You</h3>
+
+    <div class="pipeline-steps">
+      <div class="pipeline-step">
+        <span class="step-num">FIXED</span>
+        <div class="step-content">
+          <div class="step-title">Never Changes</div>
+          <p>Loss function (Dice + CE), optimizer (SGD, momentum 0.99), activation function (LeakyReLU), normalization (instance norm), training schedule (1000 epochs), augmentation strategy, deep supervision during training.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">RULES</span>
+        <div class="step-content">
+          <div class="step-title">Determined by Dataset Fingerprint</div>
+          <p>Resampling resolution, network topology (depth, feature channels per stage), patch size, batch size, whether to include 3D cascade configuration.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">EMPIRICAL</span>
+        <div class="step-content">
+          <div class="step-title">Learned from Cross-Validation</div>
+          <p>Best configuration (2D vs 3D full-res vs cascade), whether to ensemble configurations, post-processing decisions.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-icon">&#128161;</div>
+      <div class="callout-text"><strong>The key insight from ablation studies:</strong> No single design choice dominates nnU-Net&rsquo;s success. It&rsquo;s the <em>combination</em> of automated preprocessing, architecture configuration, training strategy, and post-processing that yields state-of-the-art performance. This is why swapping in a fancier architecture (SwinUNETR, UNETR++) often doesn&rsquo;t help &mdash; the existing U-Net is not the bottleneck.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 4.7 POST-PROCESSING ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 4.7 After Training</div>
+    <h2>Post-Processing &amp; Ensembling</h2>
+
+    <p>The raw output of a segmentation model is a probability map &mdash; each voxel gets a probability for each class. Converting this to a final segmentation and cleaning it up is post-processing.</p>
+
+    <div class="concept-card">
+      <div class="concept-title">Ensembling Across Folds</div>
+      <p>nnU-Net trains 5 models using 5-fold cross-validation. At inference, predictions from all 5 models are <strong>averaged</strong> before taking the argmax. This ensemble is more robust than any single model and typically adds 1&ndash;2 Dice points. It&rsquo;s one of the easiest performance boosts available.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Ensembling Across Configurations</div>
+      <p>If both 2D and 3D configurations perform well, nnU-Net can average their predictions too. This captures complementary information: the 2D model may be better at sharp in-plane boundaries while the 3D model better understands through-plane continuity.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Connected Component Analysis</div>
+      <p>The model may predict small, isolated &ldquo;islands&rdquo; of tumor in regions where no tumor exists (false positives). Connected component analysis identifies these disconnected predictions and removes those below a size threshold. nnU-Net automatically decides whether this post-processing helps based on validation performance.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Test-Time Augmentation (TTA)</div>
+      <p>Apply augmentations (flipping, rotation) to the input image at inference time, run the model on each augmented version, then average the (un-augmented) predictions. This is like asking the model to look at the same scan from multiple angles and averaging its opinions. Not part of default nnU-Net but commonly used by top BraTS teams for a small additional boost.</p>
+    </div>
+  </div>
+
+  <!-- ═══════ 4.8 COMMON PITFALLS ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 4.8 Debugging Guide</div>
+    <h2>Common Training Failures &amp; How to Fix Them</h2>
+
+    <div class="concept-card">
+      <div class="concept-title">Loss isn&rsquo;t decreasing</div>
+      <p><strong>Check:</strong> Is your learning rate too high? (Try reducing by 10x.) Are your images and labels correctly paired? (Load a sample and visualize the overlay in 3D Slicer.) Is the data normalized? (Raw MRI intensities can be enormous numbers that destabilize training.) Is the model receiving gradient? (Check for NaN values in the loss.)</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Model predicts all background</div>
+      <p><strong>Check:</strong> Are you using Dice loss or Dice+CE? (Pure CE often leads to this.) Does your patch sampling include foreground? (If all patches are 99% background, the model learns to predict background.) Are your labels correct? (A label file of all zeros means there&rsquo;s nothing to learn.) When training with limited data and strong class imbalance, the distribution of model activations can shift, causing systematic under-segmentation of small structures.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">GPU out of memory</div>
+      <p><strong>Check:</strong> Reduce patch size (the most effective fix), reduce batch size to 1, use mixed-precision training (<code>torch.cuda.amp</code>), try 2D instead of 3D, or use gradient checkpointing. nnU-Net handles this automatically by selecting patch and batch sizes that fit your GPU.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Good training loss but poor validation</div>
+      <p><strong>Overfitting.</strong> Solutions: increase data augmentation (the cheapest fix), use early stopping or select the best validation checkpoint, reduce model complexity, add dropout or weight decay. Ensemble methods also reduce overfitting. With limited data, even 20 fine-tuning cases from the target domain can substantially recover performance.</p>
+    </div>
+  </div>
+
+  <!-- ═══════ RESOURCES ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 4.9 Resources &amp; Further Reading</div>
+    <h2>This Week&rsquo;s Learning Resources</h2>
+
+    <h3>Start Here (Visual &amp; Conceptual)</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag video">Video</span><a href="https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi" target="_blank">Neural Networks &mdash; 3Blue1Brown (YouTube)</a></div>
+        <div class="resource-desc">The best visual introduction to neural networks. Explains neurons, gradient descent, and backpropagation with beautiful animations. If you haven&rsquo;t watched these yet, start here before anything else this week.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag video">Video</span><a href="https://www.youtube.com/watch?v=IHq1t7NxS8k" target="_blank">U-Net Paper Explained &mdash; Yannic Kilcher (YouTube)</a></div>
+        <div class="resource-desc">Detailed walkthrough of the original U-Net paper. Explains the encoder-decoder, skip connections, and why U-Net works for medical imaging. Watch after 3Blue1Brown.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag video">Video</span><a href="https://www.youtube.com/watch?v=0tZFQs7qBfQ" target="_blank">Coding a U-Net from Scratch &mdash; Aladdin Persson (YouTube)</a></div>
+        <div class="resource-desc">Build every component of U-Net in PyTorch step by step. Do this exercise &mdash; building it yourself solidifies understanding far more than just reading about it.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag course">Course</span><a href="https://www.fast.ai/" target="_blank">Practical Deep Learning for Coders &mdash; fast.ai</a></div>
+        <div class="resource-desc">Jeremy Howard&rsquo;s free course. Top-down approach: build working models first, then learn theory. Covers CNNs, training strategies, and segmentation. The most impactful single course for self-learners.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag video">Video</span><a href="https://www.youtube.com/playlist?list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab" target="_blank">Essence of Linear Algebra &mdash; 3Blue1Brown (YouTube)</a></div>
+        <div class="resource-desc">If matrix multiplication feels mysterious, watch this first. Convolutions, transformations, and everything in neural networks is built on linear algebra. These videos make it visual and intuitive.</div>
+      </div>
+    </div>
+
+    <h3>Hands-On Practice</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://pytorch.org/tutorials/" target="_blank">Official PyTorch Tutorials</a></div>
+        <div class="resource-desc">Work through &ldquo;Learn the Basics&rdquo; and the CNN image classification tutorial. Then modify it for segmentation by changing the output layer. Understanding PyTorch&rsquo;s tensor operations is essential for both MONAI and nnU-Net.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://github.com/MIC-DKFZ/nnUNet" target="_blank">nnU-Net Official Repository</a></div>
+        <div class="resource-desc">This week, read the README and <code>documentation/how_to_use_nnunet.md</code> in full. Try running <code>nnUNetv2_plan_and_preprocess</code> on a small dataset and examining the generated <code>nnUNetPlans.json</code> to see what nnU-Net decided about your data.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://blog.ovhcloud.com/image-segmentation-train-a-u-net-model-to-segment-brain-tumors/" target="_blank">Train a U-Net on BraTS &mdash; OVHcloud Tutorial</a></div>
+        <div class="resource-desc">Complete walkthrough: NIfTI handling, modality selection, building a U-Net in PyTorch, training on BraTS 2020, and visualizing predictions. Has a GitHub repo with all the code. Do this tutorial this week.</div>
+      </div>
+    </div>
+
+    <h3>Key Papers</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1038/s41592-020-01008-z" target="_blank">Isensee et al. &mdash; nnU-Net (Nature Methods, 2021)</a></div>
+        <div class="resource-desc">The nnU-Net paper. Read at minimum the abstract, introduction, and Figure 1 (the pipeline diagram). Understanding this paper is the goal of Weeks 4&ndash;6.</div>
+        <div class="resource-cite">Nat Methods. 2021;18(2):203&ndash;211</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1109/TPAMI.2024.3435571" target="_blank">Azad et al. &mdash; Medical Image Segmentation: The Success of U-Net (IEEE TPAMI, 2024)</a></div>
+        <div class="resource-desc">The definitive U-Net review. Organizes all variants into a taxonomy. Read the first sections for a panoramic view of the architecture landscape.</div>
+        <div class="resource-cite">IEEE Trans PAMI. 2024;46(12):10532&ndash;10553</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1016/j.media.2020.101854" target="_blank">Ma et al. &mdash; Loss Odyssey in Medical Image Segmentation (Medical Image Analysis, 2021)</a></div>
+        <div class="resource-desc">The first large-scale analysis of 20 loss functions on 3D segmentation. Key finding: compound losses (Dice + CE) are the most robust. Essential context for understanding why nnU-Net uses the loss it does.</div>
+        <div class="resource-cite">Med Image Anal. 2021;71:101854</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1109/TMI.2022.3180435" target="_blank">Gut et al. &mdash; Benchmarking Deep Architectures (IEEE TMI, 2022)</a></div>
+        <div class="resource-desc">Fair comparison proving U-Net variants don&rsquo;t reliably beat basic U-Net. Calibrates expectations: don&rsquo;t chase architectures, optimize your pipeline.</div>
+        <div class="resource-cite">IEEE Trans Med Imaging. 2022;41(11):3128&ndash;3141</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1109/TMI.2020.3046692" target="_blank">Li et al. &mdash; Analyzing Overfitting Under Class Imbalance (IEEE TMI, 2021)</a></div>
+        <div class="resource-desc">Explains why models under-segment small structures and how logit shift occurs with limited data and class imbalance. Critical for understanding brain tumor segmentation failures.</div>
+        <div class="resource-cite">IEEE Trans Med Imaging. 2021;40(3):1065&ndash;1077</div>
+      </div>
+    </div>
+
+    <h3>Deep Dives (Advanced)</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1109/TMI.2019.2959609" target="_blank">Zhou et al. &mdash; UNet++: Redesigning Skip Connections (IEEE TMI, 2020)</a></div>
+        <div class="resource-desc">Adds dense skip connections and nested decoder paths to U-Net. Read this to understand how skip connection design can be improved.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1088/1361-6560/abf2f9" target="_blank">Bukhari &amp; Mohy-Ud-Din &mdash; Learning Rate Policies for Brain Tumor Segmentation (Phys Med Biol, 2021)</a></div>
+        <div class="resource-desc">Systematic evaluation of 9 optimizer-learning rate pairs on 534 brain tumor patients. Evidence base for why polynomial decay with Adam (or SGD) works best.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1016/j.media.2023.103015" target="_blank">Liu et al. &mdash; Do We Really Need Dice? Hidden Region-Size Biases (Medical Image Analysis, 2024)</a></div>
+        <div class="resource-desc">Theoretical analysis of why Dice loss has intrinsic biases. Advanced but illuminating for understanding loss function behavior on imbalanced data.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag course">Course</span><a href="https://cs231n.github.io/" target="_blank">CS231n: CNNs for Visual Recognition &mdash; Stanford</a></div>
+        <div class="resource-desc">Stanford&rsquo;s legendary computer vision course. Free lecture notes cover convolution math, backpropagation, training dynamics, and visualization in depth. Tackle this when you want the full theoretical picture.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ NAVIGATION ═══════ -->
+  <div class="nav-lesson">
+    <a href="week3.html">&larr; Week 03: Open-Source Tools</a>
+    <a href="week5.html">Week 05: nnU-Net Deep Dive &rarr;</a>
+  </div>
+</div>
+
+<footer>
+  <p><a href="../index.html">MedVision Academy</a> &nbsp;&middot;&nbsp; Week 04: CNN Fundamentals &amp; Intro to nnU-Net</p>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('click', function(e) {
+    var link = e.target.closest('a');
+    if (!link) return;
+    var href = link.getAttribute('href');
+    if (!href) return;
+    if (href.startsWith('http') && !href.includes(window.location.hostname)) {
+      var linkName = link.getAttribute('data-link-name') || link.textContent.trim().substring(0, 60);
+      if (typeof gtag === 'function') {
+        gtag('event', 'outbound_click', { 'link_url': href, 'link_text': linkName });
+      }
+    }
+  });
+});
+</script>
+
+</body>
+</html>
