@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 06: Dataset Preparation &amp; Training — MedVision Academy</title>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9LJGDZVJRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9LJGDZVJRW');
+</script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10; --surface: #12151c; --surface-2: #1a1e28; --surface-3: #222834;
+    --border: #2a3040; --border-light: #353d50;
+    --text: #e8eaf0; --text-muted: #8b92a8; --text-dim: #5c6478;
+    --accent: #4af0c0; --accent-dim: #2a8068; --accent-glow: rgba(74,240,192,0.12);
+    --warm: #f0a04a; --rose: #f06088; --blue: #4a90f0; --purple: #a06af0;
+    --serif: 'DM Serif Display', Georgia, serif;
+    --sans: 'Instrument Sans', -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  ::selection { background: var(--accent); color: var(--bg); }
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,12,16,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 0 2rem; }
+  .nav-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .nav-logo { font-family: var(--serif); font-size: 1.25rem; color: var(--accent); text-decoration: none; }
+  .nav-logo span { color: var(--text-muted); font-style: italic; font-size: 0.9rem; margin-left: 0.4rem; }
+  .nav-back { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 500; padding: 0.4rem 0.75rem; border-radius: 6px; border: 1px solid var(--border); transition: all 0.2s; }
+  .nav-back:hover { color: var(--text); border-color: var(--border-light); background: var(--surface-2); }
+  .lesson-hero { padding: 7rem 2rem 3rem; max-width: 900px; margin: 0 auto; }
+  .lesson-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(74,144,240,0.1); border: 1px solid rgba(74,144,240,0.3); padding: 0.3rem 0.9rem; border-radius: 100px; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; color: var(--blue); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.25rem; }
+  .lesson-hero h1 { font-family: var(--serif); font-size: clamp(2rem, 4vw, 2.8rem); line-height: 1.15; letter-spacing: -0.025em; margin-bottom: 1rem; }
+  .lesson-hero h1 em { font-style: italic; color: var(--accent); }
+  .lesson-hero .subtitle { font-size: 1.05rem; color: var(--text-muted); max-width: 640px; line-height: 1.7; }
+  .lesson { max-width: 900px; margin: 0 auto; padding: 0 2rem 4rem; }
+  .divider { max-width: 900px; margin: 0 auto; padding: 0 2rem; border-top: 1px solid var(--border); }
+  .lesson-section { margin-top: 3.5rem; }
+  .lesson-section-label { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .lesson-section h2 { font-family: var(--serif); font-size: 1.6rem; line-height: 1.2; margin-bottom: 1rem; }
+  .lesson-section h3 { font-family: var(--serif); font-size: 1.2rem; line-height: 1.3; margin: 2rem 0 0.75rem; }
+  .lesson-section p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin-bottom: 1rem; }
+  .lesson-section p:last-child { margin-bottom: 0; }
+  .lesson-section strong { color: var(--text); }
+  .lesson-section code { font-family: var(--mono); font-size: 0.85em; background: var(--surface-2); padding: 0.15rem 0.4rem; border-radius: 4px; color: var(--accent); }
+  .concept-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 1.75rem; margin: 1.5rem 0; }
+  .concept-card .concept-title { font-family: var(--serif); font-size: 1.1rem; margin-bottom: 0.75rem; }
+  .concept-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; margin-bottom: 0.5rem; }
+  .concept-card p:last-child { margin-bottom: 0; }
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.5rem 0; }
+  .stat-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; text-align: center; }
+  .stat-box .stat-val { font-family: var(--serif); font-size: 1.5rem; color: var(--accent); margin-bottom: 0.25rem; }
+  .stat-box .stat-label { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; }
+  .callout { background: var(--accent-glow); border: 1px solid var(--accent-dim); border-radius: 10px; padding: 1.25rem 1.5rem; display: flex; gap: 1rem; align-items: start; margin: 1.5rem 0; }
+  .callout-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 0.1rem; }
+  .callout-text { font-size: 0.9rem; color: var(--text-muted); line-height: 1.65; }
+  .callout-text strong { color: var(--text); }
+  .callout-warn { background: rgba(240,160,74,0.08); border-color: rgba(240,160,74,0.3); }
+  .callout-info { background: rgba(74,144,240,0.08); border-color: rgba(74,144,240,0.3); }
+  .code-block { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin: 1.25rem 0; overflow-x: auto; }
+  .code-block code { font-family: var(--mono); font-size: 0.82rem; line-height: 1.8; color: var(--text-muted); }
+  .code-block .comment { color: var(--text-dim); }
+  .code-block .cmd { color: var(--accent); }
+  .code-block .str { color: var(--warm); }
+  .code-block .key { color: var(--blue); }
+  .checklist { margin: 1.5rem 0; }
+  .checklist-item { display: flex; gap: 0.75rem; padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
+  .checklist-item:last-child { border-bottom: none; }
+  .checklist-icon { color: var(--accent); font-family: var(--mono); font-size: 0.85rem; margin-top: 0.1rem; flex-shrink: 0; }
+  .checklist-text { color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; }
+  .checklist-text strong { color: var(--text); }
+  .resource-list { display: flex; flex-direction: column; gap: 0.75rem; margin: 1.5rem 0; }
+  .resource-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; transition: border-color 0.3s; }
+  .resource-item:hover { border-color: var(--border-light); }
+  .resource-tag { font-family: var(--mono); font-size: 0.62rem; font-weight: 600; padding: 0.15rem 0.45rem; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.08em; margin-right: 0.5rem; display: inline-block; }
+  .resource-tag.paper { background: rgba(240,160,74,0.12); color: var(--warm); }
+  .resource-tag.video { background: rgba(240,96,136,0.15); color: var(--rose); }
+  .resource-tag.tool { background: rgba(160,106,240,0.12); color: var(--purple); }
+  .resource-tag.site { background: rgba(74,240,192,0.12); color: var(--accent); }
+  .resource-tag.course { background: rgba(74,144,240,0.12); color: var(--blue); }
+  .resource-title { font-weight: 600; font-size: 0.92rem; margin-bottom: 0.3rem; }
+  .resource-title a { color: var(--text); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.2s; }
+  .resource-title a:hover { border-bottom-color: var(--accent); }
+  .resource-desc { color: var(--text-muted); font-size: 0.82rem; line-height: 1.6; }
+  .resource-cite { font-family: var(--mono); font-size: 0.7rem; color: var(--text-dim); margin-top: 0.25rem; }
+  .nav-lesson { display: flex; justify-content: space-between; align-items: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); }
+  .nav-lesson a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid var(--border); transition: all 0.2s; }
+  .nav-lesson a:hover { color: var(--accent); border-color: var(--accent-dim); }
+  footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--text-dim); font-size: 0.8rem; max-width: 900px; margin: 0 auto; }
+  footer a { color: var(--text-muted); text-decoration: none; }
+  footer a:hover { color: var(--accent); }
+  @media (max-width: 700px) { .stat-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="../index.html">MedVision<span>Academy</span></a>
+    <a class="nav-back" href="../index.html#curriculum">&larr; Back to Curriculum</a>
+  </div>
+</nav>
+
+<div class="lesson-hero">
+  <div class="lesson-badge">Week 06 &mdash; Q2</div>
+  <h1>Dataset Preparation, Folder Structuring &amp; <em>Interpreting Logs</em></h1>
+  <p class="subtitle">Theory is over &mdash; this is the hands-on week. You&rsquo;ll take raw BraTS data, convert it into the exact format nnU-Net expects, launch your first real training runs, and learn to read training logs like a diagnostic tool. Most beginners get stuck here, so we&rsquo;ll cover every common pitfall.</p>
+</div>
+
+<div class="divider"></div>
+
+<div class="lesson">
+
+  <!-- ═══════ 6.1 FROM RAW DATA TO NIFTI ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 6.1 Starting From Raw Data</div>
+    <h2>From DICOM to NIfTI: The First Step</h2>
+
+    <p>If you&rsquo;re working with BraTS challenge data, you can skip this section &mdash; BraTS data is already in NIfTI format. But if you ever work with clinical data from a hospital, it will arrive as <strong>DICOM files</strong>, and converting them correctly is the first critical step.</p>
+
+    <p>DICOM (Digital Imaging and Communications in Medicine) is the universal format used by MRI scanners, PACS systems, and hospitals. Each scan produces hundreds or thousands of individual DICOM files (one per slice). Converting to NIfTI combines these into a single 3D volume file with standardized metadata. The standard tool is <strong>dcm2niix</strong>.</p>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">&#9888;&#65039;</div>
+      <div class="callout-text"><strong>Conversion pitfalls that will silently break your model:</strong> Different MRI manufacturers (Siemens, GE, Philips) encode DICOM metadata differently, sometimes in private rather than public tags. Common errors include <strong>left-right flips</strong> (your model learns mirror-image anatomy), <strong>incorrect slice ordering</strong> (slices assembled in wrong order), and <strong>missing metadata</strong> (voxel spacing defaults to 1.0mm when the real spacing is different). A 2016 study documented these issues across manufacturers and modalities. Always verify orientation visually in 3D Slicer after conversion.</div>
+    </div>
+
+    <div class="code-block">
+      <code>
+<span class="comment"># Converting DICOM to NIfTI with dcm2niix</span><br>
+<span class="cmd">dcm2niix</span> -z y -o /output/path /dicom/input/folder<br><br>
+<span class="comment"># -z y : compress output as .nii.gz</span><br>
+<span class="comment"># Always verify the output!</span><br>
+<span class="cmd">python</span> -c <span class="str">"</span><br>
+<span class="cmd">import</span> nibabel <span class="cmd">as</span> nib<br>
+img = nib.load(<span class="str">'output.nii.gz'</span>)<br>
+<span class="cmd">print</span>(<span class="str">'Shape:'</span>, img.shape)<br>
+<span class="cmd">print</span>(<span class="str">'Spacing:'</span>, img.header.get_zooms())<br>
+<span class="cmd">print</span>(<span class="str">'Orientation:'</span>, nib.aff2axcodes(img.affine))<br>
+<span class="str">"</span>
+      </code>
+    </div>
+  </div>
+
+  <!-- ═══════ 6.2 nnU-NET FOLDER STRUCTURE ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 6.2 The Format That Matters Most</div>
+    <h2>Setting Up the nnU-Net Dataset Structure</h2>
+
+    <p>This is where most beginners spend the most time debugging. nnU-Net is extremely strict about its folder structure and naming conventions. One wrong filename suffix, one misnamed folder, and the pipeline will either fail with a cryptic error or silently produce wrong results.</p>
+
+    <h3>The Required Folder Layout</h3>
+    <div class="code-block">
+      <code>
+nnUNet_raw/<br>
+&nbsp;&nbsp;Dataset001_BraTS/<br>
+&nbsp;&nbsp;&nbsp;&nbsp;├── imagesTr/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Training images</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;├── BraTS_001_0000.nii.gz&nbsp;&nbsp;<span class="comment"># Patient 001, T1 (channel 0)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;├── BraTS_001_0001.nii.gz&nbsp;&nbsp;<span class="comment"># Patient 001, T1ce (channel 1)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;├── BraTS_001_0002.nii.gz&nbsp;&nbsp;<span class="comment"># Patient 001, T2 (channel 2)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;├── BraTS_001_0003.nii.gz&nbsp;&nbsp;<span class="comment"># Patient 001, FLAIR (channel 3)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;├── BraTS_002_0000.nii.gz&nbsp;&nbsp;<span class="comment"># Patient 002, T1</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;├── BraTS_002_0001.nii.gz&nbsp;&nbsp;<span class="comment"># Patient 002, T1ce</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;└── ...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># 4 files per patient</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;├── labelsTr/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Training labels</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;├── BraTS_001.nii.gz&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Patient 001 segmentation</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;├── BraTS_002.nii.gz&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Patient 002 segmentation</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;└── ...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># NO channel suffix on labels</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;├── imagesTs/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># (Optional) Test images</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;└── dataset.json&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Metadata file</span>
+      </code>
+    </div>
+
+    <h3>The Channel Suffix Convention</h3>
+    <p>The <code>_0000</code>, <code>_0001</code>, <code>_0002</code>, <code>_0003</code> suffixes tell nnU-Net which modality is which. This mapping <strong>must be consistent across all patients</strong>. If T1 is <code>_0000</code> for patient 001, it must be <code>_0000</code> for every single patient. Mixing this up is one of the most common and devastating errors.</p>
+
+    <div class="concept-card">
+      <div class="concept-title">BraTS Channel Mapping</div>
+      <p><code>_0000</code> &rarr; T1-weighted (T1)</p>
+      <p><code>_0001</code> &rarr; T1 contrast-enhanced (T1ce / T1Gd)</p>
+      <p><code>_0002</code> &rarr; T2-weighted (T2)</p>
+      <p><code>_0003</code> &rarr; Fluid-Attenuated Inversion Recovery (FLAIR)</p>
+    </div>
+
+    <h3>The dataset.json File</h3>
+    <div class="code-block">
+      <code>
+{<br>
+&nbsp;&nbsp;<span class="key">"channel_names"</span>: {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"0"</span>: <span class="str">"T1"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"1"</span>: <span class="str">"T1ce"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"2"</span>: <span class="str">"T2"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"3"</span>: <span class="str">"FLAIR"</span><br>
+&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;<span class="key">"labels"</span>: {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"background"</span>: 0,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"NCR"</span>: 1,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"ED"</span>: 2,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"ET"</span>: 3<br>
+&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;<span class="key">"numTraining"</span>: 1251,<br>
+&nbsp;&nbsp;<span class="key">"file_ending"</span>: <span class="str">".nii.gz"</span><br>
+}
+      </code>
+    </div>
+
+    <div class="callout">
+      <div class="callout-icon">&#128161;</div>
+      <div class="callout-text"><strong>BraTS label gotcha:</strong> Historically, BraTS labels use 0 (background), 1 (NCR/NET), 2 (edema), and <strong>4</strong> (enhancing tumor) &mdash; note that label 3 is skipped. nnU-Net v2 can handle non-contiguous labels, but if you&rsquo;re remapping to 0/1/2/3, make sure the mapping is correct. The evaluation regions are: <strong>WT</strong> = labels {1,2,4}, <strong>TC</strong> = labels {1,4}, <strong>ET</strong> = label {4}.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 6.3 CONVERSION SCRIPT ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 6.3 The Conversion Script</div>
+    <h2>Converting BraTS Data to nnU-Net Format</h2>
+
+    <p>BraTS organizes data by patient folder with named modality files. nnU-Net needs a flat directory with channel suffixes. Here&rsquo;s how to bridge the two:</p>
+
+    <div class="code-block">
+      <code>
+<span class="cmd">import</span> os, shutil, json<br><br>
+<span class="comment"># BraTS structure: BraTS2021_00000/BraTS2021_00000_t1.nii.gz</span><br>
+<span class="comment"># nnU-Net needs:  imagesTr/BraTS2021_00000_0000.nii.gz</span><br><br>
+brats_dir = <span class="str">"/path/to/BraTS2021/training"</span><br>
+nnunet_raw = <span class="str">"/path/to/nnUNet_raw/Dataset001_BraTS"</span><br><br>
+os.makedirs(f<span class="str">"{nnunet_raw}/imagesTr"</span>, exist_ok=True)<br>
+os.makedirs(f<span class="str">"{nnunet_raw}/labelsTr"</span>, exist_ok=True)<br><br>
+<span class="comment"># Modality-to-channel mapping</span><br>
+modality_map = {<br>
+&nbsp;&nbsp;<span class="str">"t1"</span>: <span class="str">"0000"</span>,&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># T1-weighted</span><br>
+&nbsp;&nbsp;<span class="str">"t1ce"</span>: <span class="str">"0001"</span>,&nbsp;&nbsp;<span class="comment"># T1 contrast-enhanced</span><br>
+&nbsp;&nbsp;<span class="str">"t2"</span>: <span class="str">"0002"</span>,&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># T2-weighted</span><br>
+&nbsp;&nbsp;<span class="str">"flair"</span>: <span class="str">"0003"</span>,&nbsp;<span class="comment"># FLAIR</span><br>
+}<br><br>
+<span class="cmd">for</span> patient <span class="cmd">in</span> sorted(os.listdir(brats_dir)):<br>
+&nbsp;&nbsp;patient_dir = os.path.join(brats_dir, patient)<br>
+&nbsp;&nbsp;<span class="cmd">if not</span> os.path.isdir(patient_dir): <span class="cmd">continue</span><br><br>
+&nbsp;&nbsp;<span class="comment"># Copy modality files with channel suffix</span><br>
+&nbsp;&nbsp;<span class="cmd">for</span> mod, suffix <span class="cmd">in</span> modality_map.items():<br>
+&nbsp;&nbsp;&nbsp;&nbsp;src = os.path.join(patient_dir, f<span class="str">"{patient}_{mod}.nii.gz"</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dst = os.path.join(nnunet_raw, <span class="str">"imagesTr"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;f<span class="str">"{patient}_{suffix}.nii.gz"</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;shutil.copy2(src, dst)<br><br>
+&nbsp;&nbsp;<span class="comment"># Copy segmentation label (NO channel suffix)</span><br>
+&nbsp;&nbsp;seg_src = os.path.join(patient_dir, f<span class="str">"{patient}_seg.nii.gz"</span>)<br>
+&nbsp;&nbsp;seg_dst = os.path.join(nnunet_raw, <span class="str">"labelsTr"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;f<span class="str">"{patient}.nii.gz"</span>)<br>
+&nbsp;&nbsp;shutil.copy2(seg_src, seg_dst)<br><br>
+<span class="cmd">print</span>(f<span class="str">"Converted {len(os.listdir(nnunet_raw + '/labelsTr'))} patients"</span>)
+      </code>
+    </div>
+
+    <p>After running this, <strong>always verify</strong>: count files in <code>imagesTr</code> (should be 4&times; the number of patients), count files in <code>labelsTr</code> (should equal number of patients), and spot-check a few by loading image + label in 3D Slicer to confirm alignment.</p>
+  </div>
+
+  <!-- ═══════ 6.4 LABEL VERIFICATION ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 6.4 Trust But Verify</div>
+    <h2>Label Verification: The Step Nobody Skips Twice</h2>
+
+    <p>A study on synthetic data imperfections found that <strong>label quality is more important than image quality</strong> for segmentation model performance. Degraded labels caused substantial performance drops, while degraded images actually made models <em>more</em> robust. Another study found that automated label error detection improved model accuracy by up to 45%. Take label verification seriously.</p>
+
+    <div class="checklist">
+      <div class="checklist-item"><span class="checklist-icon">&#10003;</span><div class="checklist-text"><strong>Count unique label values</strong> in every segmentation mask. For BraTS, you should see {0, 1, 2, 4} (or {0, 1, 2, 3} if remapped). Any unexpected values (negative numbers, floats, label 5) indicate corruption.</div></div>
+      <div class="checklist-item"><span class="checklist-icon">&#10003;</span><div class="checklist-text"><strong>Visual overlay check</strong> in 3D Slicer or ITK-SNAP. Load the T1ce image and overlay the segmentation. Scroll through axial, sagittal, and coronal planes. Does the enhancing tumor label (brightest on T1ce) actually overlay the bright region?</div></div>
+      <div class="checklist-item"><span class="checklist-icon">&#10003;</span><div class="checklist-text"><strong>Check spatial alignment.</strong> Image and label must have identical dimensions, voxel spacing, and orientation. <code>img.shape == label.shape</code> and <code>img.affine == label.affine</code> (approximately).</div></div>
+      <div class="checklist-item"><span class="checklist-icon">&#10003;</span><div class="checklist-text"><strong>Check data type.</strong> Labels should be integer type (int16, uint8). Float-type labels with values like 0.9999 instead of 1.0 will cause subtle errors.</div></div>
+      <div class="checklist-item"><span class="checklist-icon">&#10003;</span><div class="checklist-text"><strong>Check for empty labels.</strong> Some patients may have all-zero segmentation masks (no visible tumor). These are valid but can cause problems if too numerous. Count how many.</div></div>
+    </div>
+
+    <div class="code-block">
+      <code>
+<span class="cmd">import</span> nibabel <span class="cmd">as</span> nib<br>
+<span class="cmd">import</span> numpy <span class="cmd">as</span> np<br>
+<span class="cmd">import</span> os<br><br>
+label_dir = <span class="str">"/path/to/nnUNet_raw/Dataset001_BraTS/labelsTr"</span><br><br>
+<span class="cmd">for</span> f <span class="cmd">in</span> sorted(os.listdir(label_dir)):<br>
+&nbsp;&nbsp;label = nib.load(os.path.join(label_dir, f)).get_fdata()<br>
+&nbsp;&nbsp;unique = np.unique(label).astype(int)<br>
+&nbsp;&nbsp;has_tumor = np.<span class="cmd">any</span>(label > 0)<br>
+&nbsp;&nbsp;<span class="cmd">print</span>(f<span class="str">"{f}: labels={unique}, shape={label.shape}, "</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;f<span class="str">"dtype={label.dtype}, tumor={has_tumor}"</span>)<br>
+&nbsp;&nbsp;<span class="cmd">if</span> <span class="cmd">not</span> has_tumor:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cmd">print</span>(f<span class="str">"  ⚠️  WARNING: Empty label (no tumor voxels)"</span>)
+      </code>
+    </div>
+  </div>
+
+  <!-- ═══════ 6.5 REGION-BASED TRAINING ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 6.5 BraTS-Specific Setup</div>
+    <h2>Region-Based Training for BraTS</h2>
+
+    <p>BraTS evaluates on three <strong>nested regions</strong>: Whole Tumor (WT), Tumor Core (TC), and Enhancing Tumor (ET). Standard multi-class training treats labels as independent classes, but these regions are hierarchical &mdash; ET is a subset of TC, which is a subset of WT. nnU-Net v2&rsquo;s <strong>region-based training</strong> explicitly models this hierarchy and typically improves Dice scores by 1&ndash;2 points on the nested sub-regions.</p>
+
+    <p>To enable it, modify your <code>dataset.json</code> to define regions instead of classes:</p>
+
+    <div class="code-block">
+      <code>
+{<br>
+&nbsp;&nbsp;<span class="key">"channel_names"</span>: {<span class="str">"0"</span>: <span class="str">"T1"</span>, <span class="str">"1"</span>: <span class="str">"T1ce"</span>, <span class="str">"2"</span>: <span class="str">"T2"</span>, <span class="str">"3"</span>: <span class="str">"FLAIR"</span>},<br>
+&nbsp;&nbsp;<span class="key">"labels"</span>: {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"background"</span>: 0,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"whole_tumor"</span>: [1, 2, 3],&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">// WT = all tumor labels</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"tumor_core"</span>: [1, 3],&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">// TC = NCR + ET</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"enhancing_tumor"</span>: [3]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">// ET only</span><br>
+&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;<span class="key">"regions_class_order"</span>: [1, 2, 3],<br>
+&nbsp;&nbsp;<span class="key">"numTraining"</span>: 1251,<br>
+&nbsp;&nbsp;<span class="key">"file_ending"</span>: <span class="str">".nii.gz"</span><br>
+}
+      </code>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">&#128218;</div>
+      <div class="callout-text"><strong>Why region-based training matters:</strong> With standard training, the model predicts mutually exclusive classes (each voxel is exactly one class). With region-based training, the model predicts overlapping binary masks &mdash; a voxel can simultaneously be part of WT, TC, and ET. This matches BraTS&rsquo;s evaluation scheme and prevents the model from making hierarchically inconsistent predictions (e.g., predicting ET without TC).</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 6.6 PATCH SIZE & GPU MEMORY ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 6.6 The Memory Game</div>
+    <h2>Patch Sizes, Batch Sizes &amp; GPU Memory</h2>
+
+    <p>You can&rsquo;t fit a 240&times;240&times;155&times;4-channel brain MRI into GPU memory alongside a 3D U-Net. Instead, you train on <strong>patches</strong> &mdash; random sub-volumes cropped from the full image. The patch size is the single most impactful hyperparameter for GPU memory usage, and nnU-Net automatically selects it. But understanding the trade-offs helps you troubleshoot.</p>
+
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="stat-val">128&sup3;</div>
+        <div class="stat-label">Typical nnU-Net patch size for BraTS on 12&ndash;24GB GPUs</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">2</div>
+        <div class="stat-label">Typical batch size for 3D brain tumor segmentation</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">~30&ndash;50%</div>
+        <div class="stat-label">Memory savings from mixed-precision (FP16) training</div>
+      </div>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Patch Size Trade-offs</div>
+      <p><strong>Larger patches</strong> &rarr; more context (model sees more of the tumor and surrounding brain), better for large structures like whole tumor. But: more GPU memory, fewer patches per epoch, slower training. <strong>Smaller patches</strong> &rarr; less context (model may only see part of a tumor), but fits on cheaper GPUs and allows larger batch sizes. Research shows that patch-based methods can lose global context, reducing performance &mdash; one study found patch-free methods improved multi-organ Dice from 0.799 to 0.856.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Batch Size &amp; Learning Rate Coupling</div>
+      <p>With 3D medical images, batch sizes are typically just 1&ndash;4 due to memory constraints. A 2025 study found that <strong>optimizing batch size and learning rate separately is sub-optimal</strong> &mdash; they should be coupled as a ratio. Counterintuitively, smaller batches can actually improve performance on medical imaging data: latent spaces from smaller batches captured more biologically meaningful information. nnU-Net uses <strong>instance normalization</strong> (not batch normalization) precisely because batch sizes are so small that batch statistics would be unreliable.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">GPU Tier Guidelines</div>
+      <p><strong>8&ndash;12 GB (RTX 3060/3080):</strong> 2D config works well; 3D requires reduced patches. Enable FP16. <strong>16&ndash;24 GB (RTX 3090/4090):</strong> Standard 3D BraTS training comfortable. This is the sweet spot for students. <strong>40+ GB (A100):</strong> Larger patches, cascade configs, faster experimentation. What challenge teams use. <strong>Google Colab free tier (T4, 16GB):</strong> Can train 3D BraTS if you reduce patch size slightly. Sessions may time out on long runs.</p>
+    </div>
+  </div>
+
+  <!-- ═══════ 6.7 RUNNING TRAINING ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 6.7 Launch Day</div>
+    <h2>Running Your First Training Job</h2>
+
+    <div class="code-block">
+      <code>
+<span class="comment"># Step 1: Verify environment variables are set</span><br>
+<span class="cmd">echo</span> $nnUNet_raw $nnUNet_preprocessed $nnUNet_results<br><br>
+<span class="comment"># Step 2: Plan and preprocess (do this ONCE per dataset)</span><br>
+<span class="cmd">nnUNetv2_plan_and_preprocess</span> -d 001 --verify_dataset_integrity<br><br>
+<span class="comment"># This will:</span><br>
+<span class="comment">#   1. Extract dataset fingerprint</span><br>
+<span class="comment">#   2. Plan all configurations (2D, 3D_fullres, etc.)</span><br>
+<span class="comment">#   3. Preprocess all training cases</span><br>
+<span class="comment">#   4. Save everything to nnUNet_preprocessed/</span><br><br>
+<span class="comment"># Step 3: Train (start with fold 0 of 3D_fullres)</span><br>
+<span class="cmd">nnUNetv2_train</span> 001 3d_fullres 0<br><br>
+<span class="comment"># This trains for 1000 epochs (~12-24 hours on A100)</span><br>
+<span class="comment"># Logs appear in nnUNet_results/Dataset001_BraTS/</span><br><br>
+<span class="comment"># Step 4: (Later) Train remaining folds</span><br>
+<span class="cmd">nnUNetv2_train</span> 001 3d_fullres 1<br>
+<span class="cmd">nnUNetv2_train</span> 001 3d_fullres 2<br>
+<span class="cmd">nnUNetv2_train</span> 001 3d_fullres 3<br>
+<span class="cmd">nnUNetv2_train</span> 001 3d_fullres 4
+      </code>
+    </div>
+
+    <div class="callout">
+      <div class="callout-icon">&#128161;</div>
+      <div class="callout-text"><strong>Pro tip:</strong> Run <code>--verify_dataset_integrity</code> on your first preprocessed run. It checks for mismatched image/label dimensions, missing files, and format errors. It will catch most of the conversion mistakes from Section 6.2&ndash;6.3 before you waste hours on a broken training run.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 6.8 INTERPRETING LOGS ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 6.8 Reading the Tea Leaves</div>
+    <h2>Interpreting Training Logs</h2>
+
+    <p>nnU-Net outputs training logs to the console and saves them in the results directory. Learning to read these logs is like learning a diagnostic language &mdash; they tell you whether your training is healthy or sick.</p>
+
+    <h3>What to Watch</h3>
+
+    <div class="concept-card">
+      <div class="concept-title">Training Loss (train_loss)</div>
+      <p>Should <strong>decrease steadily</strong> over epochs. Rapid decrease early (epochs 1&ndash;100), then slower improvements. If it&rsquo;s not decreasing at all: check your data, learning rate, and label encoding. If it&rsquo;s oscillating wildly: learning rate is too high. If it spikes suddenly: possible corrupted training sample or numerical instability.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Validation Loss (val_loss)</div>
+      <p>Computed on the held-out 20% of data each fold. Should follow training loss downward but will eventually <strong>plateau or slightly increase</strong> (the gap between train and val loss is the overfitting gap). In nnU-Net, this gap is typically small because of heavy augmentation. If val_loss increases sharply while train_loss keeps decreasing: overfitting.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Validation Dice per Class</div>
+      <p>The most informative metric. nnU-Net reports Dice for each class on the validation set. For BraTS, watch WT, TC, and ET separately. <strong>Healthy training:</strong> WT reaches 0.88&ndash;0.92 first (easiest region), TC follows at 0.82&ndash;0.88, ET last at 0.75&ndash;0.85 (hardest). If one region is stuck near zero: the model can&rsquo;t find that class (check labels, check foreground oversampling).</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Learning Rate</div>
+      <p>With polynomial decay from 0.01, the LR should decrease smoothly. At epoch 500 it should be roughly half of initial; by epoch 900 it should be near zero. If you see the LR isn&rsquo;t changing: something is wrong with the scheduler configuration.</p>
+    </div>
+
+    <h3>Common Log Patterns and What They Mean</h3>
+
+    <div class="concept-card">
+      <div class="concept-title">&#9888;&#65039; Pattern: All Dice scores stuck at 0.0</div>
+      <p><strong>Diagnosis:</strong> Model is predicting all background. <strong>Causes:</strong> Labels are all zeros (empty masks), labels use wrong encoding (float instead of int), channel mapping is wrong (model receives noise instead of meaningful modalities), or severe class imbalance without foreground oversampling. <strong>Fix:</strong> Run the label verification script from Section 6.4. Check your <code>dataset.json</code> labels mapping.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">&#9888;&#65039; Pattern: Loss is NaN</div>
+      <p><strong>Diagnosis:</strong> Numerical instability. <strong>Causes:</strong> Learning rate too high, corrupted input data with extreme values (inf, NaN in the images), or division by zero in loss computation. <strong>Fix:</strong> Check for NaN/inf values in your input data. Try reducing learning rate. Disable mixed-precision training temporarily to isolate the issue.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">&#9888;&#65039; Pattern: WT Dice is good but ET Dice is very low</div>
+      <p><strong>Diagnosis:</strong> Normal for early training (ET is the hardest region). If it persists past epoch 300&ndash;400: the model struggles with small enhancing tumor regions. <strong>Potential fixes:</strong> Enable region-based training (Section 6.5), verify T1ce channel mapping is correct (enhancing tumor is defined by T1ce contrast), check if many cases have very small or absent ET.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">&#10003; Pattern: Healthy training</div>
+      <p>Train loss decreases smoothly. Val loss follows with a small gap. Dice scores improve rapidly in the first 200 epochs, then gradually improve through epoch 600&ndash;800, then plateau. Final scores for BraTS: WT &gt; 0.88, TC &gt; 0.82, ET &gt; 0.75 on cross-validation. These are strong baselines &mdash; top teams push 2&ndash;5 points higher with the optimizations you&rsquo;ll learn in Weeks 7&ndash;8.</p>
+    </div>
+  </div>
+
+  <!-- ═══════ 6.9 DATA LEAKAGE ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 6.9 The Silent Killer</div>
+    <h2>Data Leakage: The Mistake That Ruins Everything</h2>
+
+    <p><strong>Data leakage</strong> occurs when information from the test set &ldquo;leaks&rdquo; into training, giving artificially inflated performance that won&rsquo;t generalize. In medical imaging, the most common form is <strong>patient-level leakage</strong>: different scans from the same patient appearing in both training and validation sets.</p>
+
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="stat-val">+30&ndash;55%</div>
+        <div class="stat-label">False accuracy boost from slice-level splitting (vs patient-level)</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">~96%</div>
+        <div class="stat-label">Erroneous accuracy achieved on randomly labeled data with slice-level split</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">50%</div>
+        <div class="stat-label">Accuracy on randomly labeled data with correct patient-level split</div>
+      </div>
+    </div>
+
+    <p>A 2021 study quantified the impact: slice-level splitting (where 2D slices from the same patient can appear in both train and test) boosted accuracy by 30&ndash;55% across four datasets. Tests on <em>randomly labeled</em> data produced ~96% erroneous accuracy with slice-level splits but only 50% (chance level) with correct patient-level splits.</p>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">&#9888;&#65039;</div>
+      <div class="callout-text"><strong>nnU-Net handles this correctly by default</strong> &mdash; it splits at the patient level for cross-validation. But if you&rsquo;re building a custom pipeline in MONAI or raw PyTorch, <em>you</em> must ensure patient-level splitting. If a patient has multiple scans (e.g., pre- and post-treatment), <strong>all scans from that patient must be in the same fold.</strong></div>
+    </div>
+  </div>
+
+  <!-- ═══════ 6.10 HOW MUCH DATA ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 6.10 How Much Is Enough?</div>
+    <h2>Dataset Size: When Do You Have Enough?</h2>
+
+    <p>A practical question: how many training cases do you need before adding more doesn&rsquo;t help? Research using exponential-plateau models gives concrete answers:</p>
+
+    <div class="concept-card">
+      <div class="concept-title">Performance Plateaus</div>
+      <p>For kidney tumor segmentation with nnU-Net: <strong>2D reached a Dice plateau of 0.88 at ~177 cases</strong>. <strong>3D reached 0.90 at ~440 cases</strong>. 3D models consistently need more data than 2D. A separate study found that performance gains plateau beyond approximately <strong>80% of available data</strong>, with brain tumor segmentation reaching DSC 0.79 with residual U-Nets. For BraTS with ~1,200+ cases, you&rsquo;re well past the plateau.</p>
+    </div>
+
+    <p>Another important finding: <strong>stratifying training data by tumor grade</strong> (separating high-grade and low-grade gliomas and training separate models) improved performance in 64.9% of cases (p&lt;0.0001). This suggests that how you organize your data can matter as much as how much you have.</p>
+  </div>
+
+  <!-- ═══════ 6.11 QC BEFORE TRAINING ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 6.11 The Pre-Flight Checklist</div>
+    <h2>Quality Control Checklist Before Training</h2>
+
+    <p>Run through this checklist before every training run. It takes 15 minutes and saves hours of wasted compute.</p>
+
+    <div class="checklist">
+      <div class="checklist-item"><span class="checklist-icon">1</span><div class="checklist-text"><strong>File counts:</strong> <code>imagesTr</code> has exactly N&times;4 files (4 modalities per patient). <code>labelsTr</code> has exactly N files. Every patient has all 4 modalities and 1 label.</div></div>
+      <div class="checklist-item"><span class="checklist-icon">2</span><div class="checklist-text"><strong>Naming consistency:</strong> Patient IDs match across <code>imagesTr</code> and <code>labelsTr</code>. Channel suffixes (<code>_0000</code> through <code>_0003</code>) are correct and consistent.</div></div>
+      <div class="checklist-item"><span class="checklist-icon">3</span><div class="checklist-text"><strong>Label values:</strong> Every label file contains only expected integer values. No floats, no negative values, no unexpected classes.</div></div>
+      <div class="checklist-item"><span class="checklist-icon">4</span><div class="checklist-text"><strong>Spatial consistency:</strong> All images and labels for the same patient have identical shape, spacing, and orientation.</div></div>
+      <div class="checklist-item"><span class="checklist-icon">5</span><div class="checklist-text"><strong>Visual spot-check:</strong> Load 3&ndash;5 random patients in 3D Slicer. Overlay label on T1ce. Does enhancing tumor match the bright enhancement? Does edema match the FLAIR hyperintensity?</div></div>
+      <div class="checklist-item"><span class="checklist-icon">6</span><div class="checklist-text"><strong>dataset.json validity:</strong> <code>channel_names</code> matches your modality mapping. <code>labels</code> matches your label encoding. <code>numTraining</code> matches the actual file count.</div></div>
+      <div class="checklist-item"><span class="checklist-icon">7</span><div class="checklist-text"><strong>Environment variables:</strong> <code>nnUNet_raw</code>, <code>nnUNet_preprocessed</code>, <code>nnUNet_results</code> all point to valid, writable directories with sufficient disk space.</div></div>
+      <div class="checklist-item"><span class="checklist-icon">8</span><div class="checklist-text"><strong>Integrity check:</strong> Run <code>nnUNetv2_plan_and_preprocess -d 001 --verify_dataset_integrity</code> and fix any reported errors before training.</div></div>
+    </div>
+  </div>
+
+  <!-- ═══════ RESOURCES ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 6.12 Resources &amp; Further Reading</div>
+    <h2>This Week&rsquo;s Learning Resources</h2>
+
+    <h3>Hands-On (Do These This Week)</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://github.com/MIC-DKFZ/nnUNet/blob/master/documentation/dataset_format.md" target="_blank">nnU-Net v2 Dataset Format Documentation</a></div>
+        <div class="resource-desc">The definitive reference for folder structure, naming conventions, and dataset.json specification. Read this before converting a single file.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://github.com/MIC-DKFZ/nnUNet/blob/master/documentation/how_to_use_nnunet.md" target="_blank">nnU-Net v2 Usage Guide</a></div>
+        <div class="resource-desc">Step-by-step from plan_and_preprocess through training and inference. Follow this exactly for your first run.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://github.com/rordenlab/dcm2niix" target="_blank">dcm2niix &mdash; DICOM to NIfTI Converter</a></div>
+        <div class="resource-desc">The standard conversion tool. Not needed for BraTS data, but essential when you work with clinical DICOM data. Handles manufacturer-specific quirks.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://www.slicer.org/" target="_blank">3D Slicer &mdash; Visual Verification</a></div>
+        <div class="resource-desc">Use this week to overlay labels on images for every QC check. The &ldquo;Segment Editor&rdquo; module lets you load NIfTI segmentations as overlays.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tutorial">Tutorial</span><a href="https://medium.com/@maknimariem11/your-guide-to-nnu-net-ee04103f8c22" target="_blank">Your Guide to nnU-Net &mdash; Mariem Makni</a></div>
+        <div class="resource-desc">Includes specific BraTS-Metastases data conversion code. Helpful for seeing another example of the conversion process.</div>
+      </div>
+    </div>
+
+    <h3>Key Papers</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1016/j.jneumeth.2016.03.001" target="_blank">Li et al. &mdash; DICOM to NIfTI Conversion (J Neurosci Methods, 2016)</a></div>
+        <div class="resource-desc">The dcm2niix paper. Documents manufacturer-specific conversion challenges across modalities. Essential if you ever work with clinical DICOM data.</div>
+        <div class="resource-cite">J Neurosci Methods. 2016;264:47&ndash;56</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1002/mp.16437" target="_blank">G&uuml;ne&scedil; et al. &mdash; Impact of Data Imperfections on Segmentation (Medical Physics, 2023)</a></div>
+        <div class="resource-desc">The definitive study showing label quality matters more than image quality. Provides evidence for why the verification steps in this lesson aren&rsquo;t optional.</div>
+        <div class="resource-cite">Med Phys. 2023;50(6):3644&ndash;3656</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1038/s41598-021-01681-w" target="_blank">Yagis et al. &mdash; Effect of Data Leakage in Brain MRI (Scientific Reports, 2021)</a></div>
+        <div class="resource-desc">Quantifies the devastating impact of slice-level vs patient-level splitting: 30&ndash;55% false accuracy boost. The paper that should convince you to never skip patient-level splitting.</div>
+        <div class="resource-cite">Sci Rep. 2021;11:22544</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1007/s10278-023-00804-1" target="_blank">Gottlich et al. &mdash; Dataset Size and Performance Plateaus (J Digit Imaging, 2023)</a></div>
+        <div class="resource-desc">Exponential-plateau models showing exactly how many training cases are needed for 2D vs 3D nnU-Net configurations. Practical guidance for planning data collection.</div>
+        <div class="resource-cite">J Digit Imaging. 2023;36:1770&ndash;1781</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1136/bmjopen-2021-059000" target="_blank">Gryska et al. &mdash; Reproducibility of Brain Tumor Segmentation (BMJ Open, 2022)</a></div>
+        <div class="resource-desc">Failed replication study showing that insufficient preprocessing description causes reproduction failures. Motivation for documenting every step of your pipeline.</div>
+        <div class="resource-cite">BMJ Open. 2022;12:e059000</div>
+      </div>
+    </div>
+
+    <h3>Deep Dives (Advanced)</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1016/j.media.2020.101693" target="_blank">Tajbakhsh et al. &mdash; Embracing Imperfect Datasets (Medical Image Analysis, 2020)</a></div>
+        <div class="resource-desc">Comprehensive review of solutions for scarce, sparse, noisy, and weak annotations. Your roadmap when label quality is a problem.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1016/j.media.2020.101759" target="_blank">Karimi et al. &mdash; Deep Learning with Noisy Labels (Medical Image Analysis, 2020)</a></div>
+        <div class="resource-desc">Review of methods for handling label noise. Critical when your annotations come from multiple annotators with varying expertise.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1038/sdata.2016.44" target="_blank">Gorgolewski et al. &mdash; BIDS: Brain Imaging Data Structure (Scientific Data, 2016)</a></div>
+        <div class="resource-desc">The standard for organizing neuroimaging datasets. Useful when managing large multi-site datasets before converting to nnU-Net format.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.3389/fnins.2019.01182" target="_blank">Rebsamen et al. &mdash; Stratifying Training Data by Tumor Grade (Frontiers in Neuroscience, 2019)</a></div>
+        <div class="resource-desc">Evidence that training separate models for HGG and LGG improves performance in 64.9% of cases. An advanced data organization strategy.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ NAVIGATION ═══════ -->
+  <div class="nav-lesson">
+    <a href="week5.html">&larr; Week 05: nnU-Net Deep Dive</a>
+    <a href="week7.html">Week 07: Evaluation Metrics &rarr;</a>
+  </div>
+</div>
+
+<footer>
+  <p><a href="../index.html">MedVision Academy</a> &nbsp;&middot;&nbsp; Week 06: Dataset Preparation &amp; Training</p>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('click', function(e) {
+    var link = e.target.closest('a');
+    if (!link) return;
+    var href = link.getAttribute('href');
+    if (!href) return;
+    if (href.startsWith('http') && !href.includes(window.location.hostname)) {
+      var linkName = link.getAttribute('data-link-name') || link.textContent.trim().substring(0, 60);
+      if (typeof gtag === 'function') {
+        gtag('event', 'outbound_click', { 'link_url': href, 'link_text': linkName });
+      }
+    }
+  });
+});
+</script>
+
+</body>
+</html>
