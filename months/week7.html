@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 07: Evaluation Metrics — MedVision Academy</title>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9LJGDZVJRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9LJGDZVJRW');
+</script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10; --surface: #12151c; --surface-2: #1a1e28; --surface-3: #222834;
+    --border: #2a3040; --border-light: #353d50;
+    --text: #e8eaf0; --text-muted: #8b92a8; --text-dim: #5c6478;
+    --accent: #4af0c0; --accent-dim: #2a8068; --accent-glow: rgba(74,240,192,0.12);
+    --warm: #f0a04a; --rose: #f06088; --blue: #4a90f0; --purple: #a06af0;
+    --serif: 'DM Serif Display', Georgia, serif;
+    --sans: 'Instrument Sans', -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  ::selection { background: var(--accent); color: var(--bg); }
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,12,16,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 0 2rem; }
+  .nav-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .nav-logo { font-family: var(--serif); font-size: 1.25rem; color: var(--accent); text-decoration: none; }
+  .nav-logo span { color: var(--text-muted); font-style: italic; font-size: 0.9rem; margin-left: 0.4rem; }
+  .nav-back { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 500; padding: 0.4rem 0.75rem; border-radius: 6px; border: 1px solid var(--border); transition: all 0.2s; }
+  .nav-back:hover { color: var(--text); border-color: var(--border-light); background: var(--surface-2); }
+  .lesson-hero { padding: 7rem 2rem 3rem; max-width: 900px; margin: 0 auto; }
+  .lesson-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(240,160,74,0.1); border: 1px solid rgba(240,160,74,0.3); padding: 0.3rem 0.9rem; border-radius: 100px; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; color: var(--warm); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.25rem; }
+  .lesson-hero h1 { font-family: var(--serif); font-size: clamp(2rem, 4vw, 2.8rem); line-height: 1.15; letter-spacing: -0.025em; margin-bottom: 1rem; }
+  .lesson-hero h1 em { font-style: italic; color: var(--accent); }
+  .lesson-hero .subtitle { font-size: 1.05rem; color: var(--text-muted); max-width: 640px; line-height: 1.7; }
+  .lesson { max-width: 900px; margin: 0 auto; padding: 0 2rem 4rem; }
+  .divider { max-width: 900px; margin: 0 auto; padding: 0 2rem; border-top: 1px solid var(--border); }
+  .lesson-section { margin-top: 3.5rem; }
+  .lesson-section-label { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .lesson-section h2 { font-family: var(--serif); font-size: 1.6rem; line-height: 1.2; margin-bottom: 1rem; }
+  .lesson-section h3 { font-family: var(--serif); font-size: 1.2rem; line-height: 1.3; margin: 2rem 0 0.75rem; }
+  .lesson-section p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin-bottom: 1rem; }
+  .lesson-section p:last-child { margin-bottom: 0; }
+  .lesson-section strong { color: var(--text); }
+  .lesson-section code { font-family: var(--mono); font-size: 0.85em; background: var(--surface-2); padding: 0.15rem 0.4rem; border-radius: 4px; color: var(--accent); }
+  .concept-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 1.75rem; margin: 1.5rem 0; }
+  .concept-card .concept-title { font-family: var(--serif); font-size: 1.1rem; margin-bottom: 0.75rem; }
+  .concept-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; margin-bottom: 0.5rem; }
+  .concept-card p:last-child { margin-bottom: 0; }
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.5rem 0; }
+  .stat-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; text-align: center; }
+  .stat-box .stat-val { font-family: var(--serif); font-size: 1.5rem; color: var(--accent); margin-bottom: 0.25rem; }
+  .stat-box .stat-label { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; }
+  .callout { background: var(--accent-glow); border: 1px solid var(--accent-dim); border-radius: 10px; padding: 1.25rem 1.5rem; display: flex; gap: 1rem; align-items: start; margin: 1.5rem 0; }
+  .callout-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 0.1rem; }
+  .callout-text { font-size: 0.9rem; color: var(--text-muted); line-height: 1.65; }
+  .callout-text strong { color: var(--text); }
+  .callout-warn { background: rgba(240,160,74,0.08); border-color: rgba(240,160,74,0.3); }
+  .callout-info { background: rgba(74,144,240,0.08); border-color: rgba(74,144,240,0.3); }
+  .formula-box { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; margin: 1.25rem 0; text-align: center; }
+  .formula-box .formula { font-family: var(--serif); font-size: 1.3rem; color: var(--text); margin-bottom: 0.5rem; }
+  .formula-box .formula-desc { font-size: 0.82rem; color: var(--text-muted); }
+  .metric-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.85rem; }
+  .metric-table th { font-family: var(--mono); font-size: 0.68rem; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.06em; text-align: left; padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--border); }
+  .metric-table td { padding: 0.75rem; color: var(--text-muted); border-bottom: 1px solid var(--border); vertical-align: top; }
+  .metric-table tr:last-child td { border-bottom: none; }
+  .metric-table td:first-child { font-weight: 600; color: var(--text); font-size: 0.82rem; white-space: nowrap; }
+  .code-block { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin: 1.25rem 0; overflow-x: auto; }
+  .code-block code { font-family: var(--mono); font-size: 0.82rem; line-height: 1.8; color: var(--text-muted); }
+  .code-block .comment { color: var(--text-dim); }
+  .code-block .cmd { color: var(--accent); }
+  .code-block .str { color: var(--warm); }
+  .resource-list { display: flex; flex-direction: column; gap: 0.75rem; margin: 1.5rem 0; }
+  .resource-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; transition: border-color 0.3s; }
+  .resource-item:hover { border-color: var(--border-light); }
+  .resource-tag { font-family: var(--mono); font-size: 0.62rem; font-weight: 600; padding: 0.15rem 0.45rem; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.08em; margin-right: 0.5rem; display: inline-block; }
+  .resource-tag.paper { background: rgba(240,160,74,0.12); color: var(--warm); }
+  .resource-tag.video { background: rgba(240,96,136,0.15); color: var(--rose); }
+  .resource-tag.tool { background: rgba(160,106,240,0.12); color: var(--purple); }
+  .resource-tag.site { background: rgba(74,240,192,0.12); color: var(--accent); }
+  .resource-title { font-weight: 600; font-size: 0.92rem; margin-bottom: 0.3rem; }
+  .resource-title a { color: var(--text); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.2s; }
+  .resource-title a:hover { border-bottom-color: var(--accent); }
+  .resource-desc { color: var(--text-muted); font-size: 0.82rem; line-height: 1.6; }
+  .resource-cite { font-family: var(--mono); font-size: 0.7rem; color: var(--text-dim); margin-top: 0.25rem; }
+  .nav-lesson { display: flex; justify-content: space-between; align-items: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); }
+  .nav-lesson a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid var(--border); transition: all 0.2s; }
+  .nav-lesson a:hover { color: var(--accent); border-color: var(--accent-dim); }
+  footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--text-dim); font-size: 0.8rem; max-width: 900px; margin: 0 auto; }
+  footer a { color: var(--text-muted); text-decoration: none; }
+  footer a:hover { color: var(--accent); }
+  @media (max-width: 700px) { .stat-grid { grid-template-columns: 1fr; } .metric-table { font-size: 0.78rem; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="../index.html">MedVision<span>Academy</span></a>
+    <a class="nav-back" href="../index.html#curriculum">&larr; Back to Curriculum</a>
+  </div>
+</nav>
+
+<div class="lesson-hero">
+  <div class="lesson-badge">Week 07 &mdash; Q3</div>
+  <h1>Understanding <em>Evaluation Metrics</em> for Image Segmentation</h1>
+  <p class="subtitle">You&rsquo;ve trained your first models. Now you need to know if they&rsquo;re actually good &mdash; and &ldquo;good&rdquo; is more complicated than a single number. This week you&rsquo;ll learn every metric used to evaluate brain tumor segmentation, what each one rewards and penalizes, and the pitfalls that make experienced researchers misinterpret their own results.</p>
+</div>
+
+<div class="divider"></div>
+
+<div class="lesson">
+
+  <!-- ═══════ 7.1 WHY METRICS MATTER ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 7.1 The Big Picture</div>
+    <h2>Why One Number Is Never Enough</h2>
+
+    <p>Imagine two brain tumor segmentation models. Model A achieves a Dice score of 0.88. Model B achieves 0.87. Model A is better, right? Not necessarily. Model A might have excellent overlap with the tumor but terrible boundary accuracy &mdash; its predictions are blobby and imprecise. Model B might have slightly less overlap but much sharper, more clinically useful boundaries. A radiation oncologist planning treatment would prefer Model B every time.</p>
+
+    <p>This is why the BraTS challenge uses <strong>multiple metrics</strong>, and why understanding what each one measures is essential. A landmark 2024 Nature Methods paper by the Metrics Reloaded consortium documented dozens of pitfalls in how researchers choose and interpret metrics, and a 2018 Nature Communications study showed that <strong>different metrics produce different challenge winners</strong> &mdash; meaning the &ldquo;best&rdquo; algorithm depends entirely on how you define &ldquo;best.&rdquo;</p>
+
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="stat-val">8&ndash;25%</div>
+        <div class="stat-label">Departure from linearity between Dice score and clinical acceptability</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">0.74&ndash;0.85</div>
+        <div class="stat-label">Human inter-rater Dice on BraTS &mdash; the baseline for &ldquo;good enough&rdquo;</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">100&ndash;200</div>
+        <div class="stat-label">Test samples needed for a reliable 1% confidence interval on Dice</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 7.2 DICE ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 7.2 The Primary Metric</div>
+    <h2>Dice Similarity Coefficient (DSC)</h2>
+
+    <p>Dice is the most widely used segmentation metric and the primary ranking metric in BraTS. It measures the <strong>overlap</strong> between your predicted segmentation and the ground truth.</p>
+
+    <div class="formula-box">
+      <div class="formula">DSC = 2|A &cap; B| / (|A| + |B|)</div>
+      <div class="formula-desc">Where A = predicted segmentation, B = ground truth. Range: 0 (no overlap) to 1 (perfect overlap). Equivalent to the F1-score at the voxel level.</div>
+    </div>
+
+    <h3>What Does a Dice Score Actually Mean?</h3>
+    <p>A Dice of <strong>0.85</strong> means that 85% of the combined volume of prediction and ground truth overlaps. For BraTS, state-of-the-art models achieve roughly: <strong>WT: 0.90&ndash;0.93</strong> (whole tumor is large and well-defined), <strong>TC: 0.87&ndash;0.92</strong> (tumor core is medium-sized), <strong>ET: 0.82&ndash;0.87</strong> (enhancing tumor is smallest and hardest). Human inter-rater agreement is 0.74&ndash;0.85, so any model above ~0.85 is performing at or above expert-level agreement.</p>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">&#9888;&#65039;</div>
+      <div class="callout-text"><strong>The Dice trap:</strong> A study demonstrated that the same Dice value represents <strong>different levels of clinical acceptability</strong> for different structures depending on their size, shape, and complexity. The departure from linearity reached 8&ndash;25%. A Dice of 0.85 on a large whole tumor means something very different than 0.85 on a tiny enhancing tumor. Additionally, Dice has a theoretical <strong>region-size bias</strong> &mdash; it&rsquo;s inherently easier to get a high Dice on large structures and harder on small ones.</div>
+    </div>
+
+    <h3>Soft Dice vs Hard Dice</h3>
+    <p>During <strong>training</strong>, soft Dice operates on continuous probability maps (0.0&ndash;1.0) so it&rsquo;s differentiable and can be used as a loss function. During <strong>evaluation</strong>, hard Dice is computed on binarized predictions (each voxel is either 0 or 1). This distinction matters: a model optimized with soft Dice loss directly optimizes for the evaluation metric, which is why Dice-based losses outperform cross-entropy when the evaluation metric is Dice.</p>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">&#128218;</div>
+      <div class="callout-text"><strong>Statistical note:</strong> Dice scores are <strong>not normally distributed</strong>. A 2004 study recommended applying a logit transformation before using parametric statistical tests like ANOVA. For comparing two models, use the <strong>Wilcoxon signed-rank test</strong> (non-parametric, paired). For confidence intervals, bootstrap methods are reliable. nnU-Net uses the Wilcoxon test internally for comparing configurations.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 7.3 HAUSDORFF ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 7.3 Boundary Accuracy</div>
+    <h2>Hausdorff Distance (HD95)</h2>
+
+    <p>While Dice measures overall volume overlap, the Hausdorff Distance measures <strong>the worst-case boundary error</strong> &mdash; how far the predicted boundary deviates from the true boundary at its worst point. It catches errors that Dice misses: a prediction that is mostly correct but has one wildly wrong region.</p>
+
+    <div class="formula-box">
+      <div class="formula">HD(A,B) = max( max<sub>a&isin;&part;A</sub> min<sub>b&isin;&part;B</sub> d(a,b), &nbsp;max<sub>b&isin;&part;B</sub> min<sub>a&isin;&part;A</sub> d(a,b) )</div>
+      <div class="formula-desc">The maximum of the directed Hausdorff distances. Measured in millimeters. Lower is better.</div>
+    </div>
+
+    <p>The standard Hausdorff Distance is extremely sensitive to <strong>single outlier predictions</strong> &mdash; one misclassified voxel 50mm away from the tumor boundary will produce an HD of 50mm, even if 99.99% of the prediction is perfect. This is why BraTS uses <strong>HD95</strong> &mdash; the 95th percentile of surface distances, which is robust to isolated outliers while still capturing systematic boundary errors.</p>
+
+    <h3>Clinical Interpretation</h3>
+    <div class="concept-card">
+      <div class="concept-title">What HD95 Values Mean</div>
+      <p><strong>HD95 &lt; 5mm:</strong> Excellent. 95% of the boundary is within 5mm of truth. Generally clinically acceptable for treatment planning. Top BraTS models achieve this for WT and TC.</p>
+      <p><strong>HD95 = 5&ndash;15mm:</strong> Moderate. Noticeable boundary errors that could affect surgical margins or radiation target volumes. Typical for ET (smaller, more irregular).</p>
+      <p><strong>HD95 &gt; 20mm:</strong> Poor. Substantial boundary errors that would likely impact clinical decisions. Indicates the model is failing in certain regions.</p>
+    </div>
+
+    <p>A study proposed three methods to directly optimize Hausdorff Distance as a loss function, achieving 18&ndash;45% HD reduction without degrading Dice. This matters because <strong>Dice and HD are not strongly correlated</strong> &mdash; improving one doesn&rsquo;t automatically improve the other.</p>
+  </div>
+
+  <!-- ═══════ 7.4 NSD ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 7.4 Clinically Grounded Accuracy</div>
+    <h2>Normalized Surface Distance (NSD)</h2>
+
+    <p>NSD is a newer metric adopted by recent BraTS challenges that answers a more clinically meaningful question: <strong>what fraction of the predicted surface is within an acceptable tolerance of the true surface?</strong></p>
+
+    <div class="formula-box">
+      <div class="formula">NSD@&tau; = |{a &isin; &part;A : d(a, &part;B) &le; &tau;}| / |&part;A|</div>
+      <div class="formula-desc">Fraction of predicted surface points within tolerance &tau; of the reference surface. &tau; is typically 1mm or 2mm based on clinical relevance. Range: 0 to 1.</div>
+    </div>
+
+    <p>The tolerance &tau; is the key parameter. Setting &tau; = 2mm means &ldquo;we don&rsquo;t care about boundary errors smaller than 2mm.&rdquo; This is clinically motivated &mdash; a 1mm boundary error is within the range of human inter-rater variability and has no practical impact on treatment planning. NSD essentially filters out noise in the boundary assessment.</p>
+
+    <h3>When NSD and Dice Disagree</h3>
+    <p>NSD can reveal problems that Dice hides and vice versa. A prediction with excellent overall overlap (high Dice) but poor boundary definition (blurry, imprecise edges) will have a high Dice but low NSD. Conversely, a prediction with razor-sharp boundaries but systematic under-segmentation (the predicted region is entirely contained within the ground truth but much smaller) will have decent NSD but poor Dice. <strong>Both perspectives are needed</strong> for a complete picture. Top brain metastases detection models achieve NSD of 0.99 alongside Dice of 0.89&ndash;0.90.</p>
+  </div>
+
+  <!-- ═══════ 7.5 SENSITIVITY, SPECIFICITY, PRECISION ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 7.5 Classification Metrics at the Voxel Level</div>
+    <h2>Sensitivity, Specificity &amp; Precision</h2>
+
+    <p>These familiar classification metrics are applied voxel-by-voxel in segmentation. Each voxel is treated as a binary classification: tumor or not-tumor.</p>
+
+    <div class="concept-card">
+      <div class="concept-title">Sensitivity (Recall) = TP / (TP + FN)</div>
+      <p>Of all the voxels that are truly tumor, what fraction did the model correctly identify? <strong>High sensitivity = few missed tumor voxels.</strong> Clinically critical &mdash; missing part of a tumor can lead to under-treatment. A model with low sensitivity is &ldquo;leaving tumor behind.&rdquo;</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Precision (PPV) = TP / (TP + FP)</div>
+      <p>Of all the voxels the model predicted as tumor, what fraction are actually tumor? <strong>High precision = few false alarms.</strong> Clinically important because false positives can lead to unnecessary treatment of healthy tissue. The precision-recall trade-off is fundamental: you can increase sensitivity by predicting more voxels as tumor, but precision drops.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Specificity = TN / (TN + FP)</div>
+      <p>Of all the non-tumor voxels, what fraction did the model correctly identify as non-tumor? In brain tumor segmentation, specificity is <strong>almost always &gt; 0.99</strong> because the background (non-tumor brain) vastly outnumbers the tumor. This makes specificity a poor discriminator between algorithms &mdash; every model gets it right on the background. A 2009 study showed specificity incorporates image background properties that obscure true segmentation quality.</p>
+    </div>
+
+    <div class="callout">
+      <div class="callout-icon">&#128161;</div>
+      <div class="callout-text"><strong>For BraTS, focus on sensitivity and precision (or equivalently, Dice).</strong> Specificity is reported but is not informative for ranking algorithms because the class imbalance makes it artificially high for everyone. Dice is mathematically the harmonic mean of precision and recall, so it captures the precision-recall trade-off in a single number.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 7.6 VOLUMETRIC METRICS ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 7.6 What Clinicians Actually Measure</div>
+    <h2>Volumetric Metrics &amp; RANO</h2>
+
+    <p>In clinical practice, what matters most is often not the pixel-perfect boundary but the <strong>overall volume</strong> of the tumor. Volumetric metrics measure whether your segmentation gets the total tumor size right, which directly feeds into treatment response assessment.</p>
+
+    <h3>Why Volume Matters: The RANO Connection</h3>
+    <p>The RANO criteria (Week 1) classify tumors as responding, stable, or progressing based on size changes. Traditional RANO used 2D diameter measurements, but <strong>RANO 2.0 now includes volumetric assessment</strong>. The landmark Kickingereder et al. study (Lancet Oncology, 2019) showed that volumetric measurements are more reliable than 2D measurements because brain tumors grow in complex, non-spherical shapes. For brain metastases, a 30% unidimensional reduction corresponds to roughly 65% volumetric reduction, and volumetric changes of &ge;20% are reproducible between readers.</p>
+
+    <p>A study of RANO-based assessment on lower-grade gliomas found <strong>poor-to-moderate inter-operator reproducibility</strong> (correlation r = 0.28&ndash;0.82, accuracy 21.0%) with traditional 2D measurements. Automated volumetric segmentation directly addresses this problem.</p>
+
+    <div class="concept-card">
+      <div class="concept-title">Key Volumetric Metrics</div>
+      <p><strong>Absolute Volume Difference:</strong> |V<sub>pred</sub> &minus; V<sub>truth</sub>| in mm&sup3; or mL. Simple and clinically interpretable.</p>
+      <p><strong>Relative Volume Difference:</strong> (V<sub>pred</sub> &minus; V<sub>truth</sub>) / V<sub>truth</sub>. Positive = over-segmentation, negative = under-segmentation. A model with 0% relative volume difference and 0.85 Dice has the right total volume but imperfect spatial placement.</p>
+      <p><strong>Volume Correlation:</strong> Correlation between predicted and true volumes across patients. High correlation (&gt; 0.9) means the model tracks size changes reliably, even if individual predictions aren&rsquo;t pixel-perfect.</p>
+    </div>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">&#9888;&#65039;</div>
+      <div class="callout-text"><strong>Volume can be right while spatial accuracy is wrong.</strong> A model could predict the correct total tumor volume but in the wrong location &mdash; volumetric metrics alone don&rsquo;t catch this. Conversely, Dice can be moderate while volume is accurate. This is why reporting <strong>both overlap metrics (Dice) and volumetric metrics</strong> gives the most complete picture.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 7.7 BRATS FRAMEWORK ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 7.7 The Challenge Framework</div>
+    <h2>How BraTS Evaluates Your Submission</h2>
+
+    <p>Understanding exactly how BraTS computes your score is essential for competition strategy. Here&rsquo;s the complete evaluation framework:</p>
+
+    <h3>The Three Evaluation Regions</h3>
+    <p>Your model predicts individual label classes (NCR, ED, ET), but BraTS evaluates on <strong>three nested regions</strong> that combine those classes. Every metric is computed separately for each region:</p>
+
+    <table class="metric-table">
+      <thead><tr><th>Region</th><th>Composed Of</th><th>Labels</th><th>Clinical Meaning</th><th>Typical Dice</th></tr></thead>
+      <tbody>
+        <tr><td>Whole Tumor (WT)</td><td>NCR + ED + ET</td><td>{1, 2, 4}</td><td>Total disease extent</td><td>0.90&ndash;0.93</td></tr>
+        <tr><td>Tumor Core (TC)</td><td>NCR + ET</td><td>{1, 4}</td><td>Solid tumor mass</td><td>0.87&ndash;0.92</td></tr>
+        <tr><td>Enhancing Tumor (ET)</td><td>ET only</td><td>{4}</td><td>Active, growing tumor</td><td>0.82&ndash;0.87</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Metrics Per Region</h3>
+    <p>For each of the three regions, BraTS computes: <strong>Dice Similarity Coefficient</strong>, <strong>HD95</strong> (95th percentile Hausdorff Distance), and in recent iterations <strong>Normalized Surface Distance</strong>, plus <strong>sensitivity</strong> and <strong>specificity</strong>. That&rsquo;s up to 15 numbers per patient.</p>
+
+    <h3>How Rankings Work</h3>
+    <p>Participants are ranked based on aggregate performance across all metrics and regions. However, a Nature Communications study demonstrated that <strong>rankings are not robust</strong> to changes in test data, ranking scheme, or annotators. Different weighting of metrics and regions can produce different winners from the same results. This means marginal improvements (&lt;0.5% Dice) are often within noise.</p>
+
+    <div class="callout">
+      <div class="callout-icon">&#128161;</div>
+      <div class="callout-text"><strong>Competition strategy:</strong> Don&rsquo;t optimize for a single metric. Focus on improving your <strong>worst region</strong> (usually ET) because aggregate rankings penalize inconsistency. A model with 0.90/0.88/0.85 across WT/TC/ET will typically rank higher than one with 0.93/0.90/0.78 despite having a similar or higher average Dice.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 7.8 LESION-WISE METRICS ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 7.8 Beyond Voxels</div>
+    <h2>Lesion-Wise Evaluation for Brain Metastases</h2>
+
+    <p>For brain metastases (BraTS-METS), voxel-wise Dice isn&rsquo;t enough. A patient might have 15 small metastases. A model could achieve a high patient-wise Dice by correctly segmenting the 5 largest lesions while completely missing 10 small ones. Clinically, those missed lesions could be catastrophic.</p>
+
+    <p>Lesion-wise metrics address this by evaluating each individual lesion separately:</p>
+
+    <div class="concept-card">
+      <div class="concept-title">Lesion-Wise Detection</div>
+      <p><strong>Lesion-wise sensitivity:</strong> Of all true lesions, what fraction was detected? A systematic review of 42 studies reported pooled lesion-wise sensitivity of <strong>87%</strong>. The best current models achieve 98% sensitivity internally and 97.4% externally, with sensitivity of 93.3% even for tiny lesions &lt;3mm.</p>
+      <p><strong>False positive rate per patient:</strong> How many &ldquo;phantom&rdquo; lesions does the model hallucinate? Top models achieve just <strong>0.6 false positives per patient</strong>.</p>
+      <p><strong>Lesion-wise Dice:</strong> Dice computed per individual lesion, then averaged. Pooled lesion-wise Dice across 42 studies was <strong>79%</strong> &mdash; lower than patient-wise Dice because small lesions drag the average down.</p>
+    </div>
+
+    <p>Size-stratified evaluation is critical: models typically perform well on large metastases (&gt;12mm: sensitivity 98%, FPR 0.3) but struggle with small ones. In one study, the model even detected <strong>7 lesions that human readers had missed</strong> during manual delineation.</p>
+  </div>
+
+  <!-- ═══════ 7.9 PITFALLS ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 7.9 Traps to Avoid</div>
+    <h2>Metric Pitfalls That Trip Up Everyone</h2>
+
+    <div class="concept-card">
+      <div class="concept-title">Pitfall 1: High Dice &ne; Clinical Utility</div>
+      <p>A critical review found that commonly used geometric indices like DSC are <strong>not well correlated with clinically meaningful endpoints</strong>. A study on stroke lesion segmentation showed that nnU-Net achieved excellent segmentation metrics but <strong>failed to detect therapy-induced volume reductions</strong>, leading to false-negative study outcomes. Two segmentations with similar Dice can produce significantly different medical treatment results depending on whether they over-contour or under-contour the tumor.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Pitfall 2: Averaging Across Patients</div>
+      <p>Reporting a single &ldquo;mean Dice&rdquo; across all patients hides critical variation. A patient with a 100mL tumor and a patient with a 2mL tumor contribute equally to the mean, but their clinical significance and segmentation difficulty are vastly different. <strong>Always report per-region metrics and consider median (more robust to outliers) alongside mean.</strong> Better yet, report confidence intervals &mdash; a 2025 study showed you need 100&ndash;200 test samples for a reliable 1% confidence interval.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Pitfall 3: Dice is Overconfident About Large Regions</div>
+      <p>Dice has an intrinsic <strong>region-size bias</strong>. For large structures (whole tumor), even a sloppy prediction achieves a respectable Dice because the large overlapping volume dominates. For small structures (enhancing tumor), a small boundary error causes a large Dice drop. This is why WT Dice is always highest and ET Dice is always lowest &mdash; it&rsquo;s partly the metric, not just the model.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Pitfall 4: Calibration Matters for Deployment</div>
+      <p>If you&rsquo;re deploying a model clinically, you need to trust its confidence scores, not just its binary predictions. A study showed that models trained with Dice loss produce <strong>overconfident, poorly calibrated predictions</strong>. A model says &ldquo;90% confident this is tumor&rdquo; but is only right 70% of the time. Model ensembling (what nnU-Net does) improves calibration. For serious clinical use, calibration metrics (Expected Calibration Error) should be tracked alongside Dice and HD95.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Pitfall 5: Different Implementations Give Different Results</div>
+      <p>The &ldquo;same&rdquo; metric can produce different numbers depending on the implementation. Hausdorff Distance is particularly sensitive: choices about connectivity (6-connected vs 26-connected in 3D), voxel spacing handling, and edge cases (what happens when a class is absent) all affect the result. A 2015 paper proposed an efficient algorithm that outperforms the standard ITK implementation. <strong>Use the official BraTS evaluation toolkit for challenge submissions</strong> to ensure your numbers match the leaderboard&rsquo;s.</p>
+    </div>
+  </div>
+
+  <!-- ═══════ 7.10 STATISTICS ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 7.10 Doing It Right</div>
+    <h2>Statistical Comparison of Models</h2>
+
+    <p>Saying &ldquo;Model A got 0.88 Dice and Model B got 0.87 Dice, so Model A is better&rdquo; is not science. You need to determine whether the difference is <strong>statistically significant</strong> and <strong>practically meaningful</strong>.</p>
+
+    <div class="concept-card">
+      <div class="concept-title">Recommended Statistical Approach</div>
+      <p><strong>Paired comparisons:</strong> Use the <strong>Wilcoxon signed-rank test</strong> (non-parametric, doesn&rsquo;t assume normality, appropriate for Dice scores). Both models must be evaluated on the same test cases.</p>
+      <p><strong>Confidence intervals:</strong> Bootstrap confidence intervals are reliable without distributional assumptions. A 2025 study showed that parametric CIs are reasonable approximations of bootstrap estimates for segmentation metrics.</p>
+      <p><strong>Multiple comparisons:</strong> If comparing more than two models, apply <strong>Bonferroni or Holm correction</strong> to control the false discovery rate. Comparing 10 models at p=0.05 without correction means you&rsquo;ll find ~1 false positive by chance.</p>
+      <p><strong>Effect size:</strong> Report effect sizes alongside p-values. A statistically significant difference of 0.002 Dice points may not be clinically meaningful.</p>
+      <p><strong>Sample size:</strong> A statistical power calculation for segmentation showed that the predicted sample size was accurate within 4 subjects of Monte Carlo estimates. For a 1% wide CI, plan for 100&ndash;200 test cases when variance is low.</p>
+    </div>
+  </div>
+
+  <!-- ═══════ 7.11 COMPUTING METRICS ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 7.11 Implementation</div>
+    <h2>Computing Metrics in Python</h2>
+
+    <div class="code-block">
+      <code>
+<span class="cmd">import</span> numpy <span class="cmd">as</span> np<br>
+<span class="cmd">from</span> medpy.metric.binary <span class="cmd">import</span> dc, hd95, sensitivity, specificity<br>
+<span class="cmd">import</span> nibabel <span class="cmd">as</span> nib<br><br>
+<span class="comment"># Load prediction and ground truth</span><br>
+pred = nib.load(<span class="str">'prediction.nii.gz'</span>).get_fdata()<br>
+gt = nib.load(<span class="str">'ground_truth.nii.gz'</span>).get_fdata()<br>
+spacing = nib.load(<span class="str">'prediction.nii.gz'</span>).header.get_zooms()<br><br>
+<span class="comment"># Compute BraTS regions</span><br>
+regions = {<br>
+&nbsp;&nbsp;<span class="str">'WT'</span>: (<span class="cmd">lambda</span> x: np.isin(x, [1, 2, 4])),<br>
+&nbsp;&nbsp;<span class="str">'TC'</span>: (<span class="cmd">lambda</span> x: np.isin(x, [1, 4])),<br>
+&nbsp;&nbsp;<span class="str">'ET'</span>: (<span class="cmd">lambda</span> x: x == 4),<br>
+}<br><br>
+<span class="cmd">for</span> name, region_fn <span class="cmd">in</span> regions.items():<br>
+&nbsp;&nbsp;p = region_fn(pred).astype(np.uint8)<br>
+&nbsp;&nbsp;g = region_fn(gt).astype(np.uint8)<br><br>
+&nbsp;&nbsp;<span class="cmd">if</span> g.sum() == 0 <span class="cmd">and</span> p.sum() == 0:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cmd">print</span>(f<span class="str">"{name}: Both empty (Dice=1.0, HD95=0.0)"</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cmd">continue</span><br>
+&nbsp;&nbsp;<span class="cmd">if</span> g.sum() == 0 <span class="cmd">or</span> p.sum() == 0:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cmd">print</span>(f<span class="str">"{name}: One side empty (Dice=0.0)"</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cmd">continue</span><br><br>
+&nbsp;&nbsp;dice = dc(p, g)<br>
+&nbsp;&nbsp;hausdorff = hd95(p, g, voxelspacing=spacing)<br>
+&nbsp;&nbsp;sens = sensitivity(p, g)<br><br>
+&nbsp;&nbsp;<span class="cmd">print</span>(f<span class="str">"{name}: Dice={dice:.4f}, HD95={hausdorff:.2f}mm, "</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;f<span class="str">"Sens={sens:.4f}"</span>)
+      </code>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Python Packages for Metrics</div>
+      <p><strong>medpy:</strong> <code>pip install medpy</code> &mdash; Provides Dice, Jaccard, HD, HD95, ASSD, sensitivity, specificity. The most commonly used package.</p>
+      <p><strong>surface-distance (DeepMind):</strong> <code>pip install surface-distance</code> &mdash; Computes surface distances, NSD, and surface Dice. More accurate for boundary metrics.</p>
+      <p><strong>miseval:</strong> <code>pip install miseval</code> &mdash; Standardized metric library following the M&uuml;ller et al. guideline. Designed for reproducible evaluation.</p>
+      <p><strong>SimpleITK:</strong> Built-in <code>OverlapMeasuresImageFilter</code> for Dice, Jaccard, volume similarity, false positive/negative rates.</p>
+    </div>
+  </div>
+
+  <!-- ═══════ 7.12 SUMMARY TABLE ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 7.12 Quick Reference</div>
+    <h2>Metric Summary Table</h2>
+
+    <table class="metric-table">
+      <thead><tr><th>Metric</th><th>Measures</th><th>Range</th><th>Strengths</th><th>Limitations</th></tr></thead>
+      <tbody>
+        <tr><td>Dice (DSC)</td><td>Volumetric overlap</td><td>0&ndash;1 (&uarr;)</td><td>Simple, F1-equivalent, primary BraTS metric</td><td>Size-biased, non-linear with acceptability</td></tr>
+        <tr><td>HD95</td><td>Worst-case boundary error (95th %ile)</td><td>0&ndash;&infin; mm (&darr;)</td><td>Catches boundary errors Dice misses, robust to outliers</td><td>Ignores interior accuracy</td></tr>
+        <tr><td>NSD@&tau;</td><td>Surface accuracy within tolerance</td><td>0&ndash;1 (&uarr;)</td><td>Clinically interpretable tolerance</td><td>Requires &tau; selection</td></tr>
+        <tr><td>Sensitivity</td><td>True positive rate</td><td>0&ndash;1 (&uarr;)</td><td>Captures missed tumor</td><td>Ignores false positives</td></tr>
+        <tr><td>Precision</td><td>Positive predictive value</td><td>0&ndash;1 (&uarr;)</td><td>Captures false alarms</td><td>Ignores missed tumor</td></tr>
+        <tr><td>Specificity</td><td>True negative rate</td><td>0&ndash;1 (&uarr;)</td><td>Standard classification metric</td><td>Inflated by large background; poor discriminator</td></tr>
+        <tr><td>Volume Diff</td><td>Total volume error</td><td>0&ndash;&infin; (&darr;)</td><td>Directly clinically relevant (RANO)</td><td>Insensitive to spatial errors</td></tr>
+        <tr><td>Lesion Sensitivity</td><td>Per-lesion detection rate</td><td>0&ndash;1 (&uarr;)</td><td>Essential for metastases</td><td>Requires lesion matching</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══════ RESOURCES ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 7.13 Resources &amp; Further Reading</div>
+    <h2>This Week&rsquo;s Learning Resources</h2>
+
+    <h3>Essential Reading</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1038/s41592-023-02150-0" target="_blank">Reinke et al. &mdash; Metrics Reloaded: Understanding Metric Pitfalls (Nature Methods, 2024)</a></div>
+        <div class="resource-desc">The definitive reference for metric selection. Domain-agnostic taxonomy of pitfalls created by a multidisciplinary Delphi process. Includes a decision tree for choosing appropriate metrics based on task type. Read the &ldquo;pitfalls&rdquo; sections at minimum.</div>
+        <div class="resource-cite">Nat Methods. 2024;21:195&ndash;212</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1186/s13104-022-06096-y" target="_blank">M&uuml;ller et al. &mdash; Guideline for Evaluation Metrics (BMC Research Notes, 2022)</a></div>
+        <div class="resource-desc">Practical guideline: report DSC + at least one distance metric (HD95 or ASSD), report per-class metrics, use appropriate statistical tests, address class imbalance. Your checklist for reporting results.</div>
+        <div class="resource-cite">BMC Res Notes. 2022;15:210</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1038/s41467-018-07619-7" target="_blank">Maier-Hein et al. &mdash; Why Rankings Should Be Interpreted With Care (Nature Communications, 2018)</a></div>
+        <div class="resource-desc">Demonstrates that algorithm rankings are not robust to test data, ranking scheme, or annotators. Essential context for understanding challenge leaderboards.</div>
+        <div class="resource-cite">Nat Commun. 2018;9:5217</div>
+      </div>
+    </div>
+
+    <h3>Metric Deep Dives</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1109/TMI.2020.3002417" target="_blank">Eelbode et al. &mdash; Optimization for Dice Score or Jaccard (IEEE TMI, 2020)</a></div>
+        <div class="resource-desc">Proves metric-sensitive losses (soft Dice, soft Jaccard) outperform cross-entropy when evaluating with Dice. The theoretical foundation for understanding loss-metric alignment.</div>
+        <div class="resource-cite">IEEE Trans Med Imaging. 2020;39(11):3679&ndash;3690</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1016/j.media.2023.103015" target="_blank">Liu et al. &mdash; Hidden Region-Size Biases of Dice (Medical Image Analysis, 2024)</a></div>
+        <div class="resource-desc">Theoretical analysis of Dice&rsquo;s intrinsic bias toward specific region sizes. Explains why Dice works well for imbalanced segmentation but struggles with diverse class proportions.</div>
+        <div class="resource-cite">Med Image Anal. 2024;91:103015</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1109/TMI.2019.2930068" target="_blank">Karimi &amp; Salcudean &mdash; Reducing Hausdorff Distance (IEEE TMI, 2020)</a></div>
+        <div class="resource-desc">Three methods to optimize HD as a loss function, achieving 18&ndash;45% HD reduction. Read this when you want to improve boundary accuracy specifically.</div>
+        <div class="resource-cite">IEEE Trans Med Imaging. 2020;39(2):499&ndash;513</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1016/j.media.2025.103565" target="_blank">El Jurdi et al. &mdash; Confidence Intervals for Brain MRI Segmentation (Medical Image Analysis, 2025)</a></div>
+        <div class="resource-desc">How many test cases you need for reliable performance estimates. 100&ndash;200 for a 1% CI when variance is low; 1000+ for difficult tasks. Essential for planning validation studies.</div>
+        <div class="resource-cite">Med Image Anal. 2025;103:103565</div>
+      </div>
+    </div>
+
+    <h3>Tools</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://pypi.org/project/medpy/" target="_blank">medpy &mdash; Medical Image Processing in Python</a></div>
+        <div class="resource-desc">The most commonly used package for computing Dice, HD95, ASSD, sensitivity, specificity. <code>pip install medpy</code>. Start here for your evaluation pipeline.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://github.com/deepmind/surface-distance" target="_blank">surface-distance (DeepMind) &mdash; Surface Metrics</a></div>
+        <div class="resource-desc">Computes surface distances, NSD, and surface Dice. More precise than medpy for boundary-focused metrics. Use for NSD computation.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://pypi.org/project/miseval/" target="_blank">miseval &mdash; Standardized Metric Library</a></div>
+        <div class="resource-desc">Open-source Python package implementing the M&uuml;ller et al. evaluation guideline. Designed for reproducible, standardized evaluation. <code>pip install miseval</code>.</div>
+      </div>
+    </div>
+
+    <h3>Advanced Topics</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1109/TMI.2020.3006437" target="_blank">Mehrtash et al. &mdash; Confidence Calibration for Segmentation (IEEE TMI, 2020)</a></div>
+        <div class="resource-desc">Shows Dice loss produces overconfident predictions. Model ensembling improves calibration. Critical for clinical deployment where confidence scores matter.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1016/j.radonc.2023.110007" target="_blank">Wang et al. &mdash; Brain Metastasis Segmentation Meta-Analysis (Radiother Oncol, 2024)</a></div>
+        <div class="resource-desc">Meta-analysis of 42 studies: pooled lesion-wise Dice 79%, patient-wise sensitivity 86%, lesion-wise sensitivity 87%. The reference for understanding brain metastasis evaluation.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1016/j.radonc.2021.05.003" target="_blank">Sherer et al. &mdash; Metrics for Auto-Segmentation: A Critical Review (Radiother Oncol, 2021)</a></div>
+        <div class="resource-desc">Shows that common geometric indices are not well correlated with clinical endpoints. Argues for multi-domain evaluation including dosimetric metrics and physician assessment.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ NAVIGATION ═══════ -->
+  <div class="nav-lesson">
+    <a href="week6.html">&larr; Week 06: Dataset Preparation</a>
+    <a href="week8.html">Week 08: Model Optimization &rarr;</a>
+  </div>
+</div>
+
+<footer>
+  <p><a href="../index.html">MedVision Academy</a> &nbsp;&middot;&nbsp; Week 07: Evaluation Metrics</p>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('click', function(e) {
+    var link = e.target.closest('a');
+    if (!link) return;
+    var href = link.getAttribute('href');
+    if (!href) return;
+    if (href.startsWith('http') && !href.includes(window.location.hostname)) {
+      var linkName = link.getAttribute('data-link-name') || link.textContent.trim().substring(0, 60);
+      if (typeof gtag === 'function') {
+        gtag('event', 'outbound_click', { 'link_url': href, 'link_text': linkName });
+      }
+    }
+  });
+});
+</script>
+
+</body>
+</html>
