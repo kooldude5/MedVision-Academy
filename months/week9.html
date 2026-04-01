@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 09: Integrating AI Into the Radiology Workflow — MedVision Academy</title>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9LJGDZVJRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9LJGDZVJRW');
+</script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10; --surface: #12151c; --surface-2: #1a1e28; --surface-3: #222834;
+    --border: #2a3040; --border-light: #353d50;
+    --text: #e8eaf0; --text-muted: #8b92a8; --text-dim: #5c6478;
+    --accent: #4af0c0; --accent-dim: #2a8068; --accent-glow: rgba(74,240,192,0.12);
+    --warm: #f0a04a; --rose: #f06088; --blue: #4a90f0; --purple: #a06af0;
+    --serif: 'DM Serif Display', Georgia, serif;
+    --sans: 'Instrument Sans', -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  ::selection { background: var(--accent); color: var(--bg); }
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,12,16,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 0 2rem; }
+  .nav-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .nav-logo { font-family: var(--serif); font-size: 1.25rem; color: var(--accent); text-decoration: none; }
+  .nav-logo span { color: var(--text-muted); font-style: italic; font-size: 0.9rem; margin-left: 0.4rem; }
+  .nav-back { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 500; padding: 0.4rem 0.75rem; border-radius: 6px; border: 1px solid var(--border); transition: all 0.2s; }
+  .nav-back:hover { color: var(--text); border-color: var(--border-light); background: var(--surface-2); }
+  .lesson-hero { padding: 7rem 2rem 3rem; max-width: 900px; margin: 0 auto; }
+  .lesson-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(240,160,74,0.1); border: 1px solid rgba(240,160,74,0.3); padding: 0.3rem 0.9rem; border-radius: 100px; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; color: var(--warm); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.25rem; }
+  .lesson-hero h1 { font-family: var(--serif); font-size: clamp(2rem, 4vw, 2.8rem); line-height: 1.15; letter-spacing: -0.025em; margin-bottom: 1rem; }
+  .lesson-hero h1 em { font-style: italic; color: var(--accent); }
+  .lesson-hero .subtitle { font-size: 1.05rem; color: var(--text-muted); max-width: 640px; line-height: 1.7; }
+  .lesson { max-width: 900px; margin: 0 auto; padding: 0 2rem 4rem; }
+  .divider { max-width: 900px; margin: 0 auto; padding: 0 2rem; border-top: 1px solid var(--border); }
+  .lesson-section { margin-top: 3.5rem; }
+  .lesson-section-label { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .lesson-section h2 { font-family: var(--serif); font-size: 1.6rem; line-height: 1.2; margin-bottom: 1rem; }
+  .lesson-section h3 { font-family: var(--serif); font-size: 1.2rem; line-height: 1.3; margin: 2rem 0 0.75rem; }
+  .lesson-section p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin-bottom: 1rem; }
+  .lesson-section p:last-child { margin-bottom: 0; }
+  .lesson-section strong { color: var(--text); }
+  .lesson-section code { font-family: var(--mono); font-size: 0.85em; background: var(--surface-2); padding: 0.15rem 0.4rem; border-radius: 4px; color: var(--accent); }
+  .concept-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 1.75rem; margin: 1.5rem 0; }
+  .concept-card .concept-title { font-family: var(--serif); font-size: 1.1rem; margin-bottom: 0.75rem; }
+  .concept-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; margin-bottom: 0.5rem; }
+  .concept-card p:last-child { margin-bottom: 0; }
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.5rem 0; }
+  .stat-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; text-align: center; }
+  .stat-box .stat-val { font-family: var(--serif); font-size: 1.5rem; color: var(--accent); margin-bottom: 0.25rem; }
+  .stat-box .stat-label { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; }
+  .callout { background: var(--accent-glow); border: 1px solid var(--accent-dim); border-radius: 10px; padding: 1.25rem 1.5rem; display: flex; gap: 1rem; align-items: start; margin: 1.5rem 0; }
+  .callout-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 0.1rem; }
+  .callout-text { font-size: 0.9rem; color: var(--text-muted); line-height: 1.65; }
+  .callout-text strong { color: var(--text); }
+  .callout-warn { background: rgba(240,160,74,0.08); border-color: rgba(240,160,74,0.3); }
+  .callout-info { background: rgba(74,144,240,0.08); border-color: rgba(74,144,240,0.3); }
+  .pipeline-steps { display: flex; flex-direction: column; gap: 0; margin: 1.5rem 0; }
+  .pipeline-step { display: flex; gap: 1.25rem; padding: 1.25rem 0; border-bottom: 1px solid var(--border); }
+  .pipeline-step:last-child { border-bottom: none; }
+  .step-num { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; color: var(--accent); background: var(--accent-glow); padding: 0.2rem 0.5rem; border-radius: 4px; height: fit-content; white-space: nowrap; margin-top: 0.15rem; }
+  .step-content .step-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.3rem; }
+  .step-content p { color: var(--text-muted); font-size: 0.88rem; line-height: 1.65; margin: 0; }
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+  .compare-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; }
+  .compare-card .compare-label { font-family: var(--mono); font-size: 0.68rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .compare-card.a .compare-label { color: var(--warm); }
+  .compare-card.b .compare-label { color: var(--accent); }
+  .compare-card.c .compare-label { color: var(--blue); }
+  .compare-card p { color: var(--text-muted); font-size: 0.85rem; line-height: 1.65; margin: 0; }
+  .resource-list { display: flex; flex-direction: column; gap: 0.75rem; margin: 1.5rem 0; }
+  .resource-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; transition: border-color 0.3s; }
+  .resource-item:hover { border-color: var(--border-light); }
+  .resource-tag { font-family: var(--mono); font-size: 0.62rem; font-weight: 600; padding: 0.15rem 0.45rem; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.08em; margin-right: 0.5rem; display: inline-block; }
+  .resource-tag.paper { background: rgba(240,160,74,0.12); color: var(--warm); }
+  .resource-tag.video { background: rgba(240,96,136,0.15); color: var(--rose); }
+  .resource-tag.tool { background: rgba(160,106,240,0.12); color: var(--purple); }
+  .resource-tag.site { background: rgba(74,240,192,0.12); color: var(--accent); }
+  .resource-tag.course { background: rgba(74,144,240,0.12); color: var(--blue); }
+  .resource-title { font-weight: 600; font-size: 0.92rem; margin-bottom: 0.3rem; }
+  .resource-title a { color: var(--text); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.2s; }
+  .resource-title a:hover { border-bottom-color: var(--accent); }
+  .resource-desc { color: var(--text-muted); font-size: 0.82rem; line-height: 1.6; }
+  .resource-cite { font-family: var(--mono); font-size: 0.7rem; color: var(--text-dim); margin-top: 0.25rem; }
+  .nav-lesson { display: flex; justify-content: space-between; align-items: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); }
+  .nav-lesson a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid var(--border); transition: all 0.2s; }
+  .nav-lesson a:hover { color: var(--accent); border-color: var(--accent-dim); }
+  footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--text-dim); font-size: 0.8rem; max-width: 900px; margin: 0 auto; }
+  footer a { color: var(--text-muted); text-decoration: none; }
+  footer a:hover { color: var(--accent); }
+  @media (max-width: 700px) {
+    .stat-grid { grid-template-columns: 1fr; }
+    .compare-grid { grid-template-columns: 1fr; }
+    .pipeline-step { flex-direction: column; gap: 0.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="../index.html">MedVision<span>Academy</span></a>
+    <a class="nav-back" href="../index.html#curriculum">&larr; Back to Curriculum</a>
+  </div>
+</nav>
+
+<div class="lesson-hero">
+  <div class="lesson-badge">Week 09 &mdash; Q3</div>
+  <h1>Integrating AI Into the <em>Radiology Workflow</em></h1>
+  <p class="subtitle">You can build a model that achieves 0.93 Dice. But can you make it actually help a patient? This week bridges the gap between technical performance and clinical impact &mdash; covering regulatory approval, PACS integration, automation bias, deployment frameworks, and the ethical responsibilities that come with putting AI in front of a radiologist.</p>
+</div>
+
+<div class="divider"></div>
+
+<div class="lesson">
+
+  <!-- ═══════ 9.1 THE GAP ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 9.1 The Reality Check</div>
+    <h2>The Gap Between Research and Clinical Impact</h2>
+
+    <p>The brain tumor segmentation field has achieved impressive technical metrics. But there is a stark gap between what models achieve on challenge leaderboards and what actually reaches patients. Understanding this gap is the first step toward closing it.</p>
+
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="stat-val">950+</div>
+        <div class="stat-label">FDA-cleared AI/ML medical devices as of 2025 &mdash; but very few for brain tumor segmentation</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">5%</div>
+        <div class="stat-label">Of FDA-cleared AI devices that underwent prospective clinical testing</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">97%</div>
+        <div class="stat-label">Cleared via 510(k) &mdash; no independent clinical evidence required</div>
+      </div>
+    </div>
+
+    <p>The number of cleared AI devices has exploded &mdash; from 33 between 1995&ndash;2015 to 221 in 2023 alone. But quantity doesn&rsquo;t equal clinical adoption. Of 717 radiology AI devices with documentation, only 33 included prospective testing, 56 included human-in-the-loop evaluation, and only 15 combined both. Most evidence remains retrospective. A critical assessment noted that &ldquo;clinical utility remains to be demonstrated&rdquo; for the majority of neuroimaging AI tools.</p>
+  </div>
+
+  <!-- ═══════ 9.2 REGULATION ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 9.2 Getting to Market</div>
+    <h2>The Regulatory Landscape</h2>
+
+    <h3>United States: FDA Pathways</h3>
+
+    <div class="concept-card">
+      <div class="concept-title">510(k) (Most Common &mdash; 97% of AI devices)</div>
+      <p>Demonstrates &ldquo;substantial equivalence&rdquo; to an existing approved device (a predicate). Does not require independent clinical evidence &mdash; performance can be shown by comparison to the predicate. Faster than other pathways, but a significant limitation: each generation of device references the previous, so <strong>incremental risks can accumulate</strong> without rigorous independent testing. The overwhelming majority of medical AI reaches market this way.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">De Novo (Novel Devices)</div>
+      <p>For devices with no suitable predicate but low-to-moderate risk. Requires more evidence than 510(k) but less than PMA. Only 22 AI/ML devices have used this pathway. Creates a new predicate that future 510(k) submissions can reference.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Predetermined Change Control Plans</div>
+      <p>AI models can change over time (retraining, adapting to new data). Traditional regulation assumes static devices. The FDA now allows manufacturers to specify anticipated modifications in advance, defining &ldquo;regions of potential changes&rdquo; with monitoring plans. This is critical for adaptive AI that learns from deployment data.</p>
+    </div>
+
+    <h3>European Union: MDR + AI Act</h3>
+    <p>The EU requires <strong>dual compliance</strong>. The Medical Device Regulation (MDR 2017) classifies most diagnostic AI as Class IIa or IIb. The AI Act (2024) introduces a risk-based framework where most medical AI is classified as &ldquo;high-risk,&rdquo; requiring risk management systems, data governance, transparency, human oversight, and ongoing monitoring. Unlike the FDA, <strong>no centralized public database of CE-marked AI devices exists</strong> in the EU, making the European landscape harder to track. Despite structural differences, EU, US, and Chinese regulations converge on core principles: patient data protection, risk classification, transparency, bias mitigation, and human oversight.</p>
+  </div>
+
+  <!-- ═══════ 9.3 VALIDATION ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 9.3 Proving It Works</div>
+    <h2>Clinical Validation: Beyond Dice Scores</h2>
+
+    <p>Getting a high Dice score on BraTS is <em>technical validation</em>. Proving your tool helps patients requires three levels of evidence:</p>
+
+    <div class="pipeline-steps">
+      <div class="pipeline-step">
+        <span class="step-num">LEVEL 1</span>
+        <div class="step-content">
+          <div class="step-title">Technical Validity</div>
+          <p>Does the algorithm produce accurate segmentations on representative external test sets? This is what Dice, HD95, and challenge leaderboards measure. Necessary but not sufficient. Most FDA submissions stop here.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">LEVEL 2</span>
+        <div class="step-content">
+          <div class="step-title">Clinical Validity</div>
+          <p>Does it work in real-world clinical scenarios with real patient populations? This requires <strong>prospective, multi-center studies</strong> with data from diverse scanners, protocols, and demographics. Only 33.8% of FDA-cleared devices have multi-center clinical data. Performance often degrades on external data due to scanner differences, protocol variations, and population shifts.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">LEVEL 3</span>
+        <div class="step-content">
+          <div class="step-title">Clinical Utility</div>
+          <p>Does it actually improve patient outcomes? This is the hardest to prove. Requires randomized controlled trials measuring outcomes like survival, quality of life, treatment accuracy, or diagnostic errors prevented. Almost no brain tumor AI tools have reached this level of evidence. It is the frontier of the field.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">&#9888;&#65039;</div>
+      <div class="callout-text"><strong>The algorithmic bias problem:</strong> AI models exhibit performance disparities across demographics, institutions, and scanner types. Chest X-ray AI classifiers were found to consistently underdiagnose underserved populations (female, Black, Hispanic patients). Brain tumor segmentation models show degraded performance on external hospital data. Models can infer race, sex, and age from medical images even when not provided as inputs, and may use these as &ldquo;shortcuts&rdquo; rather than learning true pathology.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 9.4 FDA-CLEARED TOOLS ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 9.4 What Exists Today</div>
+    <h2>FDA-Cleared Brain Tumor AI Tools</h2>
+
+    <div class="concept-card">
+      <div class="concept-title">VBrain (Vysioneer Inc.)</div>
+      <p>FDA-cleared deep learning tool for brain tumor detection and contouring in stereotactic radiosurgery. Validated on 100 patients with 435 brain metastases: <strong>Dice 0.723</strong> for whole tumor, 89.3% lesion-wise sensitivity overall (99.1% for lesions &ge;10mm, 96.2% for &ge;5mm), with 1.52 false positives per patient. Cleared via 510(k).</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">NeuroSAFE (Incepto Medical &mdash; CE-Marked)</div>
+      <p>Validated prospectively across 6 French centers on 459 consecutive patients. Sensitivity 90.2% vs 81.9% for neuroradiologists alone (P&lt;0.001). Reduced false negatives by 47% as an AI-assisted second reader. Particularly beneficial for small metastases (&lt;5mm). Demonstrates the value of <strong>prospective, multi-center validation</strong> beyond retrospective challenge benchmarks.</p>
+    </div>
+
+    <p>Note how these Dice scores (0.72) are significantly lower than BraTS challenge numbers (0.90+). This reflects the gap between curated challenge data and real-world clinical data with diverse scanners, protocols, and tumor presentations. It&rsquo;s a reminder that challenge performance is a starting point, not the destination.</p>
+  </div>
+
+  <!-- ═══════ 9.5 INTEGRATION ARCHITECTURE ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 9.5 Making It Fit</div>
+    <h2>Integration Into the Radiology Workflow</h2>
+
+    <p>A segmentation model is useless if it doesn&rsquo;t fit into how radiologists actually work. Clinical radiology runs on DICOM (the universal medical image format) and PACS (Picture Archiving and Communication Systems). Your model must speak these languages.</p>
+
+    <h3>How AI Fits Into the PACS Workflow</h3>
+
+    <div class="pipeline-steps">
+      <div class="pipeline-step">
+        <span class="step-num">01</span>
+        <div class="step-content">
+          <div class="step-title">Image Acquisition</div>
+          <p>MRI scanner produces DICOM images and sends them to PACS. No AI involvement yet.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">02</span>
+        <div class="step-content">
+          <div class="step-title">AI Processing</div>
+          <p>A DICOM listener detects the new study and routes it to a GPU server running the segmentation model. The model converts DICOM to NIfTI internally, runs inference, and converts the segmentation back to DICOM SEG or DICOM RT Structure Set format. Well-designed systems achieve <strong>9&ndash;20 minute latency</strong> from scan completion to AI result, significantly faster than the 51&ndash;66 minute clinician latency.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">03</span>
+        <div class="step-content">
+          <div class="step-title">Result Delivery</div>
+          <p>The AI segmentation is sent back to PACS and appears as an overlay on the radiologist&rsquo;s viewer. It can also feed structured reports via HL7 FHIR, trigger notifications for abnormal findings, or populate worklist priorities.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">04</span>
+        <div class="step-content">
+          <div class="step-title">Radiologist Review</div>
+          <p>The radiologist views the AI segmentation, verifies or modifies it, and incorporates it into their clinical report. The AI assists but does not replace the human decision-maker.</p>
+        </div>
+      </div>
+    </div>
+
+    <h3>Three AI Interaction Models</h3>
+    <div class="compare-grid">
+      <div class="compare-card a">
+        <div class="compare-label">Triage</div>
+        <p>AI prioritizes the worklist, flagging potentially abnormal cases for faster review. The radiologist still reads every study. Lowest risk, clearest workflow benefit.</p>
+      </div>
+      <div class="compare-card b">
+        <div class="compare-label">Concurrent Reader</div>
+        <p>AI results shown alongside images while the radiologist reads. Most common for FDA-cleared devices. Risk of automation bias &mdash; radiologists may anchor to AI predictions.</p>
+      </div>
+      <div class="compare-card c">
+        <div class="compare-label">Second Reader</div>
+        <p>Radiologist makes initial assessment, then sees AI output. Reduces automation bias but adds time. Studies show AI as second reader reduced false negatives by 47% for brain metastases.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 9.6 DEPLOYMENT TOOLS ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 9.6 From Research to Deployment</div>
+    <h2>Deployment Frameworks &amp; Tools</h2>
+
+    <div class="concept-card">
+      <div class="concept-title">MONAI Deploy</div>
+      <p>The end of the MONAI ecosystem pipeline: <strong>MONAI Label</strong> (annotation) &rarr; <strong>MONAI Core</strong> (training) &rarr; <strong>MONAI Deploy</strong> (clinical deployment). Deploy packages your trained model as a <strong>MONAI Application Package (MAP)</strong> &mdash; a Docker container with the model, preprocessing, inference pipeline, and DICOM I/O. The App SDK provides tools for building clinical-grade inference, and informatics gateways handle DICOM routing and HL7 FHIR integration. This is the closest thing to a standardized path from research model to clinical tool.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Docker Containerization</div>
+      <p>Docker is the foundation of reproducible AI deployment. Your model, Python environment, CUDA drivers, and all dependencies are packaged into a container that runs identically on any server. NVIDIA GPU support via the NVIDIA Container Toolkit enables GPU-accelerated inference inside Docker. MONAI Application Packages are Docker containers underneath. For regulatory compliance, containers provide <strong>version control and reproducibility</strong> &mdash; you can prove exactly which model version produced any given prediction.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Streamlit / Gradio (For Research Prototypes)</div>
+      <p>Before building a full PACS-integrated system, many researchers build lightweight web demos using Streamlit or Gradio. Upload a NIfTI file, see the segmentation overlaid in the browser. These are excellent for collaborator demos, grant applications, and proof-of-concept validation, but they are <strong>not suitable for clinical deployment</strong> &mdash; they lack DICOM integration, don&rsquo;t meet regulatory requirements, and aren&rsquo;t designed for clinical security standards.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Open-Source PACS Pipelines</div>
+      <p>For institutions without commercial AI platforms, open-source options exist. An Orthanc-based vendor-agnostic pipeline demonstrated feasible low-cost AI integration. DIANA (DICOM Image ANalysis and Archive) orchestrates AI workflows from study detection to clinician notification. One PACS-integrated implementation at Yale achieved <strong>real-time brain tumor segmentation in 4 seconds</strong> with radiomic feature extraction in 5.8 seconds.</p>
+    </div>
+  </div>
+
+  <!-- ═══════ 9.7 AUTOMATION BIAS ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 9.7 The Human Factor</div>
+    <h2>Automation Bias: When AI Help Becomes Harmful</h2>
+
+    <p>Here is the most uncomfortable finding in the radiology AI literature: <strong>in some studies, AI alone outperformed radiologists who were using AI</strong>. Human-AI interaction can paradoxically degrade performance compared to either alone. This is automation bias &mdash; the tendency to over-trust automated suggestions.</p>
+
+    <div class="concept-card">
+      <div class="concept-title">The Mammography Study (Radiology, 2023)</div>
+      <p>The most rigorous study of automation bias in radiology: when AI provided <strong>correct</strong> suggestions, radiologists scored 79.7&ndash;82.3% accuracy. When AI provided <strong>incorrect</strong> suggestions, accuracy dropped to 19.8&ndash;45.5% (P&lt;0.001). All experience levels were susceptible, though inexperienced radiologists showed significantly greater bias toward incorrect high-severity suggestions. The effect sizes were massive (&eta;&sup2;=0.93&ndash;0.97).</p>
+    </div>
+
+    <div class="callout">
+      <div class="callout-icon">&#128161;</div>
+      <div class="callout-text"><strong>Positive evidence for brain tumors:</strong> A randomized multi-reader evaluation of AI-assisted brain tumor segmentation for stereotactic radiosurgery found that AI assistance increased inter-reader agreement (DSC from 0.86 to 0.90, P&lt;0.001), improved lesion detection sensitivity (82.6% &rarr; 91.3%), and reduced contouring time by 30.8%. Less-experienced physicians gained more accuracy improvement, while specialists gained more time savings. The key: appropriate integration design matters enormously.</div>
+    </div>
+
+    <h3>Mitigation Strategies</h3>
+    <p>Reducing automation bias requires designing the interaction, not just the algorithm: <strong>sequential reading</strong> (radiologist assesses first, then sees AI) reduces anchoring to AI predictions. <strong>Calibrated confidence displays</strong> show uncertainty alongside predictions so clinicians know when the model is guessing. <strong>Training programs</strong> that teach AI failure modes help clinicians maintain appropriate skepticism. <strong>Friction-based design</strong> requires active engagement rather than passive acceptance of AI output.</p>
+  </div>
+
+  <!-- ═══════ 9.8 CLINICAL IMPACT ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 9.8 What AI Actually Enables</div>
+    <h2>Clinical Impact Beyond Efficiency</h2>
+
+    <div class="concept-card">
+      <div class="concept-title">Treatment Planning</div>
+      <p>Automated segmentation transforms radiation therapy planning. AI-generated tumor contours provide a consistent starting point that reduces inter-practitioner variability &mdash; a major source of treatment inconsistency. For stereotactic radiosurgery, AI contouring is fast enough (4 seconds) to enable real-time treatment plan iteration, improving dose targeting precision.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Volumetric Monitoring (RANO)</div>
+      <p>RANO 2.0 now supports volumetric tumor measurements alongside traditional 2D measurements. But manual volumetric assessment is impractical without automation. AI segmentation makes longitudinal volume tracking feasible, enabling earlier detection of progression and more objective treatment response assessment. One study showed that 2D RANO measurements had only 21% accuracy compared to volumetric ground truth for lower-grade gliomas.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Radiogenomics</div>
+      <p>AI segmentation enables extraction of radiomic features that can predict molecular tumor characteristics non-invasively: tumor grading, molecular subtype prediction (IDH mutation, MGMT methylation), survival prediction, and distinguishing pseudoprogression from true recurrence. This could potentially reduce reliance on invasive biopsies and accelerate time to molecular diagnosis.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Pediatric Brain Tumors</div>
+      <p>Volumetric consistency is particularly important for pediatric neuro-oncology, where inter-rater variability in manual measurements can obscure treatment response. AI-based segmentation provides a standardized approach that reduces this variability, supporting more reliable longitudinal monitoring during a child&rsquo;s treatment.</p>
+    </div>
+  </div>
+
+  <!-- ═══════ 9.9 ETHICS ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 9.9 Doing It Responsibly</div>
+    <h2>Ethics, Transparency &amp; Liability</h2>
+
+    <div class="concept-card">
+      <div class="concept-title">Explainability: The &ldquo;Black Box&rdquo; Problem</div>
+      <p>A U-Net that outputs a segmentation mask doesn&rsquo;t tell you <em>why</em> it drew that boundary. Methods exist for making models more interpretable: <strong>Grad-CAM/Grad-CAM++</strong> highlights which input regions most influenced the prediction, <strong>attention maps</strong> from transformer architectures show where the model focused, and <strong>uncertainty visualization</strong> (via TTA or Monte Carlo dropout) shows where the model is unsure. Evidence on whether explainability improves clinical decisions is mixed &mdash; it may be more valuable for detecting model failures and data drift than for improving individual predictions.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Informed Consent</div>
+      <p>When should patients be told AI was involved in their diagnosis? A proposed framework evaluates AI model autonomy, departure from standard practice, whether AI is patient-facing, and clinical risk. Low-risk, non-patient-facing uses (like AI helping a radiologist contour a tumor faster) may require no specific consent. Higher-risk or more autonomous applications may require notification or formal consent. The field is still evolving.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Liability</div>
+      <p>Who is responsible when AI contributes to an error? Currently, <strong>healthcare professionals retain full accountability</strong> for decisions involving AI &mdash; the AI is legally a tool, not a decision-maker. But liability is distributed across developers, clinicians, healthcare organizations, and patients in complex ways. The dynamic, learning nature of AI complicates traditional product liability definitions. Multiple legal frameworks have been proposed (risk-based liability, strict liability, regulatory sandboxes), but none have been widely adopted.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Equity</div>
+      <p>If your model was trained primarily on data from academic medical centers with 3T scanners, it may fail at community hospitals with 1.5T scanners. If the training data underrepresents certain demographics, the model may perform worse for those patients. Ensuring AI works equitably requires diverse training data, demographic-stratified evaluation, and post-deployment monitoring for performance disparities. This is not just an ethical obligation &mdash; it&rsquo;s increasingly a regulatory requirement under both the EU AI Act and evolving FDA guidance.</p>
+    </div>
+  </div>
+
+  <!-- ═══════ 9.10 CHALLENGES ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 9.10 The Hard Problems</div>
+    <h2>Challenges &amp; Barriers to Adoption</h2>
+
+    <div class="concept-card">
+      <div class="concept-title">Data Drift: Models Decay Over Time</div>
+      <p>An AI model trained in 2023 may not work in 2025. Scanner software updates change image characteristics. New treatment protocols alter what tumors look like. Patient populations shift. A comprehensive analysis of 8 clinical AI models found that COVID-19 caused performance shifts of up to &Delta;AUROC 0.44. Solutions include <strong>label-agnostic drift monitoring</strong> (detecting shifts without needing new ground-truth labels), <strong>transfer learning</strong> (adapting to new sites), and <strong>continual learning</strong> (proactively updating models when drift is detected).</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">The &ldquo;Last Mile&rdquo; Problem</div>
+      <p>Despite 950+ FDA-cleared AI devices, clinical adoption remains limited. Published barriers include: unstructured implementation processes, lack of hospital-wide innovation strategies, uncertain clinical added value, large variance in trust among radiologists, poor interoperability with existing systems, information overload from AI outputs, medicolegal uncertainty, and insufficient AI literacy. The technology is often ready before the institution is.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Economics: Who Pays?</div>
+      <p>AI cost-effectiveness analyses look promising on paper: 85% of reviewed studies reported cost savings. But the analyses are often incomplete &mdash; only 28% included implementation costs, only 57% reported operational costs, and 63% evaluated AI at early development stages. Commonly overlooked costs include software licensing ($50K&ndash;$200K+/year), GPU hardware, integration engineering, clinician training, continuous monitoring, and regulatory compliance. Organizations often focus exclusively on financial returns while ignoring quality and safety benefits.</p>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">&#128218;</div>
+      <div class="callout-text"><strong>What this means for you as a student:</strong> Building the model is the beginning, not the end. The skills that matter most for clinical translation are ones rarely taught in AI courses: understanding regulatory pathways, designing prospective validation studies, building DICOM-compatible infrastructure, managing data drift, and communicating with clinicians. If you&rsquo;re serious about clinical impact, learn to think like a translational researcher, not just a machine learning engineer.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ RESOURCES ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 9.11 Resources &amp; Further Reading</div>
+    <h2>This Week&rsquo;s Learning Resources</h2>
+
+    <h3>Essential Reading</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1056/NEJMra2305635" target="_blank">Rajpurkar &amp; Lungren &mdash; AI Interpretation of Medical Images (NEJM, 2023)</a></div>
+        <div class="resource-desc">The most important single paper on this topic. Covers the current state and future of AI in medical image interpretation, automation bias, clinical trial design, and the gap between technical and clinical validation. Required reading.</div>
+        <div class="resource-cite">N Engl J Med. 2023;388:1981&ndash;1990</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1093/neuonc/noab106" target="_blank">Lu et al. &mdash; Randomized Multi-Reader AI for Brain Tumor SRS (Neuro-Oncology, 2021)</a></div>
+        <div class="resource-desc">Landmark randomized trial: AI assistance improved detection sensitivity (82.6%&rarr;91.3%), inter-reader agreement (DSC 0.86&rarr;0.90), and reduced contouring time by 30.8%. The gold standard for brain tumor AI clinical evidence.</div>
+        <div class="resource-cite">Neuro-Oncology. 2021;23(10):1713&ndash;1724</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1148/radiol.232030" target="_blank">Dratsch et al. &mdash; Automation Bias in Mammography (Radiology, 2023)</a></div>
+        <div class="resource-desc">The study that proves automation bias is real and massive: accuracy dropped from 80% to 20&ndash;45% with incorrect AI suggestions. All experience levels were susceptible. Essential for understanding human-AI interaction risks.</div>
+        <div class="resource-cite">Radiology. 2023;307(4):e222176</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1148/radiol.232174" target="_blank">Tejani et al. &mdash; Integrating AI in Radiology Workflow (Radiology, 2024)</a></div>
+        <div class="resource-desc">Practical primer on DICOM, IHE profiles, DICOMweb, HL7 FHIR, and how they connect to build clinical AI infrastructure. The technical roadmap for integration.</div>
+        <div class="resource-cite">Radiology. 2024;310(3):e232174</div>
+      </div>
+    </div>
+
+    <h3>Deployment Tools</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://monai.io/deploy.html" target="_blank">MONAI Deploy</a></div>
+        <div class="resource-desc">Package your trained model as a clinical-grade containerized application. Includes App SDK, informatics gateway, and example application packages. The canonical path from MONAI training to clinical deployment.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://www.orthanc-server.com/" target="_blank">Orthanc &mdash; Open-Source DICOM Server</a></div>
+        <div class="resource-desc">Free, vendor-agnostic DICOM server that can serve as the backbone for research AI deployment. Used in published open-source AI integration pipelines.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://streamlit.io/" target="_blank">Streamlit &mdash; Research Prototypes</a></div>
+        <div class="resource-desc">Build quick interactive demos of your segmentation model. Not for clinical use, but invaluable for collaborator demonstrations, paper figures, and grant applications.</div>
+      </div>
+    </div>
+
+    <h3>Deep Dives</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1038/s41591-021-01595-0" target="_blank">Seyyed-Kalantari et al. &mdash; Underdiagnosis Bias in AI (Nature Medicine, 2021)</a></div>
+        <div class="resource-desc">AI chest X-ray classifiers systematically underdiagnose underserved populations. The paper that put algorithmic bias in medical AI on the map.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1001/jamanetworkopen.2025.14940" target="_blank">Subasri et al. &mdash; Detecting and Remediating Data Drift (JAMA Network Open, 2025)</a></div>
+        <div class="resource-desc">The most comprehensive study of data drift across 8 clinical AI models. Demonstrates label-agnostic monitoring, transfer learning, and continual learning as solutions.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1056/NEJMhle2308901" target="_blank">Mello &amp; Guha &mdash; Liability from Healthcare AI (NEJM, 2024)</a></div>
+        <div class="resource-desc">Legal analysis of liability risk when AI contributes to clinical errors. Essential reading for understanding the medicolegal landscape.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1056/NEJMp2306100" target="_blank">Sahni &amp; Carrus &mdash; AI in US Health Care Delivery (NEJM, 2023)</a></div>
+        <div class="resource-desc">The &ldquo;last mile&rdquo; problem from a health system perspective. Why technically excellent AI isn&rsquo;t used clinically, and what it takes to change that.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ NAVIGATION ═══════ -->
+  <div class="nav-lesson">
+    <a href="week8.html">&larr; Week 08: Fine-Tuning &amp; Improving</a>
+    <a href="week10.html">Week 10: Deployment &rarr;</a>
+  </div>
+</div>
+
+<footer>
+  <p><a href="../index.html">MedVision Academy</a> &nbsp;&middot;&nbsp; Week 09: Integrating AI Into the Radiology Workflow</p>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('click', function(e) {
+    var link = e.target.closest('a');
+    if (!link) return;
+    var href = link.getAttribute('href');
+    if (!href) return;
+    if (href.startsWith('http') && !href.includes(window.location.hostname)) {
+      var linkName = link.getAttribute('data-link-name') || link.textContent.trim().substring(0, 60);
+      if (typeof gtag === 'function') {
+        gtag('event', 'outbound_click', { 'link_url': href, 'link_text': linkName });
+      }
+    }
+  });
+});
+</script>
+
+</body>
+</html>
