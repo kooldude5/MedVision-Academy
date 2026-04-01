@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 10: Deploying Your Model — MedVision Academy</title>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9LJGDZVJRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9LJGDZVJRW');
+</script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10; --surface: #12151c; --surface-2: #1a1e28; --surface-3: #222834;
+    --border: #2a3040; --border-light: #353d50;
+    --text: #e8eaf0; --text-muted: #8b92a8; --text-dim: #5c6478;
+    --accent: #4af0c0; --accent-dim: #2a8068; --accent-glow: rgba(74,240,192,0.12);
+    --warm: #f0a04a; --rose: #f06088; --blue: #4a90f0; --purple: #a06af0;
+    --serif: 'DM Serif Display', Georgia, serif;
+    --sans: 'Instrument Sans', -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  ::selection { background: var(--accent); color: var(--bg); }
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,12,16,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 0 2rem; }
+  .nav-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .nav-logo { font-family: var(--serif); font-size: 1.25rem; color: var(--accent); text-decoration: none; }
+  .nav-logo span { color: var(--text-muted); font-style: italic; font-size: 0.9rem; margin-left: 0.4rem; }
+  .nav-back { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 500; padding: 0.4rem 0.75rem; border-radius: 6px; border: 1px solid var(--border); transition: all 0.2s; }
+  .nav-back:hover { color: var(--text); border-color: var(--border-light); background: var(--surface-2); }
+  .lesson-hero { padding: 7rem 2rem 3rem; max-width: 900px; margin: 0 auto; }
+  .lesson-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(160,106,240,0.1); border: 1px solid rgba(160,106,240,0.3); padding: 0.3rem 0.9rem; border-radius: 100px; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; color: var(--purple); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.25rem; }
+  .lesson-hero h1 { font-family: var(--serif); font-size: clamp(2rem, 4vw, 2.8rem); line-height: 1.15; letter-spacing: -0.025em; margin-bottom: 1rem; }
+  .lesson-hero h1 em { font-style: italic; color: var(--accent); }
+  .lesson-hero .subtitle { font-size: 1.05rem; color: var(--text-muted); max-width: 640px; line-height: 1.7; }
+  .lesson { max-width: 900px; margin: 0 auto; padding: 0 2rem 4rem; }
+  .divider { max-width: 900px; margin: 0 auto; padding: 0 2rem; border-top: 1px solid var(--border); }
+  .lesson-section { margin-top: 3.5rem; }
+  .lesson-section-label { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .lesson-section h2 { font-family: var(--serif); font-size: 1.6rem; line-height: 1.2; margin-bottom: 1rem; }
+  .lesson-section h3 { font-family: var(--serif); font-size: 1.2rem; line-height: 1.3; margin: 2rem 0 0.75rem; }
+  .lesson-section p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin-bottom: 1rem; }
+  .lesson-section p:last-child { margin-bottom: 0; }
+  .lesson-section strong { color: var(--text); }
+  .lesson-section code { font-family: var(--mono); font-size: 0.85em; background: var(--surface-2); padding: 0.15rem 0.4rem; border-radius: 4px; color: var(--accent); }
+  .concept-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 1.75rem; margin: 1.5rem 0; }
+  .concept-card .concept-title { font-family: var(--serif); font-size: 1.1rem; margin-bottom: 0.75rem; }
+  .concept-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; margin-bottom: 0.5rem; }
+  .concept-card p:last-child { margin-bottom: 0; }
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.5rem 0; }
+  .stat-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; text-align: center; }
+  .stat-box .stat-val { font-family: var(--serif); font-size: 1.5rem; color: var(--accent); margin-bottom: 0.25rem; }
+  .stat-box .stat-label { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; }
+  .callout { background: var(--accent-glow); border: 1px solid var(--accent-dim); border-radius: 10px; padding: 1.25rem 1.5rem; display: flex; gap: 1rem; align-items: start; margin: 1.5rem 0; }
+  .callout-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 0.1rem; }
+  .callout-text { font-size: 0.9rem; color: var(--text-muted); line-height: 1.65; }
+  .callout-text strong { color: var(--text); }
+  .callout-warn { background: rgba(240,160,74,0.08); border-color: rgba(240,160,74,0.3); }
+  .callout-info { background: rgba(74,144,240,0.08); border-color: rgba(74,144,240,0.3); }
+  .pipeline-steps { display: flex; flex-direction: column; gap: 0; margin: 1.5rem 0; }
+  .pipeline-step { display: flex; gap: 1.25rem; padding: 1.25rem 0; border-bottom: 1px solid var(--border); }
+  .pipeline-step:last-child { border-bottom: none; }
+  .step-num { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; color: var(--accent); background: var(--accent-glow); padding: 0.2rem 0.5rem; border-radius: 4px; height: fit-content; white-space: nowrap; margin-top: 0.15rem; }
+  .step-content .step-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.3rem; }
+  .step-content p { color: var(--text-muted); font-size: 0.88rem; line-height: 1.65; margin: 0; }
+  .code-block { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin: 1.25rem 0; overflow-x: auto; }
+  .code-block code { font-family: var(--mono); font-size: 0.82rem; line-height: 1.8; color: var(--text-muted); }
+  .code-block .comment { color: var(--text-dim); }
+  .code-block .cmd { color: var(--accent); }
+  .code-block .str { color: var(--warm); }
+  .code-block .key { color: var(--blue); }
+  .resource-list { display: flex; flex-direction: column; gap: 0.75rem; margin: 1.5rem 0; }
+  .resource-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; transition: border-color 0.3s; }
+  .resource-item:hover { border-color: var(--border-light); }
+  .resource-tag { font-family: var(--mono); font-size: 0.62rem; font-weight: 600; padding: 0.15rem 0.45rem; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.08em; margin-right: 0.5rem; display: inline-block; }
+  .resource-tag.paper { background: rgba(240,160,74,0.12); color: var(--warm); }
+  .resource-tag.video { background: rgba(240,96,136,0.15); color: var(--rose); }
+  .resource-tag.tool { background: rgba(160,106,240,0.12); color: var(--purple); }
+  .resource-tag.site { background: rgba(74,240,192,0.12); color: var(--accent); }
+  .resource-tag.course { background: rgba(74,144,240,0.12); color: var(--blue); }
+  .resource-title { font-weight: 600; font-size: 0.92rem; margin-bottom: 0.3rem; }
+  .resource-title a { color: var(--text); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.2s; }
+  .resource-title a:hover { border-bottom-color: var(--accent); }
+  .resource-desc { color: var(--text-muted); font-size: 0.82rem; line-height: 1.6; }
+  .resource-cite { font-family: var(--mono); font-size: 0.7rem; color: var(--text-dim); margin-top: 0.25rem; }
+  .nav-lesson { display: flex; justify-content: space-between; align-items: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); }
+  .nav-lesson a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid var(--border); transition: all 0.2s; }
+  .nav-lesson a:hover { color: var(--accent); border-color: var(--accent-dim); }
+  footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--text-dim); font-size: 0.8rem; max-width: 900px; margin: 0 auto; }
+  footer a { color: var(--text-muted); text-decoration: none; }
+  footer a:hover { color: var(--accent); }
+  @media (max-width: 700px) {
+    .stat-grid { grid-template-columns: 1fr; }
+    .pipeline-step { flex-direction: column; gap: 0.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="../index.html">MedVision<span>Academy</span></a>
+    <a class="nav-back" href="../index.html#curriculum">&larr; Back to Curriculum</a>
+  </div>
+</nav>
+
+<div class="lesson-hero">
+  <div class="lesson-badge">Week 10 &mdash; Q4</div>
+  <h1>Deploying Your Model: <em>MONAI Deploy, Streamlit, BraTS Toolkit &amp; Beyond</em></h1>
+  <p class="subtitle">Last week was the &ldquo;why&rdquo; of clinical integration. This week is the &ldquo;how&rdquo; &mdash; the actual tools, containers, APIs, and pipelines that take a trained model out of a Jupyter notebook and make it usable by researchers, collaborators, and eventually clinicians.</p>
+</div>
+
+<div class="divider"></div>
+
+<div class="lesson">
+
+  <!-- ═══════ 10.1 THE DEPLOYMENT SPECTRUM ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 10.1 Choosing Your Path</div>
+    <h2>The Deployment Spectrum</h2>
+
+    <p>There isn&rsquo;t one way to deploy a segmentation model. The right approach depends on your audience, your infrastructure, and your goals. This week covers four levels, from simplest to most clinical.</p>
+
+    <div class="pipeline-steps">
+      <div class="pipeline-step">
+        <span class="step-num">LEVEL 1</span>
+        <div class="step-content">
+          <div class="step-title">Research Demo (Streamlit / Gradio)</div>
+          <p>An interactive web app where colleagues can upload a NIfTI file and see the segmentation. Takes hours to build, runs on a laptop. Great for papers, grant demos, and collaborator feedback. Not for clinical use.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">LEVEL 2</span>
+        <div class="step-content">
+          <div class="step-title">Reproducible Package (Docker + CLI)</div>
+          <p>Your model, environment, and dependencies in a Docker container with a command-line interface. Anyone can run inference with one command. TotalSegmentator popularized this model &mdash; <code>TotalSegmentator -i input.nii.gz -o output</code>. Reproducible, shareable, publishable.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">LEVEL 3</span>
+        <div class="step-content">
+          <div class="step-title">Algorithm Orchestration (BraTS Toolkit)</div>
+          <p>Run multiple segmentation algorithms, fuse their predictions, and produce a standardized result. The BraTS Toolkit wraps the full pipeline: preprocessing, multi-algorithm segmentation, and fusion. Used for research benchmarking and multi-model ensembling.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">LEVEL 4</span>
+        <div class="step-content">
+          <div class="step-title">Clinical Integration (MONAI Deploy / PACS Pipeline)</div>
+          <p>Your model runs as a DICOM-in, DICOM-out service integrated into the hospital PACS. Radiologists see the segmentation in their normal viewer. Requires DICOM handling, GPU infrastructure, monitoring, and regulatory compliance. The ultimate goal.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="stat-val">4 sec</div>
+        <div class="stat-label">Segmentation time for PACS-integrated brain tumor AI at Yale</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">33 sec</div>
+        <div class="stat-label">Median inference for MONAI Deploy Express prostate segmentation</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">80 sec</div>
+        <div class="stat-label">Browser-based 3D CNN inference on consumer hardware (no server)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 10.2 STREAMLIT ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 10.2 Level 1: Research Demos</div>
+    <h2>Streamlit &amp; Gradio: Build It This Week</h2>
+
+    <p>The fastest way to make your model accessible. Streamlit turns a Python script into an interactive web application. In under 100 lines of code, you can build an app where users upload a brain MRI, your model runs inference, and the segmentation is displayed as an interactive overlay with axial/sagittal/coronal sliders.</p>
+
+    <div class="code-block">
+      <code>
+<span class="comment"># Minimal Streamlit app for brain tumor segmentation</span><br>
+<span class="cmd">import</span> streamlit <span class="cmd">as</span> st<br>
+<span class="cmd">import</span> nibabel <span class="cmd">as</span> nib<br>
+<span class="cmd">import</span> numpy <span class="cmd">as</span> np<br>
+<span class="cmd">import</span> torch<br><br>
+st.title(<span class="str">"Brain Tumor Segmentation Demo"</span>)<br><br>
+uploaded = st.file_uploader(<span class="str">"Upload NIfTI (T1ce)"</span>, type=[<span class="str">"nii"</span>, <span class="str">"gz"</span>])<br>
+<span class="cmd">if</span> uploaded:<br>
+&nbsp;&nbsp;<span class="comment"># Load image</span><br>
+&nbsp;&nbsp;img = nib.load(uploaded).get_fdata()<br><br>
+&nbsp;&nbsp;<span class="comment"># Run model (your trained nnU-Net/MONAI model)</span><br>
+&nbsp;&nbsp;prediction = run_inference(img)&nbsp;&nbsp;<span class="comment"># Your function here</span><br><br>
+&nbsp;&nbsp;<span class="comment"># Display with interactive slice selector</span><br>
+&nbsp;&nbsp;axis = st.selectbox(<span class="str">"View"</span>, [<span class="str">"Axial"</span>, <span class="str">"Sagittal"</span>, <span class="str">"Coronal"</span>])<br>
+&nbsp;&nbsp;slice_idx = st.slider(<span class="str">"Slice"</span>, 0, img.shape[2]-1, img.shape[2]//2)<br><br>
+&nbsp;&nbsp;<span class="comment"># Overlay segmentation on image</span><br>
+&nbsp;&nbsp;fig = create_overlay(img, prediction, slice_idx, axis)<br>
+&nbsp;&nbsp;st.pyplot(fig)<br><br>
+&nbsp;&nbsp;<span class="comment"># Display metrics</span><br>
+&nbsp;&nbsp;vol_ml = np.sum(prediction > 0) * voxel_volume / 1000<br>
+&nbsp;&nbsp;st.metric(<span class="str">"Tumor Volume"</span>, f<span class="str">"{vol_ml:.1f} mL"</span>)
+      </code>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Deployment Options</div>
+      <p><strong>Streamlit Cloud:</strong> Free hosting for public apps. Limited to CPU (no GPU), so inference will be slow for 3D models. Good for demos with lightweight 2D models or pre-computed results. <strong>Hugging Face Spaces:</strong> Free hosting with optional GPU access (A10G, T4). Better for real-time inference. <strong>Institutional server:</strong> Run on a GPU workstation behind your university&rsquo;s firewall. Best for processing real (non-public) data. FastAPI is the modern alternative when you need API-style deployment instead of a visual interface.</p>
+    </div>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">&#9888;&#65039;</div>
+      <div class="callout-text"><strong>Streamlit is NOT for clinical use.</strong> It doesn&rsquo;t handle DICOM, doesn&rsquo;t meet regulatory requirements, has no audit trail, and isn&rsquo;t designed for healthcare security standards. Use it for: demos to collaborators, paper figures, grant applications, conference presentations, and proof-of-concept validation. One published brain tumor web app included a feedback facility that let clinicians refine results, which were then used to retrain the model &mdash; a powerful research loop.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 10.3 DOCKER ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 10.3 Level 2: Reproducible Containers</div>
+    <h2>Docker: The Foundation of Everything</h2>
+
+    <p>Docker packages your model, Python environment, CUDA drivers, and all dependencies into a <strong>container</strong> that runs identically on any machine. This solves the &ldquo;works on my laptop&rdquo; problem. It&rsquo;s the foundation for MONAI Deploy (MAPs are Docker containers), challenge submissions (BraTS requires Docker), and clinical deployment.</p>
+
+    <div class="code-block">
+      <code>
+<span class="comment"># Dockerfile for nnU-Net inference</span><br>
+<span class="key">FROM</span> nvcr.io/nvidia/pytorch:23.10-py3<br><br>
+<span class="comment"># Install nnU-Net</span><br>
+<span class="key">RUN</span> pip install nnunetv2<br><br>
+<span class="comment"># Copy trained model weights</span><br>
+<span class="key">COPY</span> ./nnUNet_results /opt/nnUNet_results<br><br>
+<span class="comment"># Set environment variables</span><br>
+<span class="key">ENV</span> nnUNet_results=/opt/nnUNet_results<br>
+<span class="key">ENV</span> nnUNet_raw=/opt/nnUNet_raw<br>
+<span class="key">ENV</span> nnUNet_preprocessed=/opt/nnUNet_preprocessed<br><br>
+<span class="comment"># Entrypoint: run inference</span><br>
+<span class="key">ENTRYPOINT</span> [<span class="str">"nnUNetv2_predict"</span>]
+      </code>
+    </div>
+
+    <div class="code-block">
+      <code>
+<span class="comment"># Build and run</span><br>
+<span class="cmd">docker build</span> -t brats-segmentation .<br>
+<span class="cmd">docker run</span> --gpus all \<br>
+&nbsp;&nbsp;-v /path/to/input:/input \<br>
+&nbsp;&nbsp;-v /path/to/output:/output \<br>
+&nbsp;&nbsp;brats-segmentation \<br>
+&nbsp;&nbsp;-i /input -o /output -d 001 -c 3d_fullres
+      </code>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">The TotalSegmentator Model</div>
+      <p>TotalSegmentator is the gold standard for how to package an nnU-Net model for practical use. It segments 80 anatomical structures from a single command: <code>TotalSegmentator -i input.nii.gz -o output</code>. Under the hood, it&rsquo;s nnU-Net in a pip-installable Python package. The MRI version achieved Dice 0.839 for 80 structures and nearly matched the CT version (0.966 vs 0.970). It&rsquo;s available as both a command-line tool and a web app at totalsegmentator.com. This is the deployment pattern to emulate for your own models.</p>
+    </div>
+
+    <div class="callout">
+      <div class="callout-icon">&#128161;</div>
+      <div class="callout-text"><strong>Docker best practices for medical AI:</strong> Use multi-stage builds to keep image sizes small. Pin every dependency version (don&rsquo;t use <code>pip install nnunetv2</code> &mdash; use <code>pip install nnunetv2==2.5.1</code>). Include health checks. Log all predictions for audit trails. Tag images with the model version and training date. The published &ldquo;Ten Simple Rules for Writing Dockerfiles&rdquo; is required reading.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 10.4 BRATS TOOLKIT ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 10.4 Level 3: Multi-Algorithm Orchestration</div>
+    <h2>BraTS Toolkit: Preprocessing, Segmentation &amp; Fusion</h2>
+
+    <p>The BraTS Toolkit is a three-component system that standardizes the entire brain tumor segmentation workflow. It was developed specifically to bridge the gap between challenge-winning algorithms and practical use.</p>
+
+    <div class="concept-card">
+      <div class="concept-title">BraTS Preprocessor</div>
+      <p>Standardizes raw brain MRI data through the full pipeline: DICOM-to-NIfTI conversion, co-registration of all four modalities to a common space, atlas registration to SRI24 space, skull stripping, and intensity normalization. This produces BraTS-compatible data from any institutional format. It handles the preprocessing that Week 2 covered &mdash; but in an automated, reproducible pipeline.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">BraTS Segmentor</div>
+      <p>Orchestrates <strong>multiple segmentation algorithms</strong> on the preprocessed data. Instead of running one model, you can run several BraTS challenge algorithms in parallel, each producing a candidate segmentation. The key insight from the original BraTS benchmark: <strong>no single algorithm performs best across all sub-regions</strong>. Running multiple models and combining them consistently outperforms any individual approach.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">BraTS Fusionator</div>
+      <p>Combines the candidate segmentations into a single consensus result using fusion strategies: <strong>majority voting</strong> (simplest &mdash; each voxel gets the label predicted by the majority of models), <strong>SIMPLE fusion</strong> (iteratively selects the subset of models whose combination maximizes agreement), and <strong>weighted fusion</strong> (models weighted by their validation performance). A real-world evaluation found the toolkit performed well for round, well-demarcated tumors (97&ndash;100% accuracy for including necrosis and enhancing tumor), though complex infiltrative tumors still benefited from manual correction.</p>
+    </div>
+
+    <div class="code-block">
+      <code>
+<span class="comment"># BraTS Toolkit workflow (conceptual)</span><br>
+<span class="cmd">pip install</span> BraTS-Toolkit<br><br>
+<span class="comment"># Step 1: Preprocess raw data to BraTS format</span><br>
+<span class="cmd">brats-preprocess</span> -i /raw/patient001 -o /preprocessed<br><br>
+<span class="comment"># Step 2: Run multiple segmentation algorithms</span><br>
+<span class="cmd">brats-segment</span> -i /preprocessed -o /segmentations<br><br>
+<span class="comment"># Step 3: Fuse candidate segmentations</span><br>
+<span class="cmd">brats-fuse</span> -i /segmentations -o /final \<br>
+&nbsp;&nbsp;--method simple_fusion
+      </code>
+    </div>
+  </div>
+
+  <!-- ═══════ 10.5 MONAI DEPLOY ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 10.5 Level 4: Clinical-Grade Deployment</div>
+    <h2>MONAI Deploy: From Research to Clinic</h2>
+
+    <p>MONAI Deploy is the final stage of the MONAI ecosystem: <strong>MONAI Label</strong> (annotation) &rarr; <strong>MONAI Core</strong> (training) &rarr; <strong>MONAI Deploy</strong> (deployment). It packages your trained model as a <strong>MONAI Application Package (MAP)</strong> &mdash; a standardized, clinical-grade Docker container with DICOM I/O built in.</p>
+
+    <h3>The Three Components</h3>
+
+    <div class="concept-card">
+      <div class="concept-title">MONAI Deploy App SDK</div>
+      <p>A Python SDK for building inference pipelines as directed acyclic graphs (DAGs) of <strong>operators</strong>. Each operator handles one step: DICOM loading, preprocessing, model inference, post-processing, DICOM output. You chain them together, and the SDK manages data flow and execution. The first published clinical implementation achieved <strong>median inference of 33 seconds</strong> with 57/58 successful cases, and the output fed directly into biopsy planning software.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">MONAI Deploy Informatics Gateway</div>
+      <p>Handles the DICOM networking. Receives DICOM images from PACS via standard DICOM C-STORE, routes them to the right MAP for processing, and sends results back to PACS. Also supports HL7 FHIR for integrating with electronic health records. This is the component that makes your model speak the language of the hospital.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">MONAI Deploy Workflow Manager</div>
+      <p>Orchestrates multi-step clinical AI workflows. If your pipeline requires multiple models (e.g., skull stripping → tumor segmentation → radiomic feature extraction), the Workflow Manager sequences them, manages intermediate data, and handles failures gracefully.</p>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">&#128218;</div>
+      <div class="callout-text"><strong>Why MONAI Deploy over a custom Docker container?</strong> You could build your own DICOM-in/DICOM-out Docker container from scratch. But MONAI Deploy provides standardized DICOM I/O operators, tested integration with PACS systems, a workflow management layer, and a growing community of validated MAPs. It&rsquo;s the difference between building a house from lumber vs. building from pre-fabricated components. For a student project, either works. For clinical deployment, the standardization matters.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 10.6 DICOM CONVERSION ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 10.6 Speaking the Hospital&rsquo;s Language</div>
+    <h2>DICOM Conversion: The Glue Layer</h2>
+
+    <p>Your model outputs a NIfTI segmentation mask. The hospital needs DICOM. Bridging this gap is one of the most underappreciated engineering challenges in clinical AI deployment. Three specialized libraries handle this:</p>
+
+    <div class="concept-card">
+      <div class="concept-title">highdicom</div>
+      <p>A high-level Python library that abstracts DICOM encoding complexity. Create DICOM Segmentation objects (SEG) from NumPy arrays in a few lines of code. It handles the metadata correctly &mdash; referencing the source images, encoding segment properties, and maintaining DICOM compliance. Published in the Journal of Digital Imaging, it&rsquo;s the most Pythonic option.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">dcmqi (DICOM for Quantitative Imaging)</div>
+      <p>Converts between research formats (NIfTI, NRRD) and DICOM standards (SEG, SR, PM). Available as a command-line tool, Docker image, and 3D Slicer extension. Developed at Harvard&rsquo;s Surgical Planning Lab and published in Cancer Research. The go-to for converting nnU-Net outputs to DICOM for PACS integration.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">PyRaDiSe (Python DICOM-RT)</div>
+      <p>Specifically designed for radiation therapy workflows. Converts between NIfTI and <strong>DICOM RT Structure Sets</strong> (the format radiation oncologists use for tumor contours). Unlike 2D slice-based reconstruction, PyRaDiSe uses 3D-based conversion to avoid pixelated contours. Integrates with any deep learning framework.</p>
+    </div>
+
+    <div class="callout">
+      <div class="callout-icon">&#128161;</div>
+      <div class="callout-text"><strong>Which format?</strong> <strong>DICOM SEG</strong> is the standard for encoding voxel-level segmentation masks. Used when feeding into PACS viewers. <strong>DICOM RT Structure Set</strong> is the standard in radiation therapy for encoding contours. Used when feeding into treatment planning systems. <strong>DICOM Secondary Capture</strong> is a screenshot-like format for visualization only (lowest utility but simplest). Choose based on your downstream consumer.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 10.7 PUBLISHED CASE STUDIES ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 10.7 What Others Have Built</div>
+    <h2>Published Deployment Case Studies</h2>
+
+    <div class="concept-card">
+      <div class="concept-title">Yale PACS-Integrated System (2022)</div>
+      <p>Embedded a UNETR model directly into the Visage 7 diagnostic workstation. Brain tumor segmentation completed in <strong>~4 seconds</strong>, with 106 radiomic features extracted in 5.8 seconds. Segmentation was available <em>before radiologists opened the study</em>, and they could verify and modify contours within their familiar PACS tools. Achieved median Dice of 86% on internal validation. This is the gold standard for workflow-efficient clinical integration.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Heidelberg XNAT Pipeline (2019)</div>
+      <p>Fully automated glioblastoma response assessment using XNAT open-source platform. Processing triggered automatically after MRI acquisition with no manual intervention. Segmentation masks and longitudinal volume charts pushed back to PACS. Demonstrated robust performance across 34 institutions in the EORTC-26101 trial. Proved that automated volumetric monitoring for RANO assessment is feasible at scale.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">NYU Deep Learning Pipeline (2022)</div>
+      <p>End-to-end pipeline for pre- and postoperative glioma segmentation. Total processing: ~10 minutes (routing ~1 min, preprocessing ~6 min, segmentation ~1&ndash;2 min, post-processing ~1 min). Achieved median Dice of 0.88/0.89/0.81 for WT/TC/ET. Demonstrated that clinical-grade latency is achievable with coordinated preprocessing optimization.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">DIANA Orchestration System (2021)</div>
+      <p>Open-source Python system for PACS interaction. Mean AI latency of 9&ndash;20 minutes vs clinician latency of 51&ndash;66 minutes (P&lt;0.001). Supports both retrospective data retrieval and prospective AI pipeline deployment. Demonstrates that even without deep PACS integration, middleware orchestration can achieve clinically meaningful speed improvements.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Raidionics (2023)</div>
+      <p>Open-source software with both GUI and processing backend for CNS tumor segmentation. Models for glioblastomas, lower-grade gliomas, meningiomas, and metastases (pre- and postoperative). Preoperative Dice ~85% with patient-wise recall/precision ~95%. <strong>Runs on regular laptops in ~10 minutes</strong> without specialized hardware. Includes standardized clinical report generation. The most accessible deployment for individual researchers.</p>
+    </div>
+  </div>
+
+  <!-- ═══════ 10.8 INFERENCE OPTIMIZATION ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 10.8 Making It Fast</div>
+    <h2>Inference Optimization</h2>
+
+    <p>A model that takes 30 minutes to segment one brain isn&rsquo;t clinically useful. Optimization techniques can dramatically reduce inference time without sacrificing accuracy.</p>
+
+    <div class="concept-card">
+      <div class="concept-title">TensorRT (NVIDIA)</div>
+      <p>Optimizes PyTorch/ONNX models for NVIDIA GPU inference through operator fusion, kernel auto-tuning, and precision calibration. A retinal segmentation model optimized with TensorRT achieved <strong>3.5ms inference &mdash; 21&times; faster</strong> than the unoptimized version with no accuracy loss. The total pipeline (acquisition to result) had just 41ms latency.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">ONNX Runtime</div>
+      <p>Cross-platform inference engine. Convert your PyTorch model to ONNX format, then run it on any hardware (NVIDIA, AMD, CPU, mobile). A systematic evaluation showed ONNX Runtime substantially improved runtime across radiology, histopathology, and RGB imaging without compromising model utility. Particularly valuable for deploying on hardware you don&rsquo;t control.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Model Quantization</div>
+      <p>Reduce model precision from 32-bit floats to 16-bit (FP16), 8-bit (INT8), or even <strong>2-bit (ternary)</strong>. EfficientQ achieves post-training quantization in less than 5 minutes on one GPU with one data sample, with superior performance on BraTS 2020. MedQ demonstrated lossless 2-bit quantization on BraTS 2020 &mdash; performance equivalent to full precision while enabling boolean arithmetic. This makes deployment on embedded devices or consumer hardware feasible.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Browser-Based Edge Computing</div>
+      <p>The most radical option: run inference entirely in the user&rsquo;s web browser using WebGL/WebGPU, with no server at all. A published implementation deployed a 3D CNN on 256&times;256&times;256 CT volumes with <strong>80-second runtime and 1.5GB memory</strong> on consumer hardware. PHI never leaves the user&rsquo;s machine. This approach is emerging but promising for privacy-sensitive deployment.</p>
+    </div>
+  </div>
+
+  <!-- ═══════ 10.9 MONITORING ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 10.9 Keeping It Running</div>
+    <h2>Continuous Monitoring &amp; MLOps</h2>
+
+    <p>Deployment isn&rsquo;t the finish line &mdash; it&rsquo;s the start of a new lifecycle. Models degrade over time as scanners are updated, protocols change, and patient populations shift. You need systems to detect problems before they impact patients.</p>
+
+    <div class="concept-card">
+      <div class="concept-title">MedMLOps Framework</div>
+      <p>Medical Machine Learning Operations adapts software engineering&rsquo;s CI/CD (Continuous Integration/Continuous Deployment) to clinical AI. It provides structured approaches for continuous performance monitoring, systematic validation, simplified model maintenance, and regulatory compliance. The FDA now emphasizes a <strong>total product lifecycle</strong> approach: plan/design &rarr; data collection &rarr; model building &rarr; verification &rarr; deployment &rarr; monitoring &rarr; real-world evaluation &mdash; as a continuous cycle, not a one-time process.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Drift Detection</div>
+      <p>The most advanced published approach uses a <strong>14-day rolling window analysis</strong> combining black-box shift estimation (BBSE) and maximum mean discrepancy (MMD) to detect distributional changes without needing ground-truth labels. When drift is detected, the system triggers model updating using data from the previous 60 days. During COVID-19, this continual learning approach improved AUROC by 0.44 compared to a static model (P=0.007). Critically, detection is <strong>label-agnostic</strong> &mdash; you don&rsquo;t need new expert annotations to know the model is degrading.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Silent Deployment</div>
+      <p>Before full clinical deployment, the DEPLOYR framework recommends <strong>silent trials</strong>: the model runs on real clinical data but its outputs aren&rsquo;t shown to clinicians. This allows prospective performance measurement without clinical impact. Studies consistently find that prospectively measured performance differs from retrospective estimates, making silent deployment an essential pre-launch step.</p>
+    </div>
+  </div>
+
+  <!-- ═══════ RESOURCES ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 10.10 Resources &amp; Further Reading</div>
+    <h2>This Week&rsquo;s Learning Resources</h2>
+
+    <h3>Build These This Week</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://docs.monai.io/projects/monai-deploy-app-sdk/en/stable/" target="_blank">MONAI Deploy App SDK Documentation</a></div>
+        <div class="resource-desc">Official docs for building MONAI Application Packages. Work through the &ldquo;Creating a Simple App&rdquo; tutorial. This is the canonical path for packaging your model for clinical deployment.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://streamlit.io/" target="_blank">Streamlit</a></div>
+        <div class="resource-desc">Build a brain tumor segmentation demo this week. Upload NIfTI, display axial/sagittal/coronal slices with segmentation overlay, compute and display tumor volume. Under 100 lines of code.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://github.com/neuronflow/BraTS-Toolkit" target="_blank">BraTS Toolkit (GitHub)</a></div>
+        <div class="resource-desc">Install and run the three-component pipeline on your BraTS data. Compare single-model prediction to fused multi-model predictions to see the value of algorithm orchestration.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://github.com/ImagingDataCommons/highdicom" target="_blank">highdicom &mdash; DICOM Encoding Library</a></div>
+        <div class="resource-desc">Convert your NIfTI segmentation output to a DICOM SEG object. Essential for any PACS integration. The most Pythonic way to create standards-compliant DICOM.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://github.com/wasserth/TotalSegmentator" target="_blank">TotalSegmentator (GitHub)</a></div>
+        <div class="resource-desc">Study this as a deployment template. See how they wrapped nnU-Net into a pip-installable CLI tool with simple one-command inference. Emulate this pattern for your own model.</div>
+      </div>
+    </div>
+
+    <h3>Key Papers</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.3389/fnins.2022.860208" target="_blank">Aboian et al. &mdash; PACS-Based Brain Tumor Segmentation &amp; Radiomics (Frontiers in Neurosci, 2022)</a></div>
+        <div class="resource-desc">The Yale PACS-integrated system: 4-second segmentation, 106 radiomic features in 5.8 seconds, results available before the radiologist opens the study. The benchmark for clinical integration.</div>
+        <div class="resource-cite">Front Neurosci. 2022;16:860208</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.3389/fnins.2020.00125" target="_blank">Kofler et al. &mdash; BraTS Toolkit (Frontiers in Neuroscience, 2020)</a></div>
+        <div class="resource-desc">The three-component preprocessing/segmentation/fusion toolkit. Essential reading for understanding algorithm orchestration and standardized BraTS data handling.</div>
+        <div class="resource-cite">Front Neurosci. 2020;14:125</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1007/s10278-022-00683-y" target="_blank">Bridge et al. &mdash; highdicom: DICOM Encoding for AI (J Digital Imaging, 2022)</a></div>
+        <div class="resource-desc">The highdicom library paper. How to encode segmentation masks, structured reports, and parametric maps in standards-compliant DICOM from Python.</div>
+        <div class="resource-cite">J Digit Imaging. 2022;35:1719&ndash;1737</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1148/radiol.241613" target="_blank">Akinci D&rsquo;Antonoli et al. &mdash; TotalSegmentator MRI (Radiology, 2025)</a></div>
+        <div class="resource-desc">80-structure MRI segmentation packaged as a one-command tool. Dice 0.839 across 80 structures. The deployment model to emulate.</div>
+        <div class="resource-cite">Radiology. 2025;314(1):e241613</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1038/s41598-023-36744-1" target="_blank">Bouget et al. &mdash; Raidionics: Open CNS Tumor Segmentation (Scientific Reports, 2023)</a></div>
+        <div class="resource-desc">Open-source software that runs on laptops with Dice ~85%. The most accessible deployment path for individual researchers without GPU infrastructure.</div>
+        <div class="resource-cite">Sci Rep. 2023;13:9631</div>
+      </div>
+    </div>
+
+    <h3>Deep Dives</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1371/journal.pcbi.1008316" target="_blank">N&uuml;st et al. &mdash; Ten Simple Rules for Writing Dockerfiles (PLoS Comp Biol, 2020)</a></div>
+        <div class="resource-desc">Foundational guidelines for reproducible container-based deployment. Follow these rules for every Dockerfile you write.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1007/s00261-024-04759-3" target="_blank">Harmon et al. &mdash; MONAI Deploy Express Clinical Implementation (Abdominal Radiology, 2025)</a></div>
+        <div class="resource-desc">First published MONAI Deploy clinical implementation: 33-second median inference, PACS integration, downstream biopsy planning. The evidence that MONAI Deploy works in practice.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1016/S1470-2045(19)30098-1" target="_blank">Kickingereder et al. &mdash; Automated GBM Response Assessment (Lancet Oncol, 2019)</a></div>
+        <div class="resource-desc">The Heidelberg XNAT pipeline: fully automated, manufacturer-neutral, validated across 34 trial institutions. Proved that automated RANO monitoring is feasible at scale.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1016/j.media.2024.103277" target="_blank">Zhang &amp; Chung &mdash; EfficientQ: Post-Training Quantization (Med Image Anal, 2024)</a></div>
+        <div class="resource-desc">Quantize a 3D U-Net in under 5 minutes with one GPU and one data sample. Enables deployment on resource-constrained hardware.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ NAVIGATION ═══════ -->
+  <div class="nav-lesson">
+    <a href="week9.html">&larr; Week 09: Clinical Integration</a>
+    <a href="week11.html">Week 11: Longitudinal Data &amp; RANO &rarr;</a>
+  </div>
+</div>
+
+<footer>
+  <p><a href="../index.html">MedVision Academy</a> &nbsp;&middot;&nbsp; Week 10: Deploying Your Model</p>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('click', function(e) {
+    var link = e.target.closest('a');
+    if (!link) return;
+    var href = link.getAttribute('href');
+    if (!href) return;
+    if (href.startsWith('http') && !href.includes(window.location.hostname)) {
+      var linkName = link.getAttribute('data-link-name') || link.textContent.trim().substring(0, 60);
+      if (typeof gtag === 'function') {
+        gtag('event', 'outbound_click', { 'link_url': href, 'link_text': linkName });
+      }
+    }
+  });
+});
+</script>
+
+</body>
+</html>
