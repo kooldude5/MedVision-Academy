@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 12: Radiomics in Neuro-Oncology — MedVision Academy</title>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9LJGDZVJRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9LJGDZVJRW');
+</script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10; --surface: #12151c; --surface-2: #1a1e28; --surface-3: #222834;
+    --border: #2a3040; --border-light: #353d50;
+    --text: #e8eaf0; --text-muted: #8b92a8; --text-dim: #5c6478;
+    --accent: #4af0c0; --accent-dim: #2a8068; --accent-glow: rgba(74,240,192,0.12);
+    --warm: #f0a04a; --rose: #f06088; --blue: #4a90f0; --purple: #a06af0;
+    --serif: 'DM Serif Display', Georgia, serif;
+    --sans: 'Instrument Sans', -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  ::selection { background: var(--accent); color: var(--bg); }
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,12,16,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 0 2rem; }
+  .nav-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .nav-logo { font-family: var(--serif); font-size: 1.25rem; color: var(--accent); text-decoration: none; }
+  .nav-logo span { color: var(--text-muted); font-style: italic; font-size: 0.9rem; margin-left: 0.4rem; }
+  .nav-back { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 500; padding: 0.4rem 0.75rem; border-radius: 6px; border: 1px solid var(--border); transition: all 0.2s; }
+  .nav-back:hover { color: var(--text); border-color: var(--border-light); background: var(--surface-2); }
+  .lesson-hero { padding: 7rem 2rem 3rem; max-width: 900px; margin: 0 auto; }
+  .lesson-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(160,106,240,0.1); border: 1px solid rgba(160,106,240,0.3); padding: 0.3rem 0.9rem; border-radius: 100px; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; color: var(--purple); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.25rem; }
+  .lesson-hero h1 { font-family: var(--serif); font-size: clamp(2rem, 4vw, 2.8rem); line-height: 1.15; letter-spacing: -0.025em; margin-bottom: 1rem; }
+  .lesson-hero h1 em { font-style: italic; color: var(--accent); }
+  .lesson-hero .subtitle { font-size: 1.05rem; color: var(--text-muted); max-width: 640px; line-height: 1.7; }
+  .lesson { max-width: 900px; margin: 0 auto; padding: 0 2rem 4rem; }
+  .divider { max-width: 900px; margin: 0 auto; padding: 0 2rem; border-top: 1px solid var(--border); }
+  .lesson-section { margin-top: 3.5rem; }
+  .lesson-section-label { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .lesson-section h2 { font-family: var(--serif); font-size: 1.6rem; line-height: 1.2; margin-bottom: 1rem; }
+  .lesson-section h3 { font-family: var(--serif); font-size: 1.2rem; line-height: 1.3; margin: 2rem 0 0.75rem; }
+  .lesson-section p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin-bottom: 1rem; }
+  .lesson-section p:last-child { margin-bottom: 0; }
+  .lesson-section strong { color: var(--text); }
+  .lesson-section code { font-family: var(--mono); font-size: 0.85em; background: var(--surface-2); padding: 0.15rem 0.4rem; border-radius: 4px; color: var(--accent); }
+  .concept-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 1.75rem; margin: 1.5rem 0; }
+  .concept-card .concept-title { font-family: var(--serif); font-size: 1.1rem; margin-bottom: 0.75rem; }
+  .concept-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; margin-bottom: 0.5rem; }
+  .concept-card p:last-child { margin-bottom: 0; }
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.5rem 0; }
+  .stat-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; text-align: center; }
+  .stat-box .stat-val { font-family: var(--serif); font-size: 1.5rem; color: var(--accent); margin-bottom: 0.25rem; }
+  .stat-box .stat-label { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; }
+  .callout { background: var(--accent-glow); border: 1px solid var(--accent-dim); border-radius: 10px; padding: 1.25rem 1.5rem; display: flex; gap: 1rem; align-items: start; margin: 1.5rem 0; }
+  .callout-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 0.1rem; }
+  .callout-text { font-size: 0.9rem; color: var(--text-muted); line-height: 1.65; }
+  .callout-text strong { color: var(--text); }
+  .callout-warn { background: rgba(240,160,74,0.08); border-color: rgba(240,160,74,0.3); }
+  .callout-info { background: rgba(74,144,240,0.08); border-color: rgba(74,144,240,0.3); }
+  .pipeline-steps { display: flex; flex-direction: column; gap: 0; margin: 1.5rem 0; }
+  .pipeline-step { display: flex; gap: 1.25rem; padding: 1.25rem 0; border-bottom: 1px solid var(--border); }
+  .pipeline-step:last-child { border-bottom: none; }
+  .step-num { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; color: var(--accent); background: var(--accent-glow); padding: 0.2rem 0.5rem; border-radius: 4px; height: fit-content; white-space: nowrap; margin-top: 0.15rem; }
+  .step-content .step-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.3rem; }
+  .step-content p { color: var(--text-muted); font-size: 0.88rem; line-height: 1.65; margin: 0; }
+  .code-block { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin: 1.25rem 0; overflow-x: auto; }
+  .code-block code { font-family: var(--mono); font-size: 0.82rem; line-height: 1.8; color: var(--text-muted); }
+  .code-block .comment { color: var(--text-dim); }
+  .code-block .cmd { color: var(--accent); }
+  .code-block .str { color: var(--warm); }
+  .code-block .key { color: var(--blue); }
+  .resource-list { display: flex; flex-direction: column; gap: 0.75rem; margin: 1.5rem 0; }
+  .resource-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; transition: border-color 0.3s; }
+  .resource-item:hover { border-color: var(--border-light); }
+  .resource-tag { font-family: var(--mono); font-size: 0.62rem; font-weight: 600; padding: 0.15rem 0.45rem; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.08em; margin-right: 0.5rem; display: inline-block; }
+  .resource-tag.paper { background: rgba(240,160,74,0.12); color: var(--warm); }
+  .resource-tag.video { background: rgba(240,96,136,0.15); color: var(--rose); }
+  .resource-tag.tool { background: rgba(160,106,240,0.12); color: var(--purple); }
+  .resource-tag.site { background: rgba(74,240,192,0.12); color: var(--accent); }
+  .resource-tag.course { background: rgba(74,144,240,0.12); color: var(--blue); }
+  .resource-title { font-weight: 600; font-size: 0.92rem; margin-bottom: 0.3rem; }
+  .resource-title a { color: var(--text); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.2s; }
+  .resource-title a:hover { border-bottom-color: var(--accent); }
+  .resource-desc { color: var(--text-muted); font-size: 0.82rem; line-height: 1.6; }
+  .resource-cite { font-family: var(--mono); font-size: 0.7rem; color: var(--text-dim); margin-top: 0.25rem; }
+  .nav-lesson { display: flex; justify-content: space-between; align-items: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); }
+  .nav-lesson a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid var(--border); transition: all 0.2s; }
+  .nav-lesson a:hover { color: var(--accent); border-color: var(--accent-dim); }
+  footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--text-dim); font-size: 0.8rem; max-width: 900px; margin: 0 auto; }
+  footer a { color: var(--text-muted); text-decoration: none; }
+  footer a:hover { color: var(--accent); }
+  @media (max-width: 700px) {
+    .stat-grid { grid-template-columns: 1fr; }
+    .pipeline-step { flex-direction: column; gap: 0.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="../index.html">MedVision<span>Academy</span></a>
+    <a class="nav-back" href="../index.html#curriculum">&larr; Back to Curriculum</a>
+  </div>
+</nav>
+
+<div class="lesson-hero">
+  <div class="lesson-badge">Week 12 &mdash; Q4</div>
+  <h1>Radiomics in <em>Neuro-Oncology</em></h1>
+  <p class="subtitle">Segmentation is the starting point. Radiomics is what comes next &mdash; extracting hundreds of quantitative features from your tumor segmentation masks that capture patterns invisible to the human eye, then using them to predict molecular markers, survival, and treatment response without a biopsy.</p>
+</div>
+
+<div class="divider"></div>
+
+<div class="lesson">
+
+  <!-- ═══════ 12.1 WHAT IS RADIOMICS ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 12.1 Images Are Data</div>
+    <h2>What Is Radiomics?</h2>
+
+    <p>Traditional radiology is qualitative: a radiologist looks at an image and describes what they see. Radiomics is <strong>quantitative</strong>: algorithms extract hundreds to thousands of numerical features from medical images that capture tumor characteristics invisible to the human eye &mdash; subtle texture patterns, intensity distributions, and shape irregularities that correlate with molecular biology, treatment response, and patient outcomes.</p>
+
+    <p>The core premise is simple: <strong>images contain far more information than doctors can perceive visually</strong>. A glioblastoma that appears homogeneous to a radiologist may have texture features that reveal heterogeneous cellular architecture, or intensity patterns that correlate with IDH mutation status. Radiomics turns these hidden patterns into data.</p>
+
+    <div class="callout">
+      <div class="callout-icon">&#128161;</div>
+      <div class="callout-text"><strong>The connection to everything you&rsquo;ve learned:</strong> Radiomics requires segmentation (Weeks 1&ndash;8 taught you to build the models that produce the tumor masks). It requires evaluation metrics (Week 7 &mdash; radiomic model performance uses AUC, C-index, accuracy). It connects to clinical workflows (Week 9) and treatment monitoring (Week 11). This week is the capstone: segmentation as a means to an end, not the end itself.</div>
+    </div>
+
+    <h3>The Radiomics Workflow</h3>
+    <div class="pipeline-steps">
+      <div class="pipeline-step">
+        <span class="step-num">01</span>
+        <div class="step-content">
+          <div class="step-title">Image Acquisition</div>
+          <p>Standardized MRI acquisition (T1, T1ce, T2, FLAIR, optionally DWI/perfusion). Acquisition parameters affect feature values &mdash; this is where reproducibility challenges begin.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">02</span>
+        <div class="step-content">
+          <div class="step-title">Segmentation</div>
+          <p>Delineate tumor sub-regions (ET, TC, WT, peritumoral edema) using nnU-Net or manual annotation. This is where your BraTS skills directly feed the radiomics pipeline. Segmentation quality is the single biggest source of feature variability.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">03</span>
+        <div class="step-content">
+          <div class="step-title">Preprocessing</div>
+          <p>Resample to isotropic voxels (1mm&sup3;), normalize intensities (Z-score for MRI), apply intensity discretization (bin width typically 25&ndash;50 for MRI). These settings dramatically affect features and must be standardized.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">04</span>
+        <div class="step-content">
+          <div class="step-title">Feature Extraction</div>
+          <p>PyRadiomics extracts 100&ndash;2,000+ features per region: shape, first-order histogram, texture (GLCM, GLRLM, GLSZM, NGTDM), and higher-order (wavelet, LoG). Each feature captures a different aspect of tumor biology.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">05</span>
+        <div class="step-content">
+          <div class="step-title">Feature Selection</div>
+          <p>With more features than patients, dimensionality reduction is critical to avoid overfitting. Methods: remove low-variance and highly correlated features, apply LASSO or recursive feature elimination, validate stability across resampled subsets.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">06</span>
+        <div class="step-content">
+          <div class="step-title">Model Building &amp; Validation</div>
+          <p>Train classifiers (logistic regression, random forest, SVM, XGBoost) or survival models (Cox regression) on the selected features. Validate on external, independent datasets &mdash; not just cross-validation on the training set.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 12.2 FEATURE CATEGORIES ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 12.2 The Feature Landscape</div>
+    <h2>Radiomic Feature Categories</h2>
+
+    <div class="concept-card">
+      <div class="concept-title">Shape Features (14&ndash;20 features)</div>
+      <p>Capture 3D tumor geometry: <strong>volume, surface area, sphericity, elongation, compactness, maximum 3D diameter</strong>. These are independent of image intensity &mdash; they describe the tumor&rsquo;s physical form. Biologically, irregular shapes and low sphericity often indicate aggressive, infiltrative growth. Shape features are the <strong>most sensitive to segmentation quality</strong>: a slight boundary shift changes volume and surface area.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">First-Order Histogram Features (18&ndash;20 features)</div>
+      <p>Describe the distribution of voxel intensities without considering spatial relationships: <strong>mean, median, variance, skewness, kurtosis, entropy, energy, percentiles (10th, 90th)</strong>. These capture overall tumor density and cellularity. High entropy suggests heterogeneous tissue; skewed distributions may indicate necrosis or hemorrhage. These features are <strong>more robust to segmentation variability</strong> than shape or texture features.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Second-Order Texture Features (70&ndash;90 features)</div>
+      <p>Quantify spatial relationships between neighboring voxels, capturing <strong>intratumoral heterogeneity</strong>:</p>
+      <p><strong>GLCM</strong> (Gray Level Co-occurrence Matrix): contrast, correlation, energy, homogeneity &mdash; how often pairs of voxel intensities occur together. High GLCM contrast indicates abrupt intensity transitions (tumor-necrosis boundaries).</p>
+      <p><strong>GLRLM</strong> (Gray Level Run Length Matrix): captures how long continuous runs of the same intensity extend &mdash; long runs suggest homogeneous regions, short runs indicate texture.</p>
+      <p><strong>GLSZM</strong> (Gray Level Size Zone Matrix): measures the size of connected zones of similar intensity. <strong>NGTDM</strong>: captures coarseness and busyness of texture patterns.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Higher-Order Features (Hundreds of features)</div>
+      <p>Derived from filtered images that enhance specific patterns: <strong>wavelet decomposition</strong> (8 sub-bands capturing high/low frequency patterns in each dimension) and <strong>Laplacian of Gaussian (LoG)</strong> filters (with &sigma; from 1&ndash;5mm, capturing features at different spatial scales). Apply first-order and texture features to each filtered image, multiplying the total feature count. The IBSI 2024 standardization extended to these convolutional filters for cross-platform reproducibility.</p>
+    </div>
+  </div>
+
+  <!-- ═══════ 12.3 PYRADIOMICS ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 12.3 Hands-On Feature Extraction</div>
+    <h2>PyRadiomics: The Standard Tool</h2>
+
+    <p>PyRadiomics is the open-source Python package for IBSI-compliant radiomic feature extraction. It accepts NIfTI images and segmentation masks and outputs a structured feature vector. Here&rsquo;s how to extract features from your BraTS segmentations:</p>
+
+    <div class="code-block">
+      <code>
+<span class="cmd">from</span> radiomics <span class="cmd">import</span> featureextractor<br>
+<span class="cmd">import</span> pandas <span class="cmd">as</span> pd<br>
+<span class="cmd">import</span> nibabel <span class="cmd">as</span> nib<br>
+<span class="cmd">import</span> numpy <span class="cmd">as</span> np<br><br>
+<span class="comment"># Configure extractor</span><br>
+params = {<br>
+&nbsp;&nbsp;<span class="str">"binWidth"</span>: 25,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Intensity discretization</span><br>
+&nbsp;&nbsp;<span class="str">"resampledPixelSpacing"</span>: [1, 1, 1],&nbsp;&nbsp;<span class="comment"># Isotropic 1mm</span><br>
+&nbsp;&nbsp;<span class="str">"normalize"</span>: True,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Z-score normalize</span><br>
+&nbsp;&nbsp;<span class="str">"imageType"</span>: {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"Original"</span>: {},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"LoG"</span>: {<span class="str">"sigma"</span>: [1.0, 3.0, 5.0]},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"Wavelet"</span>: {}<br>
+&nbsp;&nbsp;}<br>
+}<br>
+extractor = featureextractor.RadiomicsFeatureExtractor(params)<br><br>
+<span class="comment"># Extract features from enhancing tumor on T1ce</span><br>
+image_path = <span class="str">"patient_001_T1ce.nii.gz"</span><br>
+mask_path = <span class="str">"patient_001_seg.nii.gz"</span><br><br>
+<span class="comment"># Label 3 = enhancing tumor (or 4 in original BraTS)</span><br>
+result = extractor.execute(image_path, mask_path, label=3)<br><br>
+<span class="comment"># Convert to DataFrame</span><br>
+features = {k: v <span class="cmd">for</span> k, v <span class="cmd">in</span> result.items()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cmd">if not</span> k.startswith(<span class="str">"diagnostics"</span>)}<br>
+df = pd.DataFrame([features])<br>
+<span class="cmd">print</span>(f<span class="str">"Extracted {len(features)} features"</span>)<br>
+<span class="comment"># Typically: ~100 original + ~800 wavelet + ~300 LoG = ~1,200 total</span>
+      </code>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">&#128218;</div>
+      <div class="callout-text"><strong>Extract features from each sub-region:</strong> Run PyRadiomics separately on each tumor compartment (ET, TC, WT, peritumoral edema) across each MRI sequence (T1, T1ce, T2, FLAIR). Each region-sequence combination captures different biology: ET on T1ce reflects angiogenesis, peritumoral edema on FLAIR captures infiltrative margins, necrotic core on T1 encodes hypoxia. A complete analysis might extract features from 4 regions &times; 4 sequences = 16 combinations.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 12.4 MOLECULAR CLASSIFICATION ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 12.4 Reading Genetics From Images</div>
+    <h2>Predicting Molecular Markers Non-Invasively</h2>
+
+    <p>This is radiomics&rsquo; most impactful clinical application: predicting tumor molecular markers that normally require an invasive biopsy, using only MRI-derived features. For patients where biopsy is risky (deep-seated tumors, elderly patients), radiomics could provide critical molecular information non-invasively.</p>
+
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="stat-val">87%</div>
+        <div class="stat-label">Pooled sensitivity for IDH mutation prediction from MRI radiomics</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">0.95</div>
+        <div class="stat-label">AUC for glioma grading with integrated deep learning + radiomics</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">0.77</div>
+        <div class="stat-label">Pooled AUC for MGMT methylation prediction from MRI radiomics</div>
+      </div>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">IDH Mutation Status</div>
+      <p>The most clinically important molecular marker for glioma classification and prognosis. Meta-analyses report <strong>pooled sensitivity 86.7% and specificity 82.8%</strong> for radiomics-based IDH prediction, with individual studies achieving AUC 0.80&ndash;0.99. The most predictive features include texture from T2-FLAIR (capturing the T2-FLAIR mismatch sign), first-order features from T1ce, and shape features. A multicenter radiomics nomogram achieved AUC 0.891 in training and 0.881 in external validation. Deep learning models reach sensitivity 0.80 and specificity 0.85, and hybrid approaches combining both achieve AUC up to 0.98.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">MGMT Promoter Methylation</div>
+      <p>Predicts response to temozolomide chemotherapy &mdash; one of the most actionable molecular markers. Radiomics achieves <strong>pooled AUC 0.77</strong> (sensitivity 77.5%, specificity 71.4%). Multiregional models combining features from enhancing tumor, necrotic core, and edema perform best (AUC 0.84&ndash;0.88 in validation). The most informative features come from FLAIR texture and T1ce first-order statistics. A novel multimodal framework combining habitat radiomics, deep learning, and conventional radiomics pushed performance to AUC 0.98.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">1p/19q Codeletion</div>
+      <p>Defines oligodendroglial tumors and predicts chemotherapy sensitivity. Radiomics achieves <strong>sensitivity 0.75, specificity 0.82</strong> with AUC 0.71&ndash;0.99. Thin-slice 3D MRI-based models achieve AUC 0.94 in training and 0.89 in validation. Combining the T2-FLAIR mismatch sign with radiomics improves AUC from 0.77 (mismatch alone) to 0.88. Knowledge-guided radiomics incorporating visual features (enhancement pattern, calcification) shows better cross-center generalizability than purely data-driven approaches.</p>
+    </div>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">&#9888;&#65039;</div>
+      <div class="callout-text"><strong>Can radiomics replace biopsy?</strong> Not yet. The accuracy levels are promising but not sufficient for standalone clinical decisions. The current role is as a <strong>complement to clinical decision-making</strong>: guiding biopsy planning, providing preliminary molecular information while awaiting pathology, and monitoring patients where repeat biopsy is impractical. Prospective validation on large, diverse cohorts remains the critical gap before clinical adoption.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 12.5 SURVIVAL & RESPONSE ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 12.5 Predicting What Matters Most</div>
+    <h2>Survival Prediction &amp; Treatment Response</h2>
+
+    <div class="concept-card">
+      <div class="concept-title">Survival Prediction</div>
+      <p>Radiomic signatures predict overall survival with <strong>C-indices of 0.65&ndash;0.89</strong> in glioblastoma. An 11-feature radiomic signature stratified patients into high and low-risk groups with hazard ratios of 4.33 for OS and 2.43 for PFS. Habitat radiomics &mdash; analyzing features from tumor sub-regions separately &mdash; achieves the best performance (C-index 0.89) because different compartments capture different biological processes. Combining radiomics with clinical data (age, performance status, extent of resection) and molecular markers (IDH, MGMT) yields C-indices of 0.73&ndash;0.77 in integrated models. RNA sequencing pairing has revealed that specific radiomic features correlate with immune regulation, proliferation, and treatment response pathways.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Treatment Response Prediction</div>
+      <p>Pre-treatment radiomic features predict response to chemoradiation with AUC up to 0.92 for residual gliomas. Peritumoral radiomics combined with clinical features predicts 12-month progression-free survival with AUC 0.75. Integration of <strong>dosiomics</strong> (features from the radiation dose distribution) with pre-treatment MRI radiomics improves survival stratification to AUC 0.96 &mdash; a powerful combination of &ldquo;what does the tumor look like?&rdquo; with &ldquo;how was the tumor treated?&rdquo;</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Delta-Radiomics: Tracking Change Over Time</div>
+      <p>Instead of extracting features from a single scan, <strong>delta-radiomics</strong> computes changes in features between timepoints. This captures the dynamic treatment response that single-timepoint features miss. Delta-features improve treatment assessment AUC from 0.65&ndash;0.78 to <strong>0.89</strong> when using 1&ndash;2 week post-treatment changes. An 8-year retrospective study achieved AUC 0.95&ndash;0.99 for predicting glioma recurrence using combined pre- and post-operative delta-habitat radiomics. The optimal window is 1&ndash;2 weeks post-treatment, capturing early biological changes before morphological progression is visible. This directly complements the RANO longitudinal monitoring you learned in Week 11.</p>
+    </div>
+  </div>
+
+  <!-- ═══════ 12.6 PSEUDOPROGRESSION ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 12.6 Solving the Hardest Problem</div>
+    <h2>Radiomics for Pseudoprogression &amp; Recurrence</h2>
+
+    <p>Week 11 introduced the pseudoprogression problem. Radiomics is one of the most promising tools for solving it. Texture and intensity features from conventional and advanced MRI capture microstructural differences between treatment effects and true tumor that are invisible on standard visual assessment.</p>
+
+    <div class="concept-card">
+      <div class="concept-title">Conventional MRI Radiomics</div>
+      <p>Features from standard T1ce, T2, FLAIR, and DWI/ADC sequences achieve <strong>accuracy 73&ndash;90%, AUC 0.80&ndash;0.96</strong> for distinguishing pseudoprogression from true progression. Multi-sequence models using 6 MRI sequences with radiomics achieved AUC 0.88 with high robustness. Machine learning combining radiomic features with MGMT status and clinical factors reaches AUC 0.80.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Perfusion-Based Radiomics</div>
+      <p>The strongest discriminators come from perfusion MRI. A landmark multicenter study found perfusion-derived radiomic features identified pseudoprogression with <strong>AUC 0.90, sensitivity 91%, specificity 88%</strong>. Incorporating diffusion and perfusion into radiomics models improves AUC from 0.76&ndash;0.80 (conventional only) to 0.90. Combined quantitative susceptibility mapping (QSM) + arterial spin labeling (ASL) + diffusion features achieved AUC 0.95. The biological basis: pseudoprogression has reduced blood volume (low rCBV) and increased diffusivity (high ADC) compared to true progression.</p>
+    </div>
+  </div>
+
+  <!-- ═══════ 12.7 DEEP RADIOMICS ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 12.7 The Convergence</div>
+    <h2>Deep Radiomics: Where DL Meets Feature Engineering</h2>
+
+    <p>The traditional radiomics pipeline (handcrafted features + ML classifier) and deep learning (end-to-end CNNs) are converging. <strong>Deep radiomics</strong> uses features extracted from intermediate CNN layers as descriptors, combining the interpretability of handcrafted features with the representation power of deep learning.</p>
+
+    <div class="concept-card">
+      <div class="concept-title">Handcrafted vs Deep vs Hybrid</div>
+      <p>A head-to-head comparison found deep learning achieved <strong>AUC 0.89 vs radiomics AUC 0.86</strong> for molecular subtyping, with feature visualization showing weak correlation between the two feature types &mdash; meaning they capture <strong>complementary</strong> information. Hybrid approaches combining both consistently outperform either alone: <strong>AUC 0.946 for glioma grading</strong> (vs 0.891 radiomics-only, 0.903 deep-only), and AUC 0.98 for IDH prediction using deep radiomics nomograms. Different combinations excel for different tasks: habitat + DenseNet features for grading, habitat + radiomics for IDH prediction. The lesson: don&rsquo;t choose between radiomics and deep learning &mdash; combine them.</p>
+    </div>
+  </div>
+
+  <!-- ═══════ 12.8 PERITUMORAL ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 12.8 Beyond the Tumor Boundary</div>
+    <h2>Peritumoral Radiomics</h2>
+
+    <p>One of the most exciting radiomics findings is that features extracted from the <strong>peritumoral edema zone</strong> &mdash; the region surrounding the visible tumor &mdash; contain information about tumor biology that intratumoral features alone cannot capture. This makes biological sense: peritumoral edema contains infiltrating tumor cells, reactive astrocytes, and disrupted vasculature that reflect the tumor&rsquo;s invasive potential.</p>
+
+    <p>Adding peritumoral features to intratumoral features improves glioma grading, MGMT prediction (AUC 0.84&ndash;0.88 in multicenter validation), and progression-free survival prediction (AUC 0.75). A 2025 study demonstrated that radiomics-based quantification of tumor infiltration in the non-enhancing peritumoral region on post-operative MRI was independently associated with survival in glioblastoma. This has a practical implication for your BraTS segmentations: the &ldquo;whole tumor&rdquo; region (which includes peritumoral edema) is not just a less precise label &mdash; it captures biologically meaningful information about tumor invasiveness.</p>
+  </div>
+
+  <!-- ═══════ 12.9 REPRODUCIBILITY ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 12.9 The Elephant in the Room</div>
+    <h2>Reproducibility: The Radiomics Crisis</h2>
+
+    <p>Radiomics has a reproducibility problem that threatens clinical translation. Features are sensitive to everything: scanner type, acquisition parameters, reconstruction algorithms, and segmentation quality. If you extract features from the same tumor scanned on two different MRI machines, you may get significantly different values.</p>
+
+    <div class="concept-card">
+      <div class="concept-title">The Scale of the Problem</div>
+      <p>Only <strong>4 of 17 features achieved excellent reliability (ICC &gt; 0.9) across all software platforms</strong>. When restricted to IBSI-compliant software, this improved to 15 of 17. IBSI compliance improved cross-platform feature agreement from <strong>&lt;35% to &gt;95%</strong>. Different segmentation methods can alter feature values by &gt;30%. Most published studies lack external validation (&lt;30% include external cohorts), prospective design, or standardized preprocessing.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Solutions</div>
+      <p><strong>IBSI Standardization:</strong> The Image Biomarker Standardization Initiative defined 169 features with benchmark values for cross-platform validation. Always use IBSI-compliant software (PyRadiomics is compliant). <strong>ComBat Harmonization:</strong> Statistical method for removing batch effects between scanners/institutions, adapted from genomics. Apply ComBat before building models on multi-center data. <strong>Standardized Preprocessing:</strong> Fix resampling (1mm isotropic), bin width (25&ndash;50), normalization (Z-score for MRI), and document everything. <strong>Feature Stability Analysis:</strong> Assess which features are reproducible on your data before building models. Discard unstable features even if they seem predictive.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Reporting Standards</div>
+      <p>The <strong>Radiomics Quality Score (RQS)</strong> evaluates 16 components of study quality. The <strong>IBSI</strong> ensures feature computation reproducibility. <strong>TRIPOD-AI</strong> guidelines standardize reporting of prediction models. The 2025 ESR practice recommendations mandate IBSI compliance, standardized preprocessing, and transparent reporting for publication. If your radiomics study doesn&rsquo;t meet these standards, it won&rsquo;t be trusted &mdash; and shouldn&rsquo;t be.</p>
+    </div>
+  </div>
+
+  <!-- ═══════ 12.10 SEGMENTATION CONNECTION ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 12.10 Full Circle</div>
+    <h2>Segmentation Quality &amp; Radiomics</h2>
+
+    <p>This is where the entire 12-week curriculum comes together. Segmentation quality <strong>directly impacts</strong> every radiomic feature value and every downstream clinical prediction. Shape features are most sensitive (a slight boundary shift changes volume and surface area). First-order features are more robust but still affected by which voxels are included. Texture features in between.</p>
+
+    <p>The good news: <strong>AI segmentation produces radiomic features equivalent to manual expert segmentation</strong> for clinical endpoints. Automated nnU-Net segmentation with Dice &gt;0.85 for tumor core and &gt;0.75 for enhancing tumor produces radiomic models maintaining AUC &gt;0.90 for molecular classification. One study found automated segmentation-derived radiomics achieved AUC 0.92 vs 0.89 for manual &mdash; the automated pipeline was actually slightly <em>better</em>, likely due to reduced inter-observer variability.</p>
+
+    <div class="callout">
+      <div class="callout-icon">&#128161;</div>
+      <div class="callout-text"><strong>The complete picture:</strong> You learned to preprocess MRI (Week 2), segment tumors with nnU-Net (Weeks 4&ndash;6), evaluate with proper metrics (Week 7), improve with ensembling and advanced losses (Week 8), understand the clinical context (Weeks 9, 11), deploy the model (Week 10), and now extract radiomic features that predict molecular markers, survival, and treatment response. Every step feeds the next. The segmentation model you trained for BraTS isn&rsquo;t just a competition entry &mdash; it&rsquo;s the foundation for a complete radiomics pipeline that could one day inform clinical decisions.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ RESOURCES ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 12.11 Resources &amp; Further Reading</div>
+    <h2>This Week&rsquo;s Learning Resources</h2>
+
+    <h3>Hands-On Tools</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://pyradiomics.readthedocs.io/" target="_blank">PyRadiomics Documentation</a></div>
+        <div class="resource-desc">The standard IBSI-compliant feature extraction library. This week: install it, extract features from a BraTS segmentation, and explore the output. Start with the &ldquo;Getting Started&rdquo; tutorial.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://github.com/AIM-Harvard/pyradiomics" target="_blank">PyRadiomics GitHub Repository</a></div>
+        <div class="resource-desc">Source code, example notebooks, and configuration templates. The <code>examples/</code> directory has complete workflows for feature extraction from NIfTI images with segmentation masks.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://theibsi.github.io/" target="_blank">IBSI &mdash; Image Biomarker Standardization Initiative</a></div>
+        <div class="resource-desc">The definitive reference for standardized feature definitions with benchmark digital phantoms. Use this to validate your feature extraction pipeline produces correct values.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://www.cancerimagingarchive.net/" target="_blank">TCIA &mdash; The Cancer Imaging Archive</a></div>
+        <div class="resource-desc">Public repository of cancer imaging datasets, many with paired genomic data. The TCGA-GBM and TCGA-LGG collections include MRI + genomic data for radiogenomics studies.</div>
+      </div>
+    </div>
+
+    <h3>Key Papers</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1148/radiol.2016161352" target="_blank">Gillies et al. &mdash; Radiomics: Images Are More Than Pictures, They Are Data (Radiology, 2016)</a></div>
+        <div class="resource-desc">The foundational conceptual paper. Establishes the case for radiomics as a discipline. Read this first for the big-picture vision.</div>
+        <div class="resource-cite">Radiology. 2016;278(2):563&ndash;577</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1158/0008-5472.CAN-17-0339" target="_blank">van Griethuysen et al. &mdash; PyRadiomics: Computational Radiomics System (Cancer Research, 2017)</a></div>
+        <div class="resource-desc">The PyRadiomics paper. Describes the software architecture, feature classes, and validation. Cite this when using PyRadiomics in your own research.</div>
+        <div class="resource-cite">Cancer Res. 2017;77(21):e104&ndash;e107</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1148/radiol.2020191145" target="_blank">Zwanenburg et al. &mdash; IBSI: Standardized Quantitative Radiomics (Radiology, 2020)</a></div>
+        <div class="resource-desc">The IBSI standardization paper: 169 features defined with benchmark values. The reference for reproducible feature computation. Every radiomics study should cite this.</div>
+        <div class="resource-cite">Radiology. 2020;295(2):328&ndash;338</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1038/s41467-019-11007-0" target="_blank">Elshafeey et al. &mdash; Perfusion Radiomics for Pseudoprogression (Nature Comms, 2019)</a></div>
+        <div class="resource-desc">Multicenter study: perfusion-derived radiomics identifies pseudoprogression with AUC 0.90, sensitivity 91%, specificity 88%. The strongest evidence for radiomics in the pseudoprogression problem.</div>
+        <div class="resource-cite">Nat Commun. 2019;10:3170</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1148/radiol.2020209027" target="_blank">Sun et al. &mdash; Biologic Pathways Underlying Radiomics Phenotypes (Radiology, 2021)</a></div>
+        <div class="resource-desc">Maps radiomic features to RNA sequencing data in glioblastoma, revealing correlations with immune regulation, proliferation, and treatment response pathways. The biological validation that radiomics features aren&rsquo;t just math &mdash; they reflect real biology.</div>
+        <div class="resource-cite">Radiology. 2021;301(3):654&ndash;663</div>
+      </div>
+    </div>
+
+    <h3>Deep Dives</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1007/s00330-022-08674-7" target="_blank">Li et al. &mdash; Radiomics vs Deep Learning for Molecular Subtyping (European Radiology, 2022)</a></div>
+        <div class="resource-desc">Head-to-head comparison: deep learning AUC 0.89 vs radiomics AUC 0.86, with weak correlation between feature types suggesting complementary information. The evidence for hybrid approaches.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1158/0008-5472.CAN-24-3237" target="_blank">El-Jammal &amp; Chung &mdash; Paving a Path to Clinical Impact (Cancer Research, 2025)</a></div>
+        <div class="resource-desc">Perspective on the reproducibility crisis: what needs to happen for radiomics to reach clinical impact. Standardized workflows, prospective validation, and regulatory frameworks.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1007/s00330-025-11569-4" target="_blank">ESR Essentials &mdash; Radiomics Practice Recommendations (European Radiology, 2025)</a></div>
+        <div class="resource-desc">The European Society of Medical Imaging Informatics guidelines: IBSI compliance, preprocessing standards, reporting requirements, and the structured pathway to clinical deployment.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1148/radiol.2018180958" target="_blank">Kickingereder et al. &mdash; Radiomic Profiling of Glioblastoma (Radiology, 2016)</a></div>
+        <div class="resource-desc">11-feature radiomic signature with HR=4.33 for OS. One of the first studies demonstrating that radiomics adds prognostic value beyond clinical and molecular markers.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ NAVIGATION ═══════ -->
+  <div class="nav-lesson">
+    <a href="week11.html">&larr; Week 11: Longitudinal Data &amp; RANO</a>
+    <a href="../index.html">Back to Curriculum &rarr;</a>
+  </div>
+</div>
+
+<footer>
+  <p><a href="../index.html">MedVision Academy</a> &nbsp;&middot;&nbsp; Week 12: Radiomics in Neuro-Oncology</p>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('click', function(e) {
+    var link = e.target.closest('a');
+    if (!link) return;
+    var href = link.getAttribute('href');
+    if (!href) return;
+    if (href.startsWith('http') && !href.includes(window.location.hostname)) {
+      var linkName = link.getAttribute('data-link-name') || link.textContent.trim().substring(0, 60);
+      if (typeof gtag === 'function') {
+        gtag('event', 'outbound_click', { 'link_url': href, 'link_text': linkName });
+      }
+    }
+  });
+});
+</script>
+
+</body>
+</html>
