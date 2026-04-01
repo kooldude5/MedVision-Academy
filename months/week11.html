@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 11: Longitudinal Datasets &amp; RANO Criteria — MedVision Academy</title>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9LJGDZVJRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9LJGDZVJRW');
+</script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10; --surface: #12151c; --surface-2: #1a1e28; --surface-3: #222834;
+    --border: #2a3040; --border-light: #353d50;
+    --text: #e8eaf0; --text-muted: #8b92a8; --text-dim: #5c6478;
+    --accent: #4af0c0; --accent-dim: #2a8068; --accent-glow: rgba(74,240,192,0.12);
+    --warm: #f0a04a; --rose: #f06088; --blue: #4a90f0; --purple: #a06af0;
+    --serif: 'DM Serif Display', Georgia, serif;
+    --sans: 'Instrument Sans', -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  ::selection { background: var(--accent); color: var(--bg); }
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,12,16,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 0 2rem; }
+  .nav-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .nav-logo { font-family: var(--serif); font-size: 1.25rem; color: var(--accent); text-decoration: none; }
+  .nav-logo span { color: var(--text-muted); font-style: italic; font-size: 0.9rem; margin-left: 0.4rem; }
+  .nav-back { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 500; padding: 0.4rem 0.75rem; border-radius: 6px; border: 1px solid var(--border); transition: all 0.2s; }
+  .nav-back:hover { color: var(--text); border-color: var(--border-light); background: var(--surface-2); }
+  .lesson-hero { padding: 7rem 2rem 3rem; max-width: 900px; margin: 0 auto; }
+  .lesson-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(160,106,240,0.1); border: 1px solid rgba(160,106,240,0.3); padding: 0.3rem 0.9rem; border-radius: 100px; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; color: var(--purple); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.25rem; }
+  .lesson-hero h1 { font-family: var(--serif); font-size: clamp(2rem, 4vw, 2.8rem); line-height: 1.15; letter-spacing: -0.025em; margin-bottom: 1rem; }
+  .lesson-hero h1 em { font-style: italic; color: var(--accent); }
+  .lesson-hero .subtitle { font-size: 1.05rem; color: var(--text-muted); max-width: 640px; line-height: 1.7; }
+  .lesson { max-width: 900px; margin: 0 auto; padding: 0 2rem 4rem; }
+  .divider { max-width: 900px; margin: 0 auto; padding: 0 2rem; border-top: 1px solid var(--border); }
+  .lesson-section { margin-top: 3.5rem; }
+  .lesson-section-label { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .lesson-section h2 { font-family: var(--serif); font-size: 1.6rem; line-height: 1.2; margin-bottom: 1rem; }
+  .lesson-section h3 { font-family: var(--serif); font-size: 1.2rem; line-height: 1.3; margin: 2rem 0 0.75rem; }
+  .lesson-section p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin-bottom: 1rem; }
+  .lesson-section p:last-child { margin-bottom: 0; }
+  .lesson-section strong { color: var(--text); }
+  .lesson-section code { font-family: var(--mono); font-size: 0.85em; background: var(--surface-2); padding: 0.15rem 0.4rem; border-radius: 4px; color: var(--accent); }
+  .concept-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 1.75rem; margin: 1.5rem 0; }
+  .concept-card .concept-title { font-family: var(--serif); font-size: 1.1rem; margin-bottom: 0.75rem; }
+  .concept-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; margin-bottom: 0.5rem; }
+  .concept-card p:last-child { margin-bottom: 0; }
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.5rem 0; }
+  .stat-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; text-align: center; }
+  .stat-box .stat-val { font-family: var(--serif); font-size: 1.5rem; color: var(--accent); margin-bottom: 0.25rem; }
+  .stat-box .stat-label { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; }
+  .callout { background: var(--accent-glow); border: 1px solid var(--accent-dim); border-radius: 10px; padding: 1.25rem 1.5rem; display: flex; gap: 1rem; align-items: start; margin: 1.5rem 0; }
+  .callout-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 0.1rem; }
+  .callout-text { font-size: 0.9rem; color: var(--text-muted); line-height: 1.65; }
+  .callout-text strong { color: var(--text); }
+  .callout-warn { background: rgba(240,160,74,0.08); border-color: rgba(240,160,74,0.3); }
+  .callout-info { background: rgba(74,144,240,0.08); border-color: rgba(74,144,240,0.3); }
+  .pipeline-steps { display: flex; flex-direction: column; gap: 0; margin: 1.5rem 0; }
+  .pipeline-step { display: flex; gap: 1.25rem; padding: 1.25rem 0; border-bottom: 1px solid var(--border); }
+  .pipeline-step:last-child { border-bottom: none; }
+  .step-num { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; color: var(--accent); background: var(--accent-glow); padding: 0.2rem 0.5rem; border-radius: 4px; height: fit-content; white-space: nowrap; margin-top: 0.15rem; }
+  .step-content .step-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.3rem; }
+  .step-content p { color: var(--text-muted); font-size: 0.88rem; line-height: 1.65; margin: 0; }
+  .code-block { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin: 1.25rem 0; overflow-x: auto; }
+  .code-block code { font-family: var(--mono); font-size: 0.82rem; line-height: 1.8; color: var(--text-muted); }
+  .code-block .comment { color: var(--text-dim); }
+  .code-block .cmd { color: var(--accent); }
+  .code-block .str { color: var(--warm); }
+  .resource-list { display: flex; flex-direction: column; gap: 0.75rem; margin: 1.5rem 0; }
+  .resource-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; transition: border-color 0.3s; }
+  .resource-item:hover { border-color: var(--border-light); }
+  .resource-tag { font-family: var(--mono); font-size: 0.62rem; font-weight: 600; padding: 0.15rem 0.45rem; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.08em; margin-right: 0.5rem; display: inline-block; }
+  .resource-tag.paper { background: rgba(240,160,74,0.12); color: var(--warm); }
+  .resource-tag.video { background: rgba(240,96,136,0.15); color: var(--rose); }
+  .resource-tag.tool { background: rgba(160,106,240,0.12); color: var(--purple); }
+  .resource-tag.site { background: rgba(74,240,192,0.12); color: var(--accent); }
+  .resource-tag.course { background: rgba(74,144,240,0.12); color: var(--blue); }
+  .resource-title { font-weight: 600; font-size: 0.92rem; margin-bottom: 0.3rem; }
+  .resource-title a { color: var(--text); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.2s; }
+  .resource-title a:hover { border-bottom-color: var(--accent); }
+  .resource-desc { color: var(--text-muted); font-size: 0.82rem; line-height: 1.6; }
+  .resource-cite { font-family: var(--mono); font-size: 0.7rem; color: var(--text-dim); margin-top: 0.25rem; }
+  .nav-lesson { display: flex; justify-content: space-between; align-items: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); }
+  .nav-lesson a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid var(--border); transition: all 0.2s; }
+  .nav-lesson a:hover { color: var(--accent); border-color: var(--accent-dim); }
+  footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--text-dim); font-size: 0.8rem; max-width: 900px; margin: 0 auto; }
+  footer a { color: var(--text-muted); text-decoration: none; }
+  footer a:hover { color: var(--accent); }
+  @media (max-width: 700px) {
+    .stat-grid { grid-template-columns: 1fr; }
+    .pipeline-step { flex-direction: column; gap: 0.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="../index.html">MedVision<span>Academy</span></a>
+    <a class="nav-back" href="../index.html#curriculum">&larr; Back to Curriculum</a>
+  </div>
+</nav>
+
+<div class="lesson-hero">
+  <div class="lesson-badge">Week 11 &mdash; Q4</div>
+  <h1>Longitudinal Datasets &amp; <em>RANO Criteria</em></h1>
+  <p class="subtitle">BraTS teaches you to segment a single scan. But real patients are scanned repeatedly &mdash; before surgery, after radiation, every three months for years. This week you learn to organize, register, and segment longitudinal brain MRI, measure treatment response using RANO criteria, and navigate the imaging challenges that make post-treatment segmentation fundamentally harder than pre-treatment.</p>
+</div>
+
+<div class="divider"></div>
+
+<div class="lesson">
+
+  <!-- ═══════ 11.1 WHY LONGITUDINAL ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 11.1 Beyond a Single Timepoint</div>
+    <h2>Why Longitudinal Data Changes Everything</h2>
+
+    <p>The BraTS challenge gives you one MRI per patient, taken before surgery. In the real world, a glioblastoma patient may have <strong>15&ndash;30 MRI scans</strong> over the course of their treatment &mdash; baseline, 48 hours post-surgery, post-radiation baseline, then every 2&ndash;3 months for surveillance. The clinical question is never &ldquo;what does the tumor look like right now?&rdquo; but <strong>&ldquo;is it getting better, worse, or staying the same?&rdquo;</strong></p>
+
+    <p>This shift from single-timepoint segmentation to longitudinal treatment monitoring introduces challenges that don&rsquo;t exist in BraTS: the tumor changes appearance after each treatment, the brain itself changes shape (resection, edema resolution), and treatment creates imaging artifacts that look like tumor but aren&rsquo;t (pseudoprogression, radiation necrosis). Understanding these challenges is essential for building clinically useful AI.</p>
+
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="stat-val">87%</div>
+        <div class="stat-label">Reliability of automated volumetry vs 51% for manual RANO (Lancet Oncology)</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">20&ndash;30%</div>
+        <div class="stat-label">Of GBM patients experience pseudoprogression after chemoradiation</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">0.97</div>
+        <div class="stat-label">ICC for automated volumetry vs 0.42&ndash;0.61 for manual 2D measurements</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 11.2 RANO CRITERIA ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 11.2 The Clinical Standard</div>
+    <h2>RANO Criteria: How Doctors Measure Response</h2>
+
+    <p>The <strong>Response Assessment in Neuro-Oncology (RANO)</strong> criteria are the international standard for determining whether a brain tumor is responding to treatment. They define four response categories based on imaging measurements and clinical status. Understanding RANO is essential because it defines what &ldquo;success&rdquo; means for your segmentation model in a clinical context.</p>
+
+    <h3>RANO 1.0 (2010): Bidimensional Measurements</h3>
+    <p>The original criteria use <strong>bidimensional measurements</strong>: multiply the longest diameter of the enhancing tumor by its perpendicular diameter. Response is defined as: <strong>Complete Response (CR)</strong>: disappearance of all enhancing tumor. <strong>Partial Response (PR)</strong>: &ge;50% decrease in the product of perpendicular diameters. <strong>Stable Disease (SD)</strong>: neither PR nor PD criteria met. <strong>Progressive Disease (PD)</strong>: &ge;25% increase in the product, or new lesions.</p>
+
+    <h3>RANO 2.0 (2023): The Volumetric Shift</h3>
+    <p>Published in the Journal of Clinical Oncology, RANO 2.0 is a major update informed by data from 1,106 glioblastoma patients. The key changes represent lessons learned from a decade of clinical experience:</p>
+
+    <div class="concept-card">
+      <div class="concept-title">Post-Radiation Baseline</div>
+      <p>RANO 2.0 uses the <strong>post-radiotherapy MRI as baseline</strong>, not the post-surgical scan. This change alone improved the correlation between progression-free survival (PFS) and overall survival (OS) from 0.53 to 0.67. The rationale: comparing pre-treatment to post-treatment scans introduces too much noise from treatment effects.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Volumetric Measurements Now Allowed</div>
+      <p>RANO 2.0 formally introduces <strong>volumetric measurement as an option</strong> alongside traditional 2D. This is a direct acknowledgment that bidimensional measurements are unreliable for irregularly shaped tumors. A study comparing RANO 2.0 vs mRANO vs RANO 1.0 found that RANO 2.0 provided the strongest survival risk stratification (HR=3.6). The vorasidenib trial (NEJM 2023) used volumetric RANO for low-grade gliomas, demonstrating clinical trial adoption.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Pseudoprogression Confirmation Window</div>
+      <p>Confirmation scans are now mandatory <strong>only within the first 12 weeks post-radiotherapy</strong> (when pseudoprogression incidence is highest at 20&ndash;30%), not at all timepoints. The previous iRANO approach required 3-month confirmation for all suspected progression, which censored &gt;50% of patients without improving outcomes.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Simplified FLAIR Assessment</div>
+      <p>T2/FLAIR evaluation is <strong>eliminated for IDH wild-type glioblastoma</strong> (except with anti-angiogenic therapy). Data showed that adding FLAIR evaluation did not improve the correlation between PFS and OS. For IDH-mutant tumors with large non-enhancing components, both enhancing and non-enhancing tumor must still be evaluated.</p>
+    </div>
+
+    <h3>RANO-BM: Brain Metastases</h3>
+    <p>RANO-BM (Lancet Oncology, 2015) defines separate criteria for metastases: measurable disease is &ge;10mm in longest diameter (or &ge;5mm with thin-slice MRI). Up to 5 target CNS lesions are measured. PR requires &ge;30% decrease in the sum of longest diameters; PD requires &ge;20% increase or new lesions. CNS response is assessed independently from systemic disease.</p>
+
+    <div class="callout">
+      <div class="callout-icon">&#128161;</div>
+      <div class="callout-text"><strong>Why this matters for AI:</strong> RANO 2.0&rsquo;s endorsement of volumetric measurements is the clinical mandate for automated segmentation. Manual 2D measurements have ICC of only 0.42&ndash;0.61 between neuroradiologists. Automated volumetry achieves ICC of 0.97 with processing in under 2 minutes vs 16+ minutes manually. AI segmentation makes reliable RANO volumetric assessment feasible for the first time.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 11.3 POST-TREATMENT CHANGES ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 11.3 Why Post-Treatment Is Harder</div>
+    <h2>Treatment Effects That Confound Segmentation</h2>
+
+    <p>Every treatment changes how the tumor looks on MRI. A model trained only on pre-operative BraTS data will fail on post-treatment scans because it has never seen these appearances. Understanding them is critical for building models that work longitudinally.</p>
+
+    <div class="concept-card">
+      <div class="concept-title">After Surgery (Days)</div>
+      <p>The resection cavity appears as a fluid-filled void where the tumor was. <strong>Blood products</strong> at the cavity rim are hyperintense on T1 (mimicking enhancing tumor) and variable on FLAIR. Post-operative enhancement along the cavity margin is normal and does not indicate residual tumor. Imaging should be acquired within <strong>48 hours post-surgery</strong> to establish the post-surgical baseline before enhancement develops. Segmentation models need a separate &ldquo;surgical cavity&rdquo; label.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">After Radiation (Weeks to Months)</div>
+      <p><strong>Pseudoprogression</strong> (3&ndash;6 months post-chemoradiation): transient increase in enhancement caused by treatment-induced endothelial injury and inflammation. Occurs in 20&ndash;30% of newly diagnosed GBM patients and is actually associated with <em>better</em> prognosis. On imaging, it&rsquo;s often indistinguishable from true progression on conventional MRI alone. DSC perfusion (low rCBV, sensitivity 90%, specificity 88%) and DCE perfusion help differentiate.</p>
+      <p><strong>Radiation necrosis</strong> (&gt;6 months): heterogeneous &ldquo;frond-like&rdquo; enhancement with central necrosis. rCBV achieves 91% sensitivity and 100% specificity when combined with DTI and MRS. A meta-analysis of AI approaches found overall accuracy of 80% (sensitivity 85%, specificity 69%) for distinguishing pseudoprogression from true progression.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">After Anti-Angiogenic Therapy &mdash; Bevacizumab (Days)</div>
+      <p><strong>Pseudoresponse</strong>: bevacizumab normalizes abnormal blood-brain barrier permeability, causing rapid decrease in enhancement <em>without true tumor response</em>. Response rates of 35&ndash;63% in trials, but no overall survival benefit. rCBV changes at 2 weeks predicted outcome (P=0.002) when enhancement-based RANO could not (P=0.86). Non-enhancing tumor often <em>progresses</em> on T2/FLAIR while enhancement decreases &mdash; making enhancement an unreliable metric in bevacizumab-treated patients.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">After Immunotherapy</div>
+      <p>Immune checkpoint inhibitors can trigger inflammatory responses that mimic tumor progression on imaging. The previous iRANO criteria proposed mandatory 3-month confirmation scans, but validation showed this censored &gt;50% of patients without improving PFS-OS correlation. RANO 2.0 now limits confirmation requirements to the first 12 weeks post-RT.</p>
+    </div>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">&#9888;&#65039;</div>
+      <div class="callout-text"><strong>The fundamental challenge:</strong> Pseudoprogression, radiation necrosis, pseudoresponse, and immunotherapy inflammation all create imaging changes that <em>look like tumor</em> but aren&rsquo;t. A model that simply measures enhancing volume will systematically miscategorize these patients. Advanced imaging (perfusion, diffusion, spectroscopy) and temporal context (when did treatment happen?) are essential for accurate longitudinal assessment. This is why RANO 2.0 is moving toward multimodal, volumetric, context-aware evaluation.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 11.4 POST-TREATMENT LABELS ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 11.4 New Labels for New Problems</div>
+    <h2>Post-Treatment Segmentation Labels</h2>
+
+    <p>Pre-treatment BraTS has three foreground labels: enhancing tumor (ET), necrosis (NCR), and peritumoral edema (ED). Post-treatment segmentation requires additional classes to capture treatment effects:</p>
+
+    <div class="concept-card">
+      <div class="concept-title">Pre-Treatment Labels (BraTS Standard)</div>
+      <p>Label 0: Background. Label 1: Necrotic/non-enhancing tumor core. Label 2: Peritumoral edema. Label 4: Enhancing tumor. These labels capture a treatment-naive tumor&rsquo;s anatomy.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Post-Treatment Labels (BraTS 2024 / UCSD-PTGBM)</div>
+      <p>All pre-treatment labels <em>plus</em>: <strong>Surgical cavity</strong> (distinct from necrosis &mdash; a fluid-filled void where tumor was resected). <strong>Radiation necrosis</strong> (distinct from tumor necrosis &mdash; treatment-induced tissue death). <strong>Non-enhancing residual tumor</strong> (distinct from edema &mdash; residual tumor that doesn&rsquo;t enhance on T1ce). <strong>Blood products</strong> (acute vs chronic). These additional classes are critical because conflating surgical cavity with tumor necrosis, or edema with non-enhancing tumor, leads to incorrect volume measurements and wrong RANO classifications.</p>
+    </div>
+
+    <p>Inter-rater agreement is lower for post-treatment labels (Dice 0.60&ndash;0.75) compared to pre-treatment (0.74&ndash;0.85), reflecting the genuine ambiguity of post-treatment imaging. Your model&rsquo;s ceiling is limited by this human disagreement.</p>
+  </div>
+
+  <!-- ═══════ 11.5 ORGANIZING DATA ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 11.5 Structuring the Chaos</div>
+    <h2>Organizing Longitudinal Datasets</h2>
+
+    <p>Longitudinal data is inherently more complex than single-timepoint data. Each patient has multiple scans, each scan has multiple modalities, and the clinical context (treatment dates, molecular markers, RANO assessments) must travel with the imaging data.</p>
+
+    <div class="code-block">
+      <code>
+<span class="comment"># Recommended folder structure for longitudinal neuro-oncology data</span><br><br>
+Patient_001/<br>
+&nbsp;&nbsp;├── clinical/<br>
+&nbsp;&nbsp;│&nbsp;&nbsp;├── demographics.json&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Age, sex, IDH, MGMT, 1p/19q</span><br>
+&nbsp;&nbsp;│&nbsp;&nbsp;└── treatment_timeline.json&nbsp;<span class="comment"># Surgery, RT, chemo dates</span><br>
+&nbsp;&nbsp;├── T0_PreOp/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Baseline pre-operative</span><br>
+&nbsp;&nbsp;│&nbsp;&nbsp;├── T1.nii.gz<br>
+&nbsp;&nbsp;│&nbsp;&nbsp;├── T1ce.nii.gz<br>
+&nbsp;&nbsp;│&nbsp;&nbsp;├── T2.nii.gz<br>
+&nbsp;&nbsp;│&nbsp;&nbsp;├── FLAIR.nii.gz<br>
+&nbsp;&nbsp;│&nbsp;&nbsp;└── seg.nii.gz&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Pre-treatment labels</span><br>
+&nbsp;&nbsp;├── T1_PostOp_48hr/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># 48-hour post-surgery</span><br>
+&nbsp;&nbsp;│&nbsp;&nbsp;└── ...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Post-treatment labels</span><br>
+&nbsp;&nbsp;├── T2_PostRT_Baseline/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Post-radiation (RANO 2.0 baseline)</span><br>
+&nbsp;&nbsp;├── T3_FollowUp_3mo/<br>
+&nbsp;&nbsp;├── T4_FollowUp_6mo/<br>
+&nbsp;&nbsp;├── T5_FollowUp_9mo/<br>
+&nbsp;&nbsp;└── T6_Progression/<br>
+      </code>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">&#128218;</div>
+      <div class="callout-text"><strong>For nnU-Net:</strong> Each timepoint is typically treated as a separate training case. If you&rsquo;re training a post-treatment model, collect only post-treatment timepoints in <code>imagesTr</code>. Mixing pre- and post-treatment data in the same training set without careful stratification will hurt performance. Consider training <strong>separate models</strong> for pre-treatment (BraTS-style labels) and post-treatment (expanded labels with surgical cavity, radiation necrosis) &mdash; or use a single model with the full post-treatment label set if you have sufficient post-treatment annotations.</div>
+    </div>
+
+    <h3>Database Systems</h3>
+    <p><strong>XNAT</strong> is the most widely used platform for longitudinal neuroimaging research. It tracks subjects, experiments (scans), and assessments across time, integrates with PACS, and supports automated processing pipelines. The Heidelberg automated RANO pipeline uses XNAT as its backbone, processing data from 34 institutions. <strong>Flywheel</strong> is a cloud-based alternative with built-in DICOM management. <strong>The LUMIERE Dataset</strong> provides longitudinal glioblastoma MRI with expert RANO ratings, serving as a benchmark for automated response assessment.</p>
+  </div>
+
+  <!-- ═══════ 11.6 REGISTRATION ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 11.6 Aligning the Scans</div>
+    <h2>Longitudinal Registration: When Anatomy Has Changed</h2>
+
+    <p>Comparing tumor volume between two timepoints requires registering the scans to a common space. But after surgery, the brain has shifted &mdash; there&rsquo;s a cavity where tumor used to be, edema may have resolved, ventricles may have expanded. Standard rigid registration is insufficient.</p>
+
+    <div class="concept-card">
+      <div class="concept-title">Registration Strategy</div>
+      <p><strong>Rigid registration:</strong> Corrects for head position differences only. Fast and reliable, but doesn&rsquo;t account for tissue changes. Use as a first step. <strong>Affine registration:</strong> Adds global scaling and shearing. Better for accounting for brain shift. <strong>Deformable registration (ANTs SyN, FSL FNIRT):</strong> Models local tissue deformation. Necessary when anatomy has changed significantly (resection, edema resolution). But over-aggressive deformation can warp tumor regions incorrectly. Quality control of registration is critical &mdash; misalignment leads to false volume changes that mimic progression or response.</p>
+    </div>
+
+    <div class="concept_card">
+      <div class="concept-title">Practical Approach</div>
+      <p>For longitudinal RANO assessment, <strong>pairwise registration between consecutive timepoints</strong> is often preferred over registering everything to a common template. Each scan is registered to its immediately preceding scan, preserving the temporal chain. The 2025 ACR guidelines emphasize that the post-radiotherapy scan should serve as the registration reference (new baseline), not the pre-operative scan.</p>
+    </div>
+  </div>
+
+  <!-- ═══════ 11.7 2D VS VOLUMETRIC ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 11.7 The Measurement Revolution</div>
+    <h2>Automated Volumetry vs Manual 2D: The Evidence</h2>
+
+    <p>The landmark Kickingereder et al. study (Lancet Oncology, 2019) is the single most important paper demonstrating why AI-based volumetry matters for treatment response. Tested on 596 patients from the EORTC-26101 trial across 38 institutions:</p>
+
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="stat-val">87%</div>
+        <div class="stat-label">Reliability of automated volumetric assessment</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">51%</div>
+        <div class="stat-label">Reliability of manual RANO assessment between local and central readers</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">20&times;</div>
+        <div class="stat-label">Speed improvement of automated vs manual delineation</div>
+      </div>
+    </div>
+
+    <p>Automated volumetric progression detection was a <strong>superior surrogate endpoint for overall survival</strong> compared to RANO-defined progression. A separate validation on 760 pre-operative and 504 post-operative patients achieved ICC of 0.959 for enhancing tumor volume and 0.960 for cavity volume, with processing up to 20 times faster than manual delineation.</p>
+
+    <p>The relationship between 2D and 3D measurements is non-linear because tumors grow irregularly. Studies consistently show <strong>~20% disagreement</strong> between 2D and volumetric response classification for pediatric gliomas. A 50% reduction in bidimensional product does not correspond to a consistent volumetric change. This non-linearity is why RANO 2.0 now endorses volumetric assessment.</p>
+  </div>
+
+  <!-- ═══════ 11.8 PSEUDOPROGRESSION AI ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 11.8 The Hardest Problem</div>
+    <h2>AI for Pseudoprogression vs True Progression</h2>
+
+    <p>This is one of the most clinically consequential problems in neuro-oncology imaging. Misclassifying pseudoprogression as true progression may lead to premature treatment changes. Misclassifying true progression as pseudoprogression delays life-saving intervention.</p>
+
+    <div class="concept-card">
+      <div class="concept-title">The State of the Art</div>
+      <p>A 2025 meta-analysis of 26 studies (1,972 patients) found AI algorithms achieve overall <strong>accuracy 80%, sensitivity 85%, specificity 69%</strong> for differentiating pseudoprogression from true progression. Specificity remains the bottleneck &mdash; the models are better at detecting true progression than confirming pseudoprogression. The most successful approaches combine multiple imaging modalities: a Vision Transformer using pre- and post-operative contrast-enhanced T1 achieved AUC of 95.2%, and adding clinical data pushed this to AUC of 99.3%. Combined perfusion parameters (rCBV + ASL) achieved AUC of 0.948.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Why Conventional MRI Isn&rsquo;t Enough</div>
+      <p>Conventional MRI has modest performance in the post-treatment setting (sensitivity 68%, specificity 77% per ACR 2025 guidelines). The most powerful discriminators require <strong>advanced imaging</strong>: DSC perfusion (relative cerebral blood volume), DCE perfusion, diffusion-weighted imaging (ADC maps), MR spectroscopy (Cho/NAA ratios), and amino acid PET. A combined DSC + MRS approach achieved AUC of 0.994 for distinguishing tumor recurrence from radiation necrosis. Future multimodal AI models that integrate these sequences with temporal context will likely achieve near-clinician performance.</p>
+    </div>
+  </div>
+
+  <!-- ═══════ 11.9 END-TO-END PIPELINE ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 11.9 Putting It All Together</div>
+    <h2>End-to-End Longitudinal Pipeline</h2>
+
+    <div class="pipeline-steps">
+      <div class="pipeline-step">
+        <span class="step-num">01</span>
+        <div class="step-content">
+          <div class="step-title">DICOM Reception &amp; Metadata Extraction</div>
+          <p>Receive DICOM data from PACS. Extract scan date, sequence type, acquisition parameters. Classify the timepoint: pre-op, post-op, post-RT baseline, follow-up. Automated scan-type classifiers achieve 99.7% accuracy.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">02</span>
+        <div class="step-content">
+          <div class="step-title">Preprocessing</div>
+          <p>DICOM &rarr; NIfTI conversion, skull stripping (HD-BET/SynthStrip), N4 bias field correction, intensity normalization, resampling to 1mm&sup3; isotropic. Same pipeline as Week 2 but applied to every timepoint.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">03</span>
+        <div class="step-content">
+          <div class="step-title">Longitudinal Registration</div>
+          <p>Register each scan to its preceding timepoint using rigid + deformable registration (ANTs SyN). Quality-control the registration visually or with automated metrics. Use the post-RT scan as the RANO 2.0 baseline reference.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">04</span>
+        <div class="step-content">
+          <div class="step-title">Timepoint-Appropriate Segmentation</div>
+          <p>Use a pre-treatment model for pre-operative scans and a post-treatment model for all subsequent timepoints. Post-treatment models produce surgical cavity, residual tumor, radiation necrosis, and edema labels. nnU-Net or BraTumIA for each timepoint independently.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">05</span>
+        <div class="step-content">
+          <div class="step-title">Volumetric Measurement</div>
+          <p>Compute volumes for each tumor compartment at each timepoint: enhancing tumor volume, total tumor volume, cavity volume. Calculate bidimensional products for RANO 1.0 compatibility. Generate volume-over-time plots.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">06</span>
+        <div class="step-content">
+          <div class="step-title">RANO Classification</div>
+          <p>Apply RANO 2.0 thresholds to volume changes relative to the post-RT baseline: &ge;25% increase &rarr; PD, &ge;50% decrease &rarr; PR. Flag equivocal cases within the 12-week post-RT window for pseudoprogression confirmation. Integrate clinical data (steroid dose, neurological status) for final classification.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">07</span>
+        <div class="step-content">
+          <div class="step-title">Reporting</div>
+          <p>Generate structured report with volume trends, RANO classification, and uncertainty flags. Push results (segmentation + volume chart + RANO assessment) back to PACS. The Heidelberg pipeline demonstrated this end-to-end across 34 institutions in a clinical trial.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 11.10 PEDIATRIC ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 11.10 Special Populations</div>
+    <h2>Pediatric Longitudinal Monitoring</h2>
+
+    <p>Pediatric brain tumors present unique longitudinal challenges: the brain is <strong>still developing</strong> (making registration harder), tumor biology differs from adults (more posterior fossa tumors, different molecular subtypes), and treatment protocols are different. The RAPNO (Response Assessment in Pediatric Neuro-Oncology) criteria are analogous to RANO for adults, and AI-RAPNO is an emerging initiative applying AI to pediatric response assessment.</p>
+
+    <p>A deep learning pipeline for pediatric tumors (794 pre-operative + 1,003 post-operative MRIs) achieved automated RAPNO scores with ICC of 0.851&ndash;0.909 vs manual measurements, and was superior in repeatability for patients with multiple lesions. Two companion Lancet Oncology reviews (2025) laid out the state of the art and the challenges for clinical translation, emphasizing that pediatric datasets are scarce, imaging protocols are heterogeneous, and validated AI tools are urgently needed.</p>
+  </div>
+
+  <!-- ═══════ RESOURCES ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 11.11 Resources &amp; Further Reading</div>
+    <h2>This Week&rsquo;s Learning Resources</h2>
+
+    <h3>Essential Papers</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1200/JCO.23.01059" target="_blank">Wen et al. &mdash; RANO 2.0 (J Clin Oncology, 2023)</a></div>
+        <div class="resource-desc">The foundational RANO 2.0 publication. Read the full text &mdash; it defines the clinical standard your AI tools will be measured against. Unified criteria for all glioma grades, volumetric option, post-RT baseline, simplified FLAIR assessment.</div>
+        <div class="resource-cite">J Clin Oncol. 2023;41(33):5187&ndash;5199</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1016/S1470-2045(19)30098-1" target="_blank">Kickingereder et al. &mdash; Automated Volumetric Response Assessment (Lancet Oncology, 2019)</a></div>
+        <div class="resource-desc">The paper that proved automated volumetry outperforms manual RANO. 596 patients, 38 institutions, 87% vs 51% reliability. Volumetric time-to-progression was a superior OS surrogate. The strongest evidence for AI-based longitudinal monitoring.</div>
+        <div class="resource-cite">Lancet Oncol. 2019;20(5):728&ndash;740</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.3174/ajnr.A8396" target="_blank">Ellingson et al. &mdash; Operationalizing RANO 2.0 (AJNR, 2024)</a></div>
+        <div class="resource-desc">Practical step-by-step guide for implementing RANO 2.0. Includes representative cases and challenging scenarios. Read this after the RANO 2.0 paper to understand how it works in practice.</div>
+        <div class="resource-cite">AJNR. 2024;45(12):1846&ndash;1856</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1016/S1470-2045(15)70057-4" target="_blank">Lin et al. &mdash; RANO-BM for Brain Metastases (Lancet Oncology, 2015)</a></div>
+        <div class="resource-desc">The RANO criteria for brain metastases. Different thresholds and measurement approach from glioma RANO. Essential if you work on the BraTS-METS challenge.</div>
+        <div class="resource-cite">Lancet Oncol. 2015;16(6):e270&ndash;e278</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1002/cncr.32790" target="_blank">Akbari et al. &mdash; Histopathology-Validated ML for Pseudoprogression (Cancer, 2020)</a></div>
+        <div class="resource-desc">87% accuracy (AUC 0.92) for distinguishing true progression from pseudoprogression, validated against biopsy. The gold standard for pseudoprogression AI.</div>
+        <div class="resource-cite">Cancer. 2020;126(11):2625&ndash;2636</div>
+      </div>
+    </div>
+
+    <h3>Datasets &amp; Tools</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://zenodo.org/record/6471753" target="_blank">LUMIERE Dataset &mdash; Longitudinal GBM MRI with RANO</a></div>
+        <div class="resource-desc">Publicly available longitudinal glioblastoma dataset with expert RANO ratings at each timepoint. The benchmark for automated response assessment.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://www.synapse.org/Synapse:syn64153130/wiki/630130" target="_blank">BraTS 2025 Challenge</a></div>
+        <div class="resource-desc">Includes post-treatment segmentation tasks with expanded label sets. Check for longitudinal and post-treatment tracks that extend beyond single-timepoint pre-operative segmentation.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://xnat.org/" target="_blank">XNAT &mdash; Neuroimaging Data Platform</a></div>
+        <div class="resource-desc">The standard platform for organizing longitudinal neuroimaging studies. Supports subject tracking, automated processing pipelines, and multi-site coordination. Used by the Heidelberg RANO pipeline.</div>
+      </div>
+    </div>
+
+    <h3>Deep Dives</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1016/S1470-2045(25)00484-X" target="_blank">Kann et al. &mdash; AI-RAPNO Part 1: State of the Art (Lancet Oncology, 2025)</a></div>
+        <div class="resource-desc">Comprehensive review of AI for pediatric neuro-oncology response assessment. The roadmap for applying everything in this course to pediatric brain tumors.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.3389/fonc.2023.1061502" target="_blank">Boxerman et al. &mdash; rCBV Identifies Pseudoresponse (Frontiers in Oncology, 2023)</a></div>
+        <div class="resource-desc">From the ACRIN 6677/RTOG 0625 trial: perfusion changes at 2 weeks predict outcome when enhancement-based RANO cannot. The definitive evidence against trusting enhancement alone during bevacizumab.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1038/s41597-025-06499-z" target="_blank">Gagnon et al. &mdash; UCSD Post-Treatment GBM Dataset (Scientific Data, 2026)</a></div>
+        <div class="resource-desc">New publicly available post-treatment glioblastoma dataset with annotations for surgical cavity, radiation necrosis, and non-enhancing residual tumor. Train your post-treatment model here.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1093/neuonc/noae093" target="_blank">Familiar et al. &mdash; Pediatric Brain Tumor Measurement Challenges (Neuro-Oncology, 2024)</a></div>
+        <div class="resource-desc">Reviews challenges specific to pediatric tumors: non-enhancing tumors, mild enhancement assessment, cystic components, and the role of AI for consistency.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ NAVIGATION ═══════ -->
+  <div class="nav-lesson">
+    <a href="week10.html">&larr; Week 10: Deployment</a>
+    <a href="week12.html">Week 12: Radiomics &rarr;</a>
+  </div>
+</div>
+
+<footer>
+  <p><a href="../index.html">MedVision Academy</a> &nbsp;&middot;&nbsp; Week 11: Longitudinal Datasets &amp; RANO Criteria</p>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('click', function(e) {
+    var link = e.target.closest('a');
+    if (!link) return;
+    var href = link.getAttribute('href');
+    if (!href) return;
+    if (href.startsWith('http') && !href.includes(window.location.hostname)) {
+      var linkName = link.getAttribute('data-link-name') || link.textContent.trim().substring(0, 60);
+      if (typeof gtag === 'function') {
+        gtag('event', 'outbound_click', { 'link_url': href, 'link_text': linkName });
+      }
+    }
+  });
+});
+</script>
+
+</body>
+</html>
