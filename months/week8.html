@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 08: Fine-Tuning &amp; Improving Your Model — MedVision Academy</title>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9LJGDZVJRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9LJGDZVJRW');
+</script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10; --surface: #12151c; --surface-2: #1a1e28; --surface-3: #222834;
+    --border: #2a3040; --border-light: #353d50;
+    --text: #e8eaf0; --text-muted: #8b92a8; --text-dim: #5c6478;
+    --accent: #4af0c0; --accent-dim: #2a8068; --accent-glow: rgba(74,240,192,0.12);
+    --warm: #f0a04a; --rose: #f06088; --blue: #4a90f0; --purple: #a06af0;
+    --serif: 'DM Serif Display', Georgia, serif;
+    --sans: 'Instrument Sans', -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  ::selection { background: var(--accent); color: var(--bg); }
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,12,16,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 0 2rem; }
+  .nav-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .nav-logo { font-family: var(--serif); font-size: 1.25rem; color: var(--accent); text-decoration: none; }
+  .nav-logo span { color: var(--text-muted); font-style: italic; font-size: 0.9rem; margin-left: 0.4rem; }
+  .nav-back { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 500; padding: 0.4rem 0.75rem; border-radius: 6px; border: 1px solid var(--border); transition: all 0.2s; }
+  .nav-back:hover { color: var(--text); border-color: var(--border-light); background: var(--surface-2); }
+  .lesson-hero { padding: 7rem 2rem 3rem; max-width: 900px; margin: 0 auto; }
+  .lesson-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(240,160,74,0.1); border: 1px solid rgba(240,160,74,0.3); padding: 0.3rem 0.9rem; border-radius: 100px; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; color: var(--warm); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.25rem; }
+  .lesson-hero h1 { font-family: var(--serif); font-size: clamp(2rem, 4vw, 2.8rem); line-height: 1.15; letter-spacing: -0.025em; margin-bottom: 1rem; }
+  .lesson-hero h1 em { font-style: italic; color: var(--accent); }
+  .lesson-hero .subtitle { font-size: 1.05rem; color: var(--text-muted); max-width: 640px; line-height: 1.7; }
+  .lesson { max-width: 900px; margin: 0 auto; padding: 0 2rem 4rem; }
+  .divider { max-width: 900px; margin: 0 auto; padding: 0 2rem; border-top: 1px solid var(--border); }
+  .lesson-section { margin-top: 3.5rem; }
+  .lesson-section-label { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .lesson-section h2 { font-family: var(--serif); font-size: 1.6rem; line-height: 1.2; margin-bottom: 1rem; }
+  .lesson-section h3 { font-family: var(--serif); font-size: 1.2rem; line-height: 1.3; margin: 2rem 0 0.75rem; }
+  .lesson-section p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin-bottom: 1rem; }
+  .lesson-section p:last-child { margin-bottom: 0; }
+  .lesson-section strong { color: var(--text); }
+  .lesson-section code { font-family: var(--mono); font-size: 0.85em; background: var(--surface-2); padding: 0.15rem 0.4rem; border-radius: 4px; color: var(--accent); }
+  .concept-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 1.75rem; margin: 1.5rem 0; }
+  .concept-card .concept-title { font-family: var(--serif); font-size: 1.1rem; margin-bottom: 0.75rem; }
+  .concept-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; margin-bottom: 0.5rem; }
+  .concept-card p:last-child { margin-bottom: 0; }
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.5rem 0; }
+  .stat-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; text-align: center; }
+  .stat-box .stat-val { font-family: var(--serif); font-size: 1.5rem; color: var(--accent); margin-bottom: 0.25rem; }
+  .stat-box .stat-label { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; }
+  .callout { background: var(--accent-glow); border: 1px solid var(--accent-dim); border-radius: 10px; padding: 1.25rem 1.5rem; display: flex; gap: 1rem; align-items: start; margin: 1.5rem 0; }
+  .callout-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 0.1rem; }
+  .callout-text { font-size: 0.9rem; color: var(--text-muted); line-height: 1.65; }
+  .callout-text strong { color: var(--text); }
+  .callout-warn { background: rgba(240,160,74,0.08); border-color: rgba(240,160,74,0.3); }
+  .callout-info { background: rgba(74,144,240,0.08); border-color: rgba(74,144,240,0.3); }
+  .pipeline-steps { display: flex; flex-direction: column; gap: 0; margin: 1.5rem 0; }
+  .pipeline-step { display: flex; gap: 1.25rem; padding: 1.25rem 0; border-bottom: 1px solid var(--border); }
+  .pipeline-step:last-child { border-bottom: none; }
+  .step-num { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; color: var(--accent); background: var(--accent-glow); padding: 0.2rem 0.5rem; border-radius: 4px; height: fit-content; white-space: nowrap; margin-top: 0.15rem; }
+  .step-content .step-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.3rem; }
+  .step-content p { color: var(--text-muted); font-size: 0.88rem; line-height: 1.65; margin: 0; }
+  .resource-list { display: flex; flex-direction: column; gap: 0.75rem; margin: 1.5rem 0; }
+  .resource-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; transition: border-color 0.3s; }
+  .resource-item:hover { border-color: var(--border-light); }
+  .resource-tag { font-family: var(--mono); font-size: 0.62rem; font-weight: 600; padding: 0.15rem 0.45rem; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.08em; margin-right: 0.5rem; display: inline-block; }
+  .resource-tag.paper { background: rgba(240,160,74,0.12); color: var(--warm); }
+  .resource-tag.video { background: rgba(240,96,136,0.15); color: var(--rose); }
+  .resource-tag.tool { background: rgba(160,106,240,0.12); color: var(--purple); }
+  .resource-tag.site { background: rgba(74,240,192,0.12); color: var(--accent); }
+  .resource-tag.course { background: rgba(74,144,240,0.12); color: var(--blue); }
+  .resource-title { font-weight: 600; font-size: 0.92rem; margin-bottom: 0.3rem; }
+  .resource-title a { color: var(--text); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.2s; }
+  .resource-title a:hover { border-bottom-color: var(--accent); }
+  .resource-desc { color: var(--text-muted); font-size: 0.82rem; line-height: 1.6; }
+  .resource-cite { font-family: var(--mono); font-size: 0.7rem; color: var(--text-dim); margin-top: 0.25rem; }
+  .nav-lesson { display: flex; justify-content: space-between; align-items: center; padding: 2rem 0; margin-top: 2rem; border-top: 1px solid var(--border); }
+  .nav-lesson a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid var(--border); transition: all 0.2s; }
+  .nav-lesson a:hover { color: var(--accent); border-color: var(--accent-dim); }
+  footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--text-dim); font-size: 0.8rem; max-width: 900px; margin: 0 auto; }
+  footer a { color: var(--text-muted); text-decoration: none; }
+  footer a:hover { color: var(--accent); }
+  @media (max-width: 700px) {
+    .stat-grid { grid-template-columns: 1fr; }
+    .pipeline-step { flex-direction: column; gap: 0.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="../index.html">MedVision<span>Academy</span></a>
+    <a class="nav-back" href="../index.html#curriculum">&larr; Back to Curriculum</a>
+  </div>
+</nav>
+
+<div class="lesson-hero">
+  <div class="lesson-badge">Week 08 &mdash; Q3</div>
+  <h1>Fine-Tuning &amp; <em>Improving Your Model</em></h1>
+  <p class="subtitle">Your baseline model is trained. Now the real work begins &mdash; squeezing out every Dice point through ensembling, test-time augmentation, advanced loss functions, error analysis, and the specific modifications that separate a solid submission from a challenge-winning one.</p>
+</div>
+
+<div class="divider"></div>
+
+<div class="lesson">
+
+  <!-- ═══════ 8.1 THE IMPROVEMENT PLAYBOOK ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 8.1 Where the Points Come From</div>
+    <h2>The Improvement Playbook</h2>
+
+    <p>After training a baseline nnU-Net model (Week 5&ndash;6) and evaluating it (Week 7), you&rsquo;ll have scores that are good but not competitive. The difference between a baseline Dice of 0.87 and a winning score of 0.93 comes from stacking small improvements systematically. Here&rsquo;s the rough breakdown of where those points come from, based on published ablation studies and challenge reports:</p>
+
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="stat-val">+1&ndash;2</div>
+        <div class="stat-label">Dice points from 5-fold ensembling (built into nnU-Net)</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">+0.5&ndash;2</div>
+        <div class="stat-label">Dice points from test-time augmentation</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">+1&ndash;3</div>
+        <div class="stat-label">Dice points from advanced losses, post-processing, &amp; architecture changes</div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-icon">&#128161;</div>
+      <div class="callout-text"><strong>The golden rule of model improvement:</strong> Change one thing at a time. Record the validation Dice for each sub-region (WT, TC, ET) after every modification. Keep changes that improve performance, revert those that don&rsquo;t. Top BraTS teams follow this disciplined ablation approach &mdash; not heroic architectural overhauls.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 8.2 ENSEMBLING ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 8.2 The Easiest Free Improvement</div>
+    <h2>Model Ensembling</h2>
+
+    <p>Ensembling is the single most reliable way to improve segmentation performance. The core idea: multiple independent models make different errors, and averaging their predictions cancels out individual mistakes. Studies consistently show <strong>2&ndash;7% Dice improvements</strong> and substantial HD95 reductions from ensembling.</p>
+
+    <div class="concept-card">
+      <div class="concept-title">Fold Ensembling (Already Built In)</div>
+      <p>nnU-Net&rsquo;s 5-fold cross-validation produces 5 independently trained models. At inference, their softmax outputs are averaged before argmax. This is free &mdash; you already have the models. It typically adds 1&ndash;2 Dice points over any single fold and <strong>strongly reduces catastrophic failures</strong>. One study found ensembles eliminated outlier predictions in 68&ndash;100% of high-risk images.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Cross-Configuration Ensembling</div>
+      <p>Average predictions from different nnU-Net configurations (2D + 3D full-res). The 2D model may better capture sharp in-plane boundaries while the 3D model captures inter-slice continuity. nnU-Net automatically evaluates whether cross-configuration ensembling improves cross-validation scores.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Cross-Architecture Ensembling</div>
+      <p>The biggest gains come from ensembling <em>different</em> architectures that make different kinds of errors. Combining nnU-Net with a transformer-based model (SwinUNETR, nnUNetFormer) captures complementary features. The EnsembleUNets approach achieved Dice 0.93 on BraTS 2021, outperforming all individual models. One BraTS strategy used <strong>weighted ensembles of the top-3 models per region</strong> with customized loss functions, requiring 67% less memory and 92% less training time than training all architectures independently.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Weighted vs Simple Averaging</div>
+      <p>Simple averaging works surprisingly well, but <strong>learnable ensemble weights</strong> (optimized on the validation set) consistently outperform static averaging. You can optimize per-region weights: maybe the 3D model gets more weight for WT while the transformer model gets more weight for ET. A study found optimized weights yielded 2&ndash;7% DSC improvements and up to 49% reduction in average surface distance.</p>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">&#128218;</div>
+      <div class="callout-text"><strong>Practical tip:</strong> Start by training nnU-Net (3d_fullres, all 5 folds) as your backbone. Then train one alternative &mdash; either nnU-Net with the residual encoder, or a SegResNet/SwinUNETR via MONAI. Average the two. This two-model ensemble often captures 80% of the gain you&rsquo;d get from a five-model ensemble, at a fraction of the compute cost.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 8.3 TTA ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 8.3 Getting More From Inference</div>
+    <h2>Test-Time Augmentation (TTA)</h2>
+
+    <p>TTA is like asking your model to look at the same scan from multiple angles and averaging its opinions. During inference, apply augmentations (flipping, rotation) to the input, run the model on each augmented version, reverse the augmentations on the predictions, and average the results.</p>
+
+    <div class="concept-card">
+      <div class="concept-title">What to Augment at Test Time</div>
+      <p><strong>Flipping along each axis</strong> is the most common and cheapest TTA. For a 3D volume, flipping along x, y, z, and all combinations gives 8 versions (including the original). This alone provides 0.5&ndash;1.5 Dice points on typical tasks. <strong>Rotation</strong> (small angles) and <strong>scaling</strong> (0.95&ndash;1.05&times;) can add marginal improvements but cost more compute. A study on 9 medical segmentation datasets showed TTA provided <strong>0.1&ndash;2.3% Dice improvement</strong> and 1.1&ndash;29.0% improvement in error estimation.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Computational Cost</div>
+      <p>Each TTA variant requires one additional forward pass. With 8-way flipping TTA and 5-fold ensembling, you&rsquo;re running <strong>40 forward passes per image</strong> &mdash; inference takes 40&times; longer. For BraTS volumes, this means ~10&ndash;20 minutes per case instead of ~30 seconds. Acceptable for challenge submissions, but too slow for real-time clinical use. Jointly optimizing training-time and test-time augmentation can improve efficiency.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Free Bonus: Uncertainty Estimation</div>
+      <p>The variance across TTA predictions provides a voxel-wise uncertainty estimate. High variance = the model is unsure. This is clinically valuable: you can flag uncertain regions for radiologist review. Studies show TTA-based aleatoric uncertainty outperforms Monte Carlo dropout for uncertainty estimation and reduces overconfident predictions.</p>
+    </div>
+  </div>
+
+  <!-- ═══════ 8.4 ERROR ANALYSIS ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 8.4 Know Your Failures</div>
+    <h2>Error Analysis: Where Is Your Model Failing?</h2>
+
+    <p>Before trying to improve your model, you need to understand <em>where</em> and <em>how</em> it fails. Random tweaking is less effective than targeted fixes. Load predictions alongside ground truth in 3D Slicer and systematically look for patterns.</p>
+
+    <div class="pipeline-steps">
+      <div class="pipeline-step">
+        <span class="step-num">STEP 1</span>
+        <div class="step-content">
+          <div class="step-title">Per-Region Breakdown</div>
+          <p>Compute Dice and HD95 separately for WT, TC, and ET. Which region is weakest? For most models, ET is the bottleneck &mdash; it&rsquo;s the smallest region with the most irregular boundaries. If your ET Dice is 0.75 but WT is 0.91, focus improvements on ET.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">STEP 2</span>
+        <div class="step-content">
+          <div class="step-title">Size-Stratified Analysis</div>
+          <p>Split cases by tumor size (small / medium / large). Small enhancing tumors are disproportionately hard &mdash; a few missed voxels in a 200-voxel ET can drop Dice from 0.85 to 0.40. If small tumors are your main failure mode, consider a region-related focal loss that upweights hard voxels.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">STEP 3</span>
+        <div class="step-content">
+          <div class="step-title">Failure Case Visualization</div>
+          <p>Sort patients by Dice score and inspect the worst 10&ndash;20 cases in 3D Slicer. Common patterns: false positives near surgical cavities, under-segmentation of diffuse edema, missed satellite lesions, and enhancing tumor confused with blood vessels. Each pattern suggests a different fix.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">STEP 4</span>
+        <div class="step-content">
+          <div class="step-title">Institutional Bias Check</div>
+          <p>If your data comes from multiple centers, compute per-center metrics. A model trained mainly on 3T MRI may fail on 1.5T data. One study showed performance dropped 8&ndash;17% Dice when training and testing institutions differed. This finding motivates domain adaptation or institution-aware augmentation.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-icon">&#128161;</div>
+      <div class="callout-text"><strong>Automated error detection:</strong> SegQC is a framework that computes segmentation error probabilities per voxel and identifies likely failures in individual slices, achieving 74&ndash;77% recall for error detection. Integrating this into your evaluation pipeline can scale error analysis beyond manual inspection.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 8.5 ADVANCED LOSSES ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 8.5 Teaching the Model What &ldquo;Better&rdquo; Means</div>
+    <h2>Advanced Loss Functions</h2>
+
+    <p>The default Dice + CE loss is robust, but specialized losses can target specific weaknesses revealed by error analysis. The key insight from a comprehensive analysis of 20 loss functions: <strong>compound losses are always more robust than any single loss</strong>.</p>
+
+    <div class="concept-card">
+      <div class="concept-title">Boundary Loss (for Improving HD95)</div>
+      <p>Standard Dice loss measures volumetric overlap &mdash; it doesn&rsquo;t directly penalize boundary errors. <strong>Boundary loss</strong> formulates the optimization as a distance metric on the contour space, using the distance transform of the ground truth. It&rsquo;s particularly effective for highly imbalanced structures (small ET regions). A boundary-sensitive variant improved DSC by <strong>4.17%</strong> and HD95 by <strong>73%</strong> for challenging boundary regions. <strong>Important:</strong> boundary loss should be added gradually during training (loss scheduling), not from the start &mdash; the model needs Dice/CE to establish rough segmentation first.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Hausdorff Distance Loss</div>
+      <p>Directly optimizes the metric you&rsquo;re evaluated on. Three approaches exist: distance-transform based, morphological erosion based, and convolution-kernel based. Training with HD loss achieved <strong>18&ndash;45% reduction in Hausdorff Distance</strong> without degrading Dice scores. This is particularly useful when your Dice is good but HD95 is poor &mdash; a common pattern where the model makes occasional outlier predictions far from the true boundary.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Region-Related Focal Loss (for Small ET)</div>
+      <p>Standard loss treats all voxels equally, but misclassifying voxels near the boundary of a tiny enhancing tumor matters far more than misclassifying a voxel deep inside a large edema region. Region-related focal loss dynamically upweights hard-to-classify voxels with region-specific focus, improving ET Dice by <strong>3%</strong> and average Dice by 1% on BraTS 2020. This is one of the highest-impact single changes for brain tumor segmentation.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Topological Losses (for Preserving Connectivity)</div>
+      <p>Dice and HD don&rsquo;t capture whether your prediction has the right topology &mdash; a prediction with a hole in the middle of a tumor might have high Dice but be clinically wrong. <strong>Persistent homology loss</strong> (using Betti numbers) can enforce topological constraints. A fast Euler characteristic method provides efficient topological optimization for 3D data, with significant improvements in structural correctness. Most useful for tasks where connectivity is critical (vascular segmentation, cortical parcellation).</p>
+    </div>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">&#9888;&#65039;</div>
+      <div class="callout-text"><strong>Loss scheduling matters:</strong> Don&rsquo;t add boundary loss or HD loss from epoch 1. The model needs to learn basic segmentation first (epochs 1&ndash;300 with Dice+CE), then you introduce the refinement loss (epochs 300&ndash;1000). One practical approach: start with 100% Dice+CE, then linearly ramp boundary loss from 0% to 50% over epochs 300&ndash;600. Fixed vs adaptive weighting can differ by architecture.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 8.6 TRANSFER LEARNING ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 8.6 Standing on the Shoulders of Bigger Models</div>
+    <h2>Transfer Learning &amp; Fine-Tuning</h2>
+
+    <p>Instead of training from random initialization, you can start from weights pre-trained on a related task. This is especially powerful when your target dataset is small.</p>
+
+    <div class="concept-card">
+      <div class="concept-title">Domain-Specific Pre-training Beats ImageNet</div>
+      <p>A key finding: <strong>pre-training on medical images outperforms ImageNet pre-training</strong>, even when the medical dataset is 10&times; smaller. The closer the pre-training domain and task are to your target, the better the transfer. For brain tumor segmentation, pre-training on other brain MRI tasks (skull stripping, brain parcellation) provides better features than pre-training on natural photographs. RadiologyNET (1.9M medical images) showed particular advantages in resource-limited settings.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Fine-Tuning Strategy</div>
+      <p>For U-Net architectures, a counterintuitive finding: <strong>fine-tuning shallow layers</strong> (early encoder) often works better than fine-tuning deep layers, because shallow layers learn low-level features critical for segmentation that differ between domains. The recommended approach: fine-tune the entire network with a lower learning rate (1/10th to 1/100th of the from-scratch rate), with optional warm-up over the first 5&ndash;10 epochs. Fine-tuned models consistently match or outperform from-scratch training and are more robust to small training set sizes.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Parameter-Efficient Fine-Tuning (PEFT)</div>
+      <p>With foundation models like SAM, you can fine-tune a tiny fraction of parameters while freezing the bulk of the pre-trained model. PEFT methods achieve competitive performance with as few as <strong>1&ndash;5 labeled samples</strong>. SemiSAM+ demonstrated full accuracy using only 22&ndash;49% of available labeled data through specialist-generalist collaborative learning. This is the future direction for low-data scenarios.</p>
+    </div>
+  </div>
+
+  <!-- ═══════ 8.7 ADVANCED AUGMENTATION ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 8.7 Beyond Standard Augmentation</div>
+    <h2>Advanced Data Augmentation</h2>
+
+    <p>nnU-Net&rsquo;s default augmentation (rotation, scaling, elastic deformation, gamma, noise, mirroring) is strong, but specialized augmentations can target specific weaknesses.</p>
+
+    <div class="concept-card">
+      <div class="concept-title">CarveMix: Lesion-Aware Mixing</div>
+      <p>Instead of mixing random image regions, CarveMix carves out regions based on lesion location and geometry, then transplants them into other images. This creates realistic training samples with novel lesion-context combinations, improving brain lesion segmentation accuracy. It&rsquo;s particularly valuable for rare tumor appearances.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Adversarial Data Augmentation</div>
+      <p>AdvChain generates randomly chained geometric and photometric transformations that resemble realistic but challenging imaging variations. It can alleviate the need for labeled data while improving model generalization, applicable for both low-shot supervised and semi-supervised learning. Demonstrated for cardiac and prostate MRI segmentation.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Synthetic Data via Diffusion Models</div>
+      <p>Multi-Channel Fusion Diffusion Models can generate synthetic brain tumor MRI with all four modalities. Adding synthetic data improved classification accuracy by ~3% and <strong>segmentation Dice by 1.5&ndash;2.5%</strong>. CycleGAN-based domain translation also improved out-of-distribution performance dramatically (Dice from 0.09 to 0.66 for kidneys going from contrast to non-contrast CT). This is an emerging area with high potential.</p>
+    </div>
+  </div>
+
+  <!-- ═══════ 8.8 POST-PROCESSING ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 8.8 Cleaning Up Predictions</div>
+    <h2>Post-Processing Refinement</h2>
+
+    <p>Raw model predictions often contain artifacts that simple post-processing can fix. These are &ldquo;free&rdquo; improvements that don&rsquo;t require retraining.</p>
+
+    <div class="concept-card">
+      <div class="concept-title">Hierarchical Enforcement for BraTS</div>
+      <p>BraTS regions are nested: ET &sub; TC &sub; WT. But the model can produce predictions that violate this hierarchy (e.g., ET voxels outside TC). Post-processing enforces the hierarchy: any ET voxel must also be TC, any TC voxel must also be WT. If you&rsquo;re using nnU-Net v2&rsquo;s region-based training, this is handled automatically. Otherwise, apply it as a post-processing step.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Connected Component Filtering</div>
+      <p>Small isolated predictions (a few voxels of &ldquo;tumor&rdquo; floating in normal brain) are almost always false positives. Remove connected components below a size threshold. nnU-Net automatically determines whether this helps based on cross-validation. For brain tumors, keeping only the largest connected component per class is often effective.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Conditional Random Fields (CRFs)</div>
+      <p>CRFs refine boundaries by incorporating image intensity information into the segmentation. Posterior-CRF (an end-to-end method using CNN features) outperformed other CNN-CRF approaches for multiple anatomies. For brain tumors, multi-level CRFs have been used to detect small lesions with 90% detection rate and very few false positives. CRFs add inference time but can meaningfully improve boundary quality.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Test-Time Adaptation</div>
+      <p>An emerging approach: adapting the model&rsquo;s parameters to each test case at inference time using self-supervised objectives (no labels needed). Information-geometric approaches improved generalization for brain tumor segmentation across domains. Uncertainty-guided test-time optimization dynamically adjusts per-patient, improving Dice, HD95, and mean surface distance across multiple datasets.</p>
+    </div>
+  </div>
+
+  <!-- ═══════ 8.9 SEMI-SUPERVISED ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 8.9 Using Unlabeled Data</div>
+    <h2>Semi-Supervised &amp; Self-Supervised Learning</h2>
+
+    <p>Labeled medical data is scarce and expensive. But unlabeled data is abundant &mdash; every MRI scan that doesn&rsquo;t have expert segmentation is potential training data. Semi-supervised methods leverage this.</p>
+
+    <div class="concept-card">
+      <div class="concept-title">Pseudo-Labeling</div>
+      <p>Train a model on your labeled data, use it to predict segmentations on unlabeled data (pseudo-labels), then retrain on both real labels and pseudo-labels. The key challenge: noisy pseudo-labels can hurt more than they help. Self-aware confidence estimation for selecting only reliable pseudo-labels improved performance on cardiac, pancreas, and nerve segmentation tasks. This simple loop is surprisingly effective when done carefully.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Consistency Regularization</div>
+      <p>Encourage the model to produce the same prediction under different perturbations of the same input. If the model predicts differently when you flip or add noise to the image, it&rsquo;s not confident, and this inconsistency provides a training signal without labels. The Mean Teacher approach and its variants have demonstrated effectiveness on skin lesion, optic disc, and liver segmentation.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Active Learning: Choosing What to Label</div>
+      <p>If you have a limited annotation budget, which images should you label? Active learning selects the most informative samples. One framework achieved <strong>full accuracy using only 22.7&ndash;48.9% of available data</strong> by selecting samples that maximally reduce model uncertainty. Fisher information-based selection outperformed competing methods after labeling less than 0.25% of the target data. This is directly relevant if you have clinical data without annotations.</p>
+    </div>
+  </div>
+
+  <!-- ═══════ 8.10 DISTILLATION ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 8.10 Making It Fast</div>
+    <h2>Knowledge Distillation &amp; Model Compression</h2>
+
+    <p>A 5-fold ensemble with TTA might be great for a challenge submission, but it&rsquo;s too slow for clinical deployment. Knowledge distillation trains a small, fast &ldquo;student&rdquo; model to mimic the large, slow &ldquo;teacher&rdquo; ensemble.</p>
+
+    <div class="concept-card">
+      <div class="concept-title">Teacher-Student Framework</div>
+      <p>Train a large ensemble (the teacher) to generate soft labels (probability maps). Then train a smaller network (the student) on these soft labels. The student learns the teacher&rsquo;s &ldquo;knowledge&rdquo; without needing the teacher&rsquo;s size. One framework achieved up to <strong>32.6% Dice improvement</strong> in the student network by transferring semantic region information. LCOV-Net outperformed nnU-Net with only <strong>one-fifth the parameters</strong>.</p>
+    </div>
+
+    <div class="concept-card">
+      <div class="concept-title">Extreme Compression</div>
+      <p>Growing Teacher Assistant Networks enabled a student with only <strong>8% of the teacher&rsquo;s parameters</strong> (100k total) to achieve comparable performance, with inference in just 13ms. With only 2% of parameters (30k), the model still maintained 95%+ of teacher performance. Graph flow distillation improved ET and TC Dice by 5% and 3% respectively in the student. This makes real-time clinical deployment feasible.</p>
+    </div>
+
+    <div class="callout">
+      <div class="callout-icon">&#128161;</div>
+      <div class="callout-text"><strong>The BraTS competition strategy in full:</strong> (1) Train nnU-Net 3d_fullres as baseline. (2) Enable region-based training. (3) Try the residual encoder. (4) Train one alternative architecture (transformer-based). (5) Ensemble the top performers with optimized weights. (6) Add TTA at inference. (7) Apply hierarchical post-processing. Each step adds a fraction of a Dice point, but together they compound to competitive performance.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ RESOURCES ═══════ -->
+  <div class="lesson-section">
+    <div class="lesson-section-label">// 8.11 Resources &amp; Further Reading</div>
+    <h2>This Week&rsquo;s Learning Resources</h2>
+
+    <h3>Hands-On Practice</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://github.com/MIC-DKFZ/nnUNet/blob/master/documentation/how_to_use_nnunet.md" target="_blank">nnU-Net Ensembling &amp; TTA Documentation</a></div>
+        <div class="resource-desc">Instructions for running cross-configuration ensembling and enabling test-time augmentation in nnU-Net. Start by comparing results with and without TTA on your validation set.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://github.com/MIC-DKFZ/nnUNet/blob/master/documentation/extending_nnunet.md" target="_blank">Extending nnU-Net: Custom Trainers</a></div>
+        <div class="resource-desc">Guide for creating custom trainer classes. This week, try creating a trainer that adds boundary loss to the default Dice+CE. Test it on one fold and compare HD95.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag tool">Tool</span><a href="https://www.slicer.org/" target="_blank">3D Slicer &mdash; Error Analysis</a></div>
+        <div class="resource-desc">Load your model&rsquo;s predictions and ground truth side by side. Use the &ldquo;Compare Volumes&rdquo; module to overlay differences. Identify the failure patterns from Section 8.4.</div>
+      </div>
+    </div>
+
+    <h3>Key Papers</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1016/j.media.2020.101851" target="_blank">Kervadec et al. &mdash; Boundary Loss for Highly Unbalanced Segmentation (Med Image Anal, 2021)</a></div>
+        <div class="resource-desc">The foundational boundary loss paper. Formulates segmentation as a distance metric on contour space. Essential reading for improving HD95 scores.</div>
+        <div class="resource-cite">Med Image Anal. 2021;67:101851</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1109/TMI.2019.2930068" target="_blank">Karimi &amp; Salcudean &mdash; Reducing Hausdorff Distance (IEEE TMI, 2020)</a></div>
+        <div class="resource-desc">Three methods for directly optimizing HD as a loss function, achieving 18&ndash;45% HD reduction without sacrificing Dice. The go-to paper when your HD95 is poor.</div>
+        <div class="resource-cite">IEEE Trans Med Imaging. 2020;39(2):499&ndash;513</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1088/1361-6560/ad0c8d" target="_blank">Guo et al. &mdash; nnUnetFormer for BraTS (Phys Med Biol, 2023)</a></div>
+        <div class="resource-desc">Demonstrates the highest-impact nnU-Net modification for BraTS: fusing transformer modules into deeper layers. Achieved 0.936/0.921/0.872 for WT/TC/ET with ablation showing transformers improved TC most.</div>
+        <div class="resource-cite">Phys Med Biol. 2023;68(23):235009</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1002/mp.16244" target="_blank">Li et al. &mdash; Region-Related Focal Loss (Medical Physics, 2023)</a></div>
+        <div class="resource-desc">+3% ET Dice and +1% average Dice through dynamic hard-voxel weighting. The highest-impact single loss function change for brain tumor segmentation.</div>
+        <div class="resource-cite">Med Phys. 2023;50(4):2203&ndash;2215</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1016/j.media.2021.102035" target="_blank">Ma et al. &mdash; Loss Odyssey in Medical Image Segmentation (Med Image Anal, 2021)</a></div>
+        <div class="resource-desc">The definitive benchmark of 20 loss functions across 6 datasets. Compound losses win. Essential for choosing your loss function strategy.</div>
+        <div class="resource-cite">Med Image Anal. 2021;71:102035</div>
+      </div>
+    </div>
+
+    <h3>Deep Dives (Advanced)</h3>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1016/j.cmpb.2021.106539" target="_blank">Zoetmulder et al. &mdash; Domain- and Task-Specific Transfer Learning (Comp Meth Prog Biomed, 2022)</a></div>
+        <div class="resource-desc">Proves medical pre-training beats ImageNet for segmentation. The evidence base for choosing your pre-training strategy.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1109/TMI.2022.3224459" target="_blank">Zou et al. &mdash; Graph Flow Distillation (IEEE TMI, 2023)</a></div>
+        <div class="resource-desc">Cross-layer graph distillation improving ET Dice by 5% in student networks. Key paper for deploying compressed models.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1016/j.media.2023.102862" target="_blank">Li et al. &mdash; HAL-IA Active Learning Framework (Med Image Anal, 2023)</a></div>
+        <div class="resource-desc">Combining pixel entropy, regional consistency, and image diversity for smart sample selection. Reduce your annotation budget while maintaining accuracy.</div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-title"><span class="resource-tag paper">Paper</span><a href="https://doi.org/10.1016/j.media.2022.102597" target="_blank">Chen et al. &mdash; AdvChain Adversarial Data Augmentation (Med Image Anal, 2022)</a></div>
+        <div class="resource-desc">Realistic adversarial augmentation chains for medical imaging. Improves generalization for low-shot and semi-supervised settings.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ NAVIGATION ═══════ -->
+  <div class="nav-lesson">
+    <a href="week7.html">&larr; Week 07: Evaluation Metrics</a>
+    <a href="week9.html">Week 09: Clinical Integration &rarr;</a>
+  </div>
+</div>
+
+<footer>
+  <p><a href="../index.html">MedVision Academy</a> &nbsp;&middot;&nbsp; Week 08: Fine-Tuning &amp; Improving Your Model</p>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('click', function(e) {
+    var link = e.target.closest('a');
+    if (!link) return;
+    var href = link.getAttribute('href');
+    if (!href) return;
+    if (href.startsWith('http') && !href.includes(window.location.hostname)) {
+      var linkName = link.getAttribute('data-link-name') || link.textContent.trim().substring(0, 60);
+      if (typeof gtag === 'function') {
+        gtag('event', 'outbound_click', { 'link_url': href, 'link_text': linkName });
+      }
+    }
+  });
+});
+</script>
+
+</body>
+</html>
